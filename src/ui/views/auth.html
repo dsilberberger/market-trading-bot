@@ -1,0 +1,29 @@
+<section>
+  <h1>E*TRADE Authentication</h1>
+  <p>Status: {{status}}</p>
+  <p>Environment: {{env}}</p>
+  <p>Access token: {{access}}</p>
+  <p>Request token: {{request}}</p>
+  <p class="warning">{{warning}}</p>
+  <div>
+    <form method="POST" action="/auth/connect">
+      <input type="hidden" name="csrfToken" value="{{csrfToken}}" />
+      <button type="submit">Start OAuth</button>
+    </form>
+    <form method="POST" action="/auth/renew">
+      <input type="hidden" name="csrfToken" value="{{csrfToken}}" />
+      <button type="submit">Renew</button>
+    </form>
+  </div>
+  <div>
+    <p>After authorizing at E*TRADE, you will be redirected back here automatically if your callback is set to the local UI.</p>
+    <p>Alternatively, enter the verifier manually:</p>
+    <form method="POST" action="/auth/callback">
+      <input type="hidden" name="csrfToken" value="{{csrfToken}}" />
+      <label>Verifier/PIN <input name="oauth_verifier" /></label>
+      <button type="submit">Complete</button>
+    </form>
+    <p>{{message}}</p>
+    <p><a href="{{authorizeUrl}}">{{authorizeUrl}}</a></p>
+  </div>
+</section>

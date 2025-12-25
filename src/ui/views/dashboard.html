@@ -1,0 +1,59 @@
+<h1>Weekly ETF Bot</h1>
+<div class="card-grid">
+  <div class="card">
+    <div>Equity</div>
+    <strong>${{equity}}</strong>
+  </div>
+  <div class="card">
+    <div>Drawdown</div>
+    <strong>{{drawdown}}%</strong>
+  </div>
+  <div class="card">
+    <div>Exposure</div>
+    <strong>{{exposure}}%</strong>
+  </div>
+</div>
+<div class="card-grid">
+  <div class="card">
+    <div>Cadence</div>
+    <strong>{{cadence}}</strong>
+    <p>Next scheduled: {{nextRebalance}}</p>
+  </div>
+  <div class="card">
+    <div>Approval</div>
+    <strong>{{approval}}</strong>
+    <p>{{warnAuto}}</p>
+  </div>
+</div>
+<div class="card-grid">
+  <div class="card">
+    <div>Regime</div>
+    <pre>{{regime}}</pre>
+    <small>Derived from macro + market (growth, inflation, policy, risk).</small>
+  </div>
+  <div class="card">
+    <div>Macro</div>
+    <pre>{{macro}}</pre>
+    <small>Compact macro snapshot (FRED when configured).</small>
+  </div>
+</div>
+<div class="card-grid">
+  <div class="card">
+    <h3>Start Run</h3>
+    <form method="POST" action="/actions/start-run">
+      <input type="hidden" name="csrfToken" value="{{csrfToken}}" />
+      <label>As of (UTC):
+        <input type="text" name="asof" value="{{defaultAsOf}}" placeholder="YYYY-MM-DDTHH:mm" />
+      </label>
+      <button type="submit">Start pipeline</button>
+    </form>
+    <small>Runs Round 0 (dump) then guides you through rounds 1-5.</small>
+  </div>
+</div>
+<h2>Recent Runs</h2>
+<table class="table">
+  <thead><tr><th>Date</th><th>Status</th></tr></thead>
+  <tbody>
+    {{runs}}
+  </tbody>
+</table>

@@ -1,0 +1,10 @@
+{
+  "SPY": ["SPYM", "IVV", "VOO"],
+  "QQQ": ["QQQM"],
+  "IWM": ["VTWO", "IJR"],
+  "EFA": ["IEFA"],
+  "EEM": ["IEMG", "VWO"],
+  "TLT": ["VGLT"],
+  "GLD": ["IAU", "GLDM", "SGOL"],
+  "SHY": ["BIL", "SGOV", "SHV"]
+}

@@ -1,0 +1,38 @@
+{
+  "name": "weekly-etf-bot",
+  "version": "0.1.0",
+  "description": "Weekly ETF trading bot with approval-gated execution and stubbed broker/data layers.",
+  "main": "dist/index.js",
+  "scripts": {
+    "bot:run": "ts-node src/cli/run.ts",
+    "bot:trade": "ts-node src/cli/trade.ts",
+    "bot:dump": "ts-node src/cli/botDump.ts",
+    "bot:report": "ts-node src/cli/report.ts",
+    "bot:sync-fills": "ts-node scripts/syncFills.ts",
+    "schedule:print": "ts-node src/cli/schedule.ts",
+    "auth:status": "ts-node src/cli/auth.ts status",
+    "auth:connect": "ts-node src/cli/auth.ts connect",
+    "auth:renew": "ts-node src/cli/auth.ts renew",
+    "ui": "ts-node src/ui/server.ts",
+    "build": "tsc --noEmit",
+    "test": "jest"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.19.2",
+    "oauth-1.0a": "^2.2.6",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.30",
+    "@types/supertest": "^6.0.3",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.4",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}

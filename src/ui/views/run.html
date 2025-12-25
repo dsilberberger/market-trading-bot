@@ -1,0 +1,39 @@
+<h1>Run {{runId}}</h1>
+<p>Status: <strong>{{status}}</strong></p>
+<div>{{approval}}</div>
+<p>{{stageNotice}}</p>
+<h3>Pipeline</h3>
+<ul>
+  {{timeline}}
+</ul>
+<h3>Flags</h3>
+<table class="table"><tbody>{{flags}}</tbody></table>
+<h3>Round 1 Feature Summary</h3>
+<table class="table">
+  <thead><tr><th>Symbol</th><th>Samples</th><th>Unique</th><th>Return60d Bucket</th><th>Vol20d Bucket</th></tr></thead>
+  <tbody>{{featureRows}}</tbody>
+</table>
+<h3>Orders (summary)</h3>
+<table class="table">
+  <thead><tr><th>Symbol</th><th>Side</th><th>Type</th><th>Notional</th><th>Estimated Total</th><th>Thesis</th></tr></thead>
+  <tbody>{{orderTable}}</tbody>
+</table>
+<h3>Risk</h3>
+<p>{{riskSummary}}</p>
+<h3>Inputs</h3>
+<pre>{{inputs}}</pre>
+<h3>Proposal</h3>
+<pre>{{proposal}}</pre>
+<h3>Risk Report</h3>
+<pre>{{risk}}</pre>
+<h3>Orders</h3>
+<pre>{{orders}}</pre>
+<h3>Fills</h3>
+<pre>{{fills}}</pre>
+<h3>LLM Context</h3>
+<p><a href="/runs/{{runId}}/llm_context.json">Download llm_context.json</a></p>
+<pre>{{llm}}</pre>
+<h3>Context Meta</h3>
+<pre>{{meta}}</pre>
+<h3>Events</h3>
+<ul>{{events}}</ul>

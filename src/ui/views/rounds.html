@@ -1,0 +1,62 @@
+<h1>Run {{runId}}</h1>
+<div class="card-grid">
+  <div class="card">
+    <h3>Round 0: Dump</h3>
+    <p>{{macroLagNote}}</p>
+    <form method="POST" action="/runs/{{runId}}/round0">
+      <input type="hidden" name="csrfToken" value="{{csrfToken}}" />
+      <button type="submit">Run Round 0</button>
+    </form>
+    <p><a href="/runs/{{runId}}/inputs.json">inputs.json</a> | <a href="/runs/{{runId}}/round0_flags.json">round0_flags.json</a> | <a href="/runs/{{runId}}/round0_summary.json">round0_summary.json</a></p>
+    <pre>{{round0}}</pre>
+  </div>
+  <div class="card">
+    <h3>Round 1: Features</h3>
+    <form method="POST" action="/runs/{{runId}}/round1">
+      <input type="hidden" name="csrfToken" value="{{csrfToken}}" />
+      <button type="submit" {{r1Disabled}}>Run Round 1</button>
+    </form>
+    <p><a href="/runs/{{runId}}/features.json">features.json</a> | <a href="/runs/{{runId}}/round1_flags.json">round1_flags.json</a></p>
+    <pre>{{round1}}</pre>
+  </div>
+</div>
+<div class="card-grid">
+  <div class="card">
+    <h3>Round 2: Regimes & Eligibility</h3>
+    <form method="POST" action="/runs/{{runId}}/round2">
+      <input type="hidden" name="csrfToken" value="{{csrfToken}}" />
+      <button type="submit" {{r2Disabled}}>Run Round 2</button>
+    </form>
+    <p><a href="/runs/{{runId}}/regimes.json">regimes.json</a> | <a href="/runs/{{runId}}/eligibility.json">eligibility.json</a> | <a href="/runs/{{runId}}/round2_flags.json">round2_flags.json</a></p>
+    <pre>{{round2}}</pre>
+  </div>
+  <div class="card">
+    <h3>Round 3: News & Memo</h3>
+    <form method="POST" action="/runs/{{runId}}/round3">
+      <input type="hidden" name="csrfToken" value="{{csrfToken}}" />
+      <button type="submit" {{r3Disabled}}>Run Round 3</button>
+    </form>
+    <p><a href="/runs/{{runId}}/news_headlines.json">news_headlines.json</a> | <a href="/runs/{{runId}}/macro_policy.json">macro_policy.json</a> | <a href="/runs/{{runId}}/market_memo.json">market_memo.json</a> | <a href="/runs/{{runId}}/round3_flags.json">round3_flags.json</a></p>
+    <pre>{{round3}}</pre>
+  </div>
+</div>
+<div class="card-grid">
+  <div class="card">
+    <h3>Round 4: Final Context</h3>
+    <form method="POST" action="/runs/{{runId}}/round4">
+      <input type="hidden" name="csrfToken" value="{{csrfToken}}" />
+      <button type="submit" {{r4Disabled}}>Run Round 4</button>
+    </form>
+    <p><a href="/runs/{{runId}}/llm_context.json">llm_context.json</a> | <a href="/runs/{{runId}}/context_meta.json">context_meta.json</a></p>
+    <pre>{{round4}}</pre>
+  </div>
+  <div class="card">
+    <h3>Round 5: Proposal & Risk</h3>
+    <form method="POST" action="/runs/{{runId}}/round5">
+      <input type="hidden" name="csrfToken" value="{{csrfToken}}" />
+      <button type="submit" {{r5Disabled}}>Run Proposal/Risk</button>
+    </form>
+    <p><a href="/runs/{{runId}}/proposal.json">proposal.json</a> | <a href="/runs/{{runId}}/risk_report.json">risk_report.json</a> | <a href="/runs/{{runId}}/orders.json">orders.json</a> | <a href="/runs/{{runId}}/fills.json">fills.json</a></p>
+    <pre>{{round5}}</pre>
+  </div>
+</div>

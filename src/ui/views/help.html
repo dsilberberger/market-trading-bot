@@ -1,0 +1,51 @@
+<section>
+  <h1>Cheat Sheet</h1>
+  <div class="card">
+    <h3>Typical Workflow</h3>
+    <ol>
+      <li>Run dump: <code>npm run bot:dump -- --asof YYYY-MM-DD</code></li>
+      <li>Run trade: <code>npm run bot:trade -- --asof YYYY-MM-DDTHH:MM --strategy llm --mode paper</code></li>
+      <li>If approval required: open UI dashboard → select run → Approve</li>
+      <li>Generate reports: <code>npm run bot:report -- --from ... --to ...</code></li>
+    </ol>
+  </div>
+  <div class="card">
+    <h3>Selling / Freeing a Slot</h3>
+    <ul>
+      <li>Strategies emit SELLs automatically: deterministic baseline sells anything that drops out of the top ranks or when over max positions.</li>
+      <li>If you want an exit, force a new buy to displace the weakest holding (max positions unchanged) or lower <code>maxPositions</code> temporarily and rerun.</li>
+      <li>No manual sell button; every sale is via a run/strategy. Keep approval on if you want to veto.</li>
+      <li>To test a sell immediately, run a proposal with a tiny universe containing only the holding you want to exit; it will sell if it is not selected.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Auth & Safety</h3>
+    <ul>
+      <li>E*TRADE auth status: see banner or <a href="/auth">/auth</a>.</li>
+      <li>Approval gate default on; use <code>--auto-exec</code> to bypass per run.</li>
+      <li>Weekly cadence guard: override with <code>--force</code> or set <code>cadence</code> to <code>hourly</code>.</li>
+      <li>Modes: <code>--mode paper</code> (stub broker/data by default), <code>--mode live</code> (requires E*TRADE auth and providers set to etrade). Set <code>USE_LIVE_DATA_IN_PAPER=true</code> if you want live quotes in paper mode; add <code>FINNHUB_API_KEY</code> to pull news into the context.</li>
+      <li>Env hints: <code>BROKER_PROVIDER=etrade</code>, <code>MARKET_DATA_PROVIDER=etrade</code>, <code>requireApproval</code> toggle in config.</li>
+      <li>Only one server to run: the UI (<code>npm run ui</code>). Bot runs are one-shot CLI commands.</li>
+      <li>UI actions let you choose mode (paper vs live) per run; defaults to paper.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Dashboard Fields</h3>
+    <ul>
+      <li><strong>Regime</strong>: quick labels from macro + market (growth, inflation, policy, risk on/off).</li>
+      <li><strong>Macro</strong>: compact macro stats (FRED when configured).</li>
+      <li><strong>Data dump</strong>: builds the run folder (inputs, quotes, macro, llm_context) with no LLM call and no orders. llm_context is the compact packet the LLM reads; the big inputs.json is for audit/replay.</li>
+      <li><strong>Run proposal</strong>: runs inputs → proposal → risk. If approval is on, it stops at “pending approval”; execution happens only after you approve. If approval is off or you pass auto-exec, it will place orders immediately.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Mode Toggling & Parameters</h3>
+    <ul>
+      <li>Paper vs live: set <code>--mode</code> per command and env <code>BROKER_PROVIDER</code>/<code>MARKET_DATA_PROVIDER</code>.</li>
+      <li>Cadence: <code>cadence</code> in <code>src/config/default.json</code> (weekly default). Hourly runs require timestamped <code>--asof</code> or <code>--force</code>.</li>
+      <li>Approval: <code>requireApproval</code> in config; per-run override with <code>--auto-exec</code>.</li>
+      <li>Risk rails to tune: <code>maxPositions</code>, <code>maxPositionPct</code>, <code>minCashPct</code>, <code>maxNotionalTradedPctPerRun</code>, <code>minHoldHours</code>.</li>
+    </ul>
+  </div>
+</section>
