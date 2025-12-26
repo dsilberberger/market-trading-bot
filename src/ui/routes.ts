@@ -488,6 +488,8 @@ export const registerRoutes = (app: express.Application, csrfToken: string) => {
     const inputs = readRunArtifact<Record<string, unknown>>(runId, 'inputs.json');
     const proposal = readRunArtifact<Record<string, unknown>>(runId, 'proposal.json');
     const risk = readRunArtifact<Record<string, unknown>>(runId, 'risk_report.json');
+    const rebalance = readRunArtifact<Record<string, unknown>>(runId, 'rebalance.json');
+    const dislocation = readRunArtifact<Record<string, unknown>>(runId, 'dislocation.json');
     const orders = readRunArtifact<TradeOrder[]>(runId, 'orders.json') || [];
     const fills = readRunArtifact<Record<string, unknown>[]>(runId, 'fills.json') || [];
     const placements = readRunArtifact<Record<string, unknown>[]>(runId, 'placements.json') || [];
@@ -556,6 +558,16 @@ export const registerRoutes = (app: express.Application, csrfToken: string) => {
             })
             .join('')
         : '<tr><td colspan="6">No orders</td></tr>';
+
+    const rebalanceRows =
+      rebalance && (rebalance as any).combinedOrders && Array.isArray((rebalance as any).combinedOrders)
+        ? (rebalance as any).combinedOrders
+            .map((o: any) => {
+              const reason = o.reason || (o.side === 'SELL' ? 'Trim to target' : 'Rebalance add');
+              return `<tr><td>${o.symbol}</td><td>${o.side}</td><td>$${o.notionalUSD?.toFixed?.(2) ?? ''}</td><td>${reason}</td></tr>`;
+            })
+            .join('')
+        : '<tr><td colspan="4">No rebalance orders</td></tr>';
 
     let riskSummary = 'n/a';
     if (risk && (risk as any).approved !== undefined) {
@@ -665,9 +677,11 @@ export const registerRoutes = (app: express.Application, csrfToken: string) => {
       fills: JSON.stringify(fills, null, 2),
       llm: llmContext ? JSON.stringify(llmContext, null, 2) : 'n/a',
       meta: meta ? JSON.stringify(meta, null, 2) : 'n/a',
+      dislocation: dislocation ? JSON.stringify(dislocation, null, 2) : 'n/a',
       events,
       approval: approveButtons,
       orderTable: orderRows,
+      rebalanceRows,
       featureRows,
       riskSummary,
       stageNotice,

@@ -26,7 +26,8 @@ export const applyDecisionPolicyGate = (
   intent: TradeIntent,
   llmContext: LLMContextPacket,
   portfolio: PortfolioState,
-  config: BotConfig
+  config: BotConfig,
+  dislocation?: { active?: boolean; metrics?: any }
 ): PolicyGateResult => {
   const flags: PolicyGateResult['flags'] = [];
   const blockedReasons: string[] = [];
@@ -52,6 +53,22 @@ export const applyDecisionPolicyGate = (
   if (hasCoarsePercentiles) exposureCap = Math.min(exposureCap, 0.7);
   if (transitionRisk === 'high') exposureCap = Math.min(exposureCap, 0.35);
   else if (transitionRisk === 'elevated') exposureCap = Math.min(exposureCap, 0.6);
+
+  const baseExposureCap = exposureCap;
+  if (dislocation?.active && config.dislocation?.enabled) {
+    const extra = config.dislocation.opportunisticExtraExposurePct ?? 0;
+    const maxTotal = config.dislocation.maxTotalExposureCapPct ?? 1.0;
+    const newCap = Math.min(maxTotal, exposureCap + extra);
+    if (newCap > exposureCap) {
+      exposureCap = newCap;
+      flags.push({
+        code: 'OPPORTUNISTIC_EXPOSURE_ADDED',
+        severity: 'info',
+        message: 'Dislocation active; exposure cap increased',
+        observed: { baseExposureCap, newCap }
+      });
+    }
+  }
 
   // Confidence cap
   let confidenceCap = 1.0;
@@ -126,7 +143,8 @@ export const applyDecisionPolicyGate = (
     hasMacroLag,
     hasCoarsePercentiles,
     transitionRisk,
-    equityConf
+    equityConf,
+    baseExposureCap
   };
 
   return { orders, flags, policyApplied, blockedReasons };

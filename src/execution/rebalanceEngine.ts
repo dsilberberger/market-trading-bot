@@ -1,4 +1,4 @@
-import { BotConfig, PortfolioState, TradeOrder } from '../core/types';
+import { BotConfig, PortfolioState, SleevePositions, TradeOrder } from '../core/types';
 import { ExecutionPlan } from './wholeSharePlanner';
 
 export interface RebalanceInput {
@@ -10,6 +10,9 @@ export interface RebalanceInput {
   priorRegimes?: any;
   proxyParentMap?: Record<string, string>;
   config: BotConfig;
+  protectFromSells?: boolean;
+  protectedSymbols?: string[];
+  sleevePositions?: SleevePositions;
 }
 
 export interface RebalanceResult {
@@ -42,7 +45,10 @@ export const rebalancePortfolio = ({
   regimes,
   priorRegimes,
   proxyParentMap,
-  config
+  config,
+  protectFromSells = false,
+  protectedSymbols = [],
+  sleevePositions
 }: RebalanceInput): RebalanceResult => {
   const flags: RebalanceResult['flags'] = [];
   const skipped: RebalanceResult['skipped'] = [];
@@ -68,14 +74,21 @@ export const rebalancePortfolio = ({
   const pfDriftTh = config.rebalance.portfolioDriftThreshold ?? 0.05;
   const minTrade = config.rebalance.minTradeNotionalUSD ?? 0;
 
-  // Build current state aggregated by parent symbol
+  // Build current state aggregated by parent symbol, with sleeve splits
   const currentValueByParent: Record<string, number> = {};
   const currentQtyByParent: Record<string, number> = {};
+  const baseQtyByParent: Record<string, number> = {};
+  const dislocQtyByParent: Record<string, number> = {};
   for (const h of portfolio.holdings || []) {
     const parent = toParent(h.symbol, proxyParentMap);
     const px = prices[h.symbol] ?? prices[parent] ?? 0;
     currentValueByParent[parent] = (currentValueByParent[parent] || 0) + h.quantity * px;
     currentQtyByParent[parent] = (currentQtyByParent[parent] || 0) + h.quantity;
+    const sleeveEntry = sleevePositions?.[h.symbol];
+    const baseQty = sleeveEntry ? sleeveEntry.baseQty || 0 : h.quantity;
+    const dislocQty = sleeveEntry ? sleeveEntry.dislocationQty || 0 : 0;
+    baseQtyByParent[parent] = (baseQtyByParent[parent] || 0) + baseQty;
+    dislocQtyByParent[parent] = (dislocQtyByParent[parent] || 0) + dislocQty;
   }
   const currentInvested = Object.values(currentValueByParent).reduce((a, b) => a + b, 0);
   const totalEquity = portfolio.cash + currentInvested;
@@ -148,20 +161,39 @@ export const rebalancePortfolio = ({
   const sellOrders: TradeOrder[] = [];
   const buyOrders: TradeOrder[] = [];
   // Sells: parents present in current > target
+  const protectedSet = new Set((protectedSymbols || []).map((s) => s));
   for (const p of allParents) {
     const currQty = currentQtyByParent[p] || 0;
     const targetQty = targetQtyByParent[p] || 0;
     if (targetQty < currQty) {
       const delta = currQty - targetQty;
+      let sellQty = delta;
+      if (protectFromSells && protectedSet.has(p)) {
+        const baseQty = baseQtyByParent[p] || 0;
+        sellQty = Math.min(delta, baseQty);
+        if (sellQty < delta) {
+          flags.push({
+            code: 'SELL_CAPPED_DUE_TO_SLEEVE_PROTECTION',
+            severity: 'info',
+            message: `Sell capped for ${p} due to sleeve protection`,
+            observed: { symbol: p, requestedSellQty: delta, sellQty, baseQty, dislocationQty: dislocQtyByParent[p] || 0 }
+          });
+          if (sellQty <= 0) {
+            skipped.push({ symbol: p, reason: 'PROTECTED_DISLOCATION_QTY_ONLY', absDiff: delta });
+            continue;
+          }
+        }
+      }
       if (delta <= dustShares) {
         skipped.push({ symbol: p, reason: 'DUST_THRESHOLD', absDiff: delta });
         continue;
       }
+      if (sellQty <= 0) continue;
       const symToSell = executedSymbolByParent[p] || p;
       const px = prices[symToSell] ?? prices[p] ?? 0;
-      const notion = delta * px;
+      const notion = sellQty * px;
       if (notion < minTrade) {
-        skipped.push({ symbol: p, reason: 'MIN_TRADE_NOTIONAL', absDiff: delta });
+        skipped.push({ symbol: p, reason: 'MIN_TRADE_NOTIONAL', absDiff: sellQty });
         continue;
       }
       sellOrders.push({

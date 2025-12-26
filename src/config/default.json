@@ -23,6 +23,38 @@
     "fullExitRemovedSymbols": true,
     "rebalanceDustSharesThreshold": 0
   },
+  "dislocation": {
+    "enabled": true,
+    "anchorSymbol": "SPY",
+    "durationWeeksAdd": 3,
+    "durationWeeksHold": 10,
+    "lookbackDaysFast": 5,
+    "lookbackDaysSlow": 20,
+    "triggerFastDrawdownPct": 0.05,
+    "triggerSlowDrawdownPct": 0.10,
+    "confirmBreadth": true,
+    "breadthUniverseSymbols": ["QQQ", "IWM"],
+    "breadthMinDownCount": 1,
+    "confirmVolatility": false,
+    "opportunisticExtraExposurePct": 0.15,
+    "maxTotalExposureCapPct": 0.60,
+    "deploymentTargets": [
+      { "symbol": "SPYM", "weight": 0.60 },
+      { "symbol": "QQQM", "weight": 0.40 }
+    ],
+    "sleeveTag": "dislocation",
+    "reintegrationMode": "passive",
+    "earlyExit": {
+      "enabled": true,
+      "riskOffConfidenceThreshold": 0.70,
+      "requiresRiskOffLabel": true,
+      "deepDrawdownFailsafePct": 0.30
+    },
+    "durationWeeks": 3,
+    "cooldownWeeks": 2,
+    "exitCondition": "time_or_recovery",
+    "recoveryPctFromLow": 0.05
+  },
   "policyGateMode": "scale",
   "cadence": "weekly",
   "round0MacroLagPolicy": "flags_warn",

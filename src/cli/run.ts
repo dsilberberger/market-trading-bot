@@ -22,6 +22,15 @@ import { assertRound5Input } from '../risk/round5Guards';
 import { preflightAuth } from '../broker/etrade/authService';
 import { planWholeShareExecution } from '../execution/wholeSharePlanner';
 import { rebalancePortfolio } from '../execution/rebalanceEngine';
+import { detectDislocation } from '../dislocation/dislocationDetector';
+import { buildDislocationBuys } from '../execution/dislocationPlanner';
+import { runSleeveLifecycle } from '../dislocation/sleeveLifecycle';
+import {
+  loadSleevePositions,
+  reconcileSleevePositions,
+  saveSleevePositions,
+  snapshotSleevePositions
+} from '../dislocation/sleevePositions';
 
 const program = new Command();
 
@@ -120,6 +129,18 @@ export const runBot = async (options: RunOptions) => {
   writeRunArtifact(runId, 'inputs.json', inputs);
   appendEvent(makeEvent(runId, 'INPUTS_WRITTEN', { symbols: universe.length }));
 
+  // Sleeve positions (base vs dislocation) tracking and reconciliation
+  const sleeveEnv = process.env.ETRADE_ENV || 'default';
+  const sleeveAccountKey = process.env.ETRADE_ACCOUNT_ID_KEY || undefined;
+  const existingSleeve = loadSleevePositions(sleeveEnv, sleeveAccountKey);
+  const reconciledSleeve = reconcileSleevePositions(inputs.portfolio.holdings || [], existingSleeve);
+  const sleevePositions = reconciledSleeve.positions;
+  if (reconciledSleeve.flags.length) {
+    writeRunArtifact(runId, 'round5_flags.json', reconciledSleeve.flags);
+  }
+  saveSleevePositions(sleevePositions, sleeveEnv, sleeveAccountKey);
+  writeRunArtifact(runId, 'sleeve_positions_snapshot.json', snapshotSleevePositions(sleevePositions));
+
   let proposal: ProposalResult | null = null;
   const chosenStrategy: string = strategyOpt || (config.useLLM ? 'llm' : 'deterministic');
 
@@ -192,6 +213,7 @@ export const runBot = async (options: RunOptions) => {
   if (hasCoarsePercentiles) exposureCap = Math.min(exposureCap, 0.7);
   if (transitionRisk === 'high') exposureCap = Math.min(exposureCap, 0.35);
   else if (transitionRisk === 'elevated') exposureCap = Math.min(exposureCap, 0.6);
+  const baseExposureCap = exposureCap;
   const capBudget = (inputs?.portfolio?.equity ?? rawBudget) * exposureCap;
   const buyBudgetUSD = Math.max(0, Math.min(rawBudget - minCashUSD, capBudget));
   const proxiesMap: Record<string, string[]> =
@@ -353,6 +375,27 @@ export const runBot = async (options: RunOptions) => {
     proposal.intent.universe = Array.from(new Set([...(proposal.intent.universe || []), ...proxySymbolsUsed]));
   }
 
+  // Detect dislocation (market-wide drawdown) and write artifacts
+  const dislocation = detectDislocation(asOf, config, inputs.history as any, quotes);
+  writeRunArtifact(runId, 'dislocation.json', dislocation);
+  if (dislocation.flags.length) writeRunArtifact(runId, 'dislocation_flags.json', dislocation.flags);
+
+  // Sleeve lifecycle to manage ADD/HOLD/REINTEGRATE and protect sells
+  const sleeveLifecycle = runSleeveLifecycle({
+    asOf,
+    config,
+    dislocationActive: dislocation.active,
+    anchorPrice: quotes[config.dislocation?.anchorSymbol || 'SPY'],
+    regimes: llmContext?.regimes
+  });
+  writeRunArtifact(runId, 'dislocation_state.json', sleeveLifecycle.state);
+  if (sleeveLifecycle.flags.length) {
+    writeRunArtifact(runId, 'dislocation_flags.json', [
+      ...(dislocation.flags || []),
+      ...sleeveLifecycle.flags
+    ]);
+  }
+
   // Rebalance: compare current holdings vs target plan and emit sells+buys
   const priceMap: Record<string, number> = { ...quotes };
   for (const o of planner.orders) {
@@ -360,6 +403,19 @@ export const runBot = async (options: RunOptions) => {
   }
   for (const h of inputs.portfolio.holdings || []) {
     if (!priceMap[h.symbol]) priceMap[h.symbol] = h.avgPrice || 0;
+  }
+  // Ensure deployment target quotes are available for opportunistic buys
+  if (dislocation.active && config.dislocation?.deploymentTargets) {
+    for (const t of config.dislocation.deploymentTargets) {
+      if (!priceMap[t.symbol]) {
+        try {
+          const q = await marketData.getQuote(t.symbol, asOf);
+          priceMap[t.symbol] = q.price;
+        } catch {
+          // ignore
+        }
+      }
+    }
   }
   const priorRegimes = loadPreviousRegimes(runId);
   const rebalance = rebalancePortfolio({
@@ -370,7 +426,10 @@ export const runBot = async (options: RunOptions) => {
     regimes: llmContext?.regimes,
     priorRegimes,
     proxyParentMap,
-    config
+    config,
+    protectFromSells: sleeveLifecycle.protectFromSells,
+    protectedSymbols: (config.dislocation?.deploymentTargets || []).map((t) => proxyParentMap[t.symbol] || t.symbol),
+    sleevePositions
   });
   writeRunArtifact(runId, 'rebalance.json', rebalance);
 
@@ -389,8 +448,49 @@ export const runBot = async (options: RunOptions) => {
     return;
   }
 
+  // Opportunistic dislocation buys (incremental)
+  let dislocationExtraOrders: TradeOrder[] = [];
+  if (sleeveLifecycle.allowAdd && config.dislocation?.enabled) {
+    const extra = config.dislocation.opportunisticExtraExposurePct ?? 0;
+    const maxTotal = config.dislocation.maxTotalExposureCapPct ?? 1.0;
+    const dislocationCap = Math.min(maxTotal, baseExposureCap + extra);
+    const extraCapPct = Math.max(0, dislocationCap - baseExposureCap);
+    if (extraCapPct > 0) {
+      const extraPlan = buildDislocationBuys({
+        extraCapPct,
+        equity: inputs.portfolio.equity ?? rawBudget,
+        prices: priceMap,
+        config
+      });
+      dislocationExtraOrders = extraPlan.orders.map((o) => ({
+        symbol: o.symbol,
+        side: o.side || 'BUY',
+        orderType: 'MARKET',
+        notionalUSD: o.estNotionalUSD ?? o.quantity * (o.estPrice || priceMap[o.symbol] || 0),
+        thesis: o.thesis || 'Opportunistic dislocation buy.',
+        invalidation: o.invalidation || '',
+        confidence: o.confidence ?? 0.6,
+        portfolioLevel: { targetHoldDays: 30, netExposureTarget: 1 },
+        sleeve: 'dislocation'
+      }));
+      if (dislocationExtraOrders.length) {
+        const existingFlags =
+          (fs.existsSync(path.join(runDir, 'round5_flags.json'))
+            ? JSON.parse(fs.readFileSync(path.join(runDir, 'round5_flags.json'), 'utf-8'))
+            : []) || [];
+        existingFlags.push({
+          code: 'DISLOCATION_ACTIVE',
+          severity: 'info',
+          message: 'Opportunistic dislocation buys added',
+          observed: { extraCapPct, dislocationCap, baseExposureCap }
+        });
+        writeRunArtifact(runId, 'round5_flags.json', existingFlags);
+      }
+    }
+  }
+
   const thesisMap = new Map(targetOrdersEnriched.map((o) => [o.symbol, o]));
-  proposal.intent.orders = rebalance.combinedOrders.map((o) => {
+  const rebalanceOrdersEnriched = rebalance.combinedOrders.map((o) => {
     const base = thesisMap.get(o.symbol) || thesisMap.get(proxyParentMap[o.symbol] || '');
     return {
       ...o,
@@ -404,6 +504,9 @@ export const runBot = async (options: RunOptions) => {
     };
   });
 
+  // Combine rebalance orders with dislocation incremental buys
+  proposal.intent.orders = [...rebalanceOrdersEnriched, ...dislocationExtraOrders];
+
   // Decision policy gate (exposure/confidence caps)
   let riskReport = evaluateRisk(proposal.intent, config, inputs.portfolio, { drawdown });
   if (llmContext) {
@@ -413,7 +516,7 @@ export const runBot = async (options: RunOptions) => {
     if (meta) {
       assertRound5Input(llmContext, meta);
     }
-    const gateResult = applyDecisionPolicyGate(proposal.intent, llmContext, inputs.portfolio, config);
+    const gateResult = applyDecisionPolicyGate(proposal.intent, llmContext, inputs.portfolio, config, dislocation);
     const existingFlags =
       (fs.existsSync(path.join(runDir, 'round5_flags.json'))
         ? JSON.parse(fs.readFileSync(path.join(runDir, 'round5_flags.json'), 'utf-8'))

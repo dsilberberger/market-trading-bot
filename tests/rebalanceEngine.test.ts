@@ -66,4 +66,55 @@ describe('rebalancePortfolio', () => {
     expect(res.buyOrders.length).toBeGreaterThan(0);
     expect(res.combinedOrders[0].side === 'SELL' || res.combinedOrders[0].side === 'BUY').toBe(true);
   });
+
+  it('caps sells to base sleeve when protection enabled', () => {
+    const res = rebalancePortfolio({
+      asOf: '2025-01-01',
+      portfolio: {
+        cash: 0,
+        equity: 300,
+        holdings: [{ symbol: 'SPYM', quantity: 3, avgPrice: 80 }]
+      },
+      prices: { SPYM: 80 },
+      targetPlan: {
+        ...targetPlan,
+        orders: [{ symbol: 'SPYM', side: 'BUY', quantity: 0, estNotionalUSD: 0, estPrice: 80 }]
+      },
+      regimes: {},
+      priorRegimes: {},
+      proxyParentMap: {},
+      config: baseConfig,
+      protectFromSells: true,
+      protectedSymbols: ['SPYM'],
+      sleevePositions: { SPYM: { baseQty: 1, dislocationQty: 2, updatedAtISO: '2025-01-01' } }
+    });
+    expect(res.sellOrders.length).toBe(1);
+    expect(res.sellOrders[0].notionalUSD).toBeCloseTo(80);
+    expect(res.flags.some((f) => f.code === 'SELL_CAPPED_DUE_TO_SLEEVE_PROTECTION')).toBe(true);
+  });
+
+  it('sells full quantity when protection disabled', () => {
+    const res = rebalancePortfolio({
+      asOf: '2025-01-01',
+      portfolio: {
+        cash: 0,
+        equity: 300,
+        holdings: [{ symbol: 'SPYM', quantity: 3, avgPrice: 80 }]
+      },
+      prices: { SPYM: 80 },
+      targetPlan: {
+        ...targetPlan,
+        orders: [{ symbol: 'SPYM', side: 'BUY', quantity: 0, estNotionalUSD: 0, estPrice: 80 }]
+      },
+      regimes: {},
+      priorRegimes: {},
+      proxyParentMap: {},
+      config: baseConfig,
+      protectFromSells: false,
+      protectedSymbols: ['SPYM'],
+      sleevePositions: { SPYM: { baseQty: 1, dislocationQty: 2, updatedAtISO: '2025-01-01' } }
+    });
+    expect(res.sellOrders.length).toBe(1);
+    expect(res.sellOrders[0].notionalUSD).toBeCloseTo(240);
+  });
 });

@@ -1,4 +1,4 @@
-import { PriceBar } from '../data/marketData.types';
+export { PriceBar } from '../data/marketData.types';
 
 export type TradeSide = 'BUY' | 'SELL';
 export type OrderType = 'MARKET' | 'LIMIT';
@@ -18,6 +18,7 @@ export interface TradeOrder {
   invalidationOriginal?: string;
   confidence: number;
   portfolioLevel: PortfolioLevelSettings;
+  sleeve?: 'base' | 'dislocation';
 }
 
 export interface TradeIntent {
@@ -61,6 +62,35 @@ export interface BotConfig {
     regimeChangeKeys?: string[];
     fullExitRemovedSymbols?: boolean;
     rebalanceDustSharesThreshold?: number;
+  };
+  dislocation?: {
+    enabled?: boolean;
+    anchorSymbol?: string;
+    lookbackDaysFast?: number;
+    lookbackDaysSlow?: number;
+    triggerFastDrawdownPct?: number;
+    triggerSlowDrawdownPct?: number;
+    confirmBreadth?: boolean;
+    breadthUniverseSymbols?: string[];
+    breadthMinDownCount?: number;
+    confirmVolatility?: boolean;
+    opportunisticExtraExposurePct?: number;
+    maxTotalExposureCapPct?: number;
+    deploymentTargets?: Array<{ symbol: string; weight: number }>;
+    durationWeeks?: number;
+    durationWeeksAdd?: number;
+    durationWeeksHold?: number;
+    cooldownWeeks?: number;
+    exitCondition?: 'time_or_recovery';
+    recoveryPctFromLow?: number;
+    sleeveTag?: string;
+    reintegrationMode?: 'passive';
+    earlyExit?: {
+      enabled?: boolean;
+      riskOffConfidenceThreshold?: number;
+      requiresRiskOffLabel?: boolean;
+      deepDrawdownFailsafePct?: number;
+    };
   };
   cadence: 'weekly' | 'hourly';
   policyGateMode?: 'scale' | 'block';
@@ -211,6 +241,14 @@ export interface PortfolioState {
   cash: number;
   holdings: Holding[];
   equity: number;
+}
+
+export interface SleevePositions {
+  [symbol: string]: {
+    baseQty: number;
+    dislocationQty: number;
+    updatedAtISO: string;
+  };
 }
 
 export interface OrderPreview {
