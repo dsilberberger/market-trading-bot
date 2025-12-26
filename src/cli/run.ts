@@ -21,6 +21,7 @@ import { applyDecisionPolicyGate } from '../risk/decisionPolicyGate';
 import { assertRound5Input } from '../risk/round5Guards';
 import { preflightAuth } from '../broker/etrade/authService';
 import { planWholeShareExecution } from '../execution/wholeSharePlanner';
+import { rebalancePortfolio } from '../execution/rebalanceEngine';
 
 const program = new Command();
 
@@ -41,6 +42,28 @@ export interface RunOptions {
   autoExec?: boolean;
   runId?: string;
 }
+
+const loadPreviousRegimes = (currentRunId: string): any | undefined => {
+  const runsDir = path.resolve(process.cwd(), 'runs');
+  if (!fs.existsSync(runsDir)) return undefined;
+  const entries = fs
+    .readdirSync(runsDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && d.name !== currentRunId)
+    .map((d) => d.name)
+    .sort()
+    .reverse();
+  for (const name of entries) {
+    const p = path.join(runsDir, name, 'regimes.json');
+    if (fs.existsSync(p)) {
+      try {
+        return JSON.parse(fs.readFileSync(p, 'utf-8'));
+      } catch {
+        continue;
+      }
+    }
+  }
+  return undefined;
+};
 
 export const runBot = async (options: RunOptions) => {
   const { asof, mode, strategy, dryRun, force, autoExec, runId: providedRunId } = options;
@@ -244,6 +267,13 @@ export const runBot = async (options: RunOptions) => {
     (fs.existsSync(path.join(runDir, 'round5_flags.json'))
       ? JSON.parse(fs.readFileSync(path.join(runDir, 'round5_flags.json'), 'utf-8'))
       : []) || [];
+  const proxyParentMap: Record<string, string> = {};
+  Object.entries(proxiesMap || {}).forEach(([parent, proxies]) => {
+    proxies.forEach((p) => {
+      proxyParentMap[p] = parent;
+    });
+  });
+
   const planner = planWholeShareExecution({
     targets: proposal.intent.orders.map((o) => ({ symbol: o.symbol, notionalUSD: o.notionalUSD, priority: o.confidence })),
     prices: quotes,
@@ -298,8 +328,8 @@ export const runBot = async (options: RunOptions) => {
     return `Invalidate if weekly close < MA200 (${proxyMa200.toFixed(2)}) or drawdown > ${drawPct}% from entry.`;
   };
 
-  proposal.intent.orders = planner.orders.map((o) => {
-    // If planner used a proxy, reuse thesis/invalidation from original symbol when available.
+  // Map planner target orders into enriched buy-only orders (used for target plan)
+  const targetOrdersEnriched = planner.orders.map((o) => {
     const originalSymbol = originalByExecuted.get(o.symbol) || (o as any).originalSymbol || o.symbol;
     const baseOriginal = originalBySymbol.get(originalSymbol) || originalBySymbol.get(o.symbol);
     const basePL = baseOriginal?.portfolioLevel;
@@ -312,7 +342,7 @@ export const runBot = async (options: RunOptions) => {
       invalidation: adjustedInvalidation(baseOriginal?.invalidation, originalSymbol, o.symbol),
       confidence: baseOriginal?.confidence ?? 0.5,
       portfolioLevel: basePL ? { ...basePL } : { targetHoldDays: 30, netExposureTarget: 1 }
-    };
+    } as TradeOrder;
   });
 
   const drawdown = await currentDrawdown(config, marketData);
@@ -323,9 +353,59 @@ export const runBot = async (options: RunOptions) => {
     proposal.intent.universe = Array.from(new Set([...(proposal.intent.universe || []), ...proxySymbolsUsed]));
   }
 
-  let riskReport = evaluateRisk(proposal.intent, config, inputs.portfolio, { drawdown });
+  // Rebalance: compare current holdings vs target plan and emit sells+buys
+  const priceMap: Record<string, number> = { ...quotes };
+  for (const o of planner.orders) {
+    if (!priceMap[o.symbol]) priceMap[o.symbol] = o.estPrice || 0;
+  }
+  for (const h of inputs.portfolio.holdings || []) {
+    if (!priceMap[h.symbol]) priceMap[h.symbol] = h.avgPrice || 0;
+  }
+  const priorRegimes = loadPreviousRegimes(runId);
+  const rebalance = rebalancePortfolio({
+    asOf,
+    portfolio: inputs.portfolio,
+    prices: priceMap,
+    targetPlan: planner,
+    regimes: llmContext?.regimes,
+    priorRegimes,
+    proxyParentMap,
+    config
+  });
+  writeRunArtifact(runId, 'rebalance.json', rebalance);
+
+  if (rebalance.status === 'SKIPPED_NO_DRIFT' || rebalance.status === 'SKIPPED_NO_CHANGES') {
+    proposal.intent.orders = [];
+    writeRunArtifact(runId, 'orders.json', []);
+    writeRunArtifact(runId, 'fills.json', [{ type: 'NO_FILL', reason: 'NO_REBALANCE_DRIFT_BELOW_THRESHOLD' }]);
+    console.log('Rebalance skipped due to drift thresholds.');
+    return;
+  }
+  if (rebalance.status === 'UNEXECUTABLE') {
+    proposal.intent.orders = [];
+    writeRunArtifact(runId, 'orders.json', []);
+    writeRunArtifact(runId, 'fills.json', [{ type: 'NO_FILL', reason: 'REBALANCE_UNEXECUTABLE' }]);
+    appendEvent(makeEvent(runId, 'RUN_FAILED', { reason: 'REBALANCE_UNEXECUTABLE' }));
+    return;
+  }
+
+  const thesisMap = new Map(targetOrdersEnriched.map((o) => [o.symbol, o]));
+  proposal.intent.orders = rebalance.combinedOrders.map((o) => {
+    const base = thesisMap.get(o.symbol) || thesisMap.get(proxyParentMap[o.symbol] || '');
+    return {
+      ...o,
+      thesis:
+        base?.thesis ||
+        o.thesis ||
+        (o.side === 'SELL' ? 'Rebalance trim to target weight.' : 'Rebalance add to target weight.'),
+      invalidation: base?.invalidation || o.invalidation || '',
+      confidence: o.confidence ?? base?.confidence ?? 0.5,
+      portfolioLevel: base?.portfolioLevel ?? o.portfolioLevel ?? { targetHoldDays: 0, netExposureTarget: 1 }
+    };
+  });
 
   // Decision policy gate (exposure/confidence caps)
+  let riskReport = evaluateRisk(proposal.intent, config, inputs.portfolio, { drawdown });
   if (llmContext) {
     const meta = fs.existsSync(path.join(runDir, 'context_meta.json'))
       ? (JSON.parse(fs.readFileSync(path.join(runDir, 'context_meta.json'), 'utf-8')) as any)

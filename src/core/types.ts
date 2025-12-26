@@ -52,6 +52,16 @@ export interface BotConfig {
   minCashPct: number;
   maxNotionalTradedPctPerRun: number;
   minHoldHours: number;
+  rebalance?: {
+    enabled?: boolean;
+    portfolioDriftThreshold?: number;
+    positionDriftThreshold?: number;
+    minTradeNotionalUSD?: number;
+    alwaysRebalanceOnRegimeChange?: boolean;
+    regimeChangeKeys?: string[];
+    fullExitRemovedSymbols?: boolean;
+    rebalanceDustSharesThreshold?: number;
+  };
   cadence: 'weekly' | 'hourly';
   policyGateMode?: 'scale' | 'block';
   round0MacroLagPolicy?: 'flags_warn' | 'summary_only';

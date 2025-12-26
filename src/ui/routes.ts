@@ -164,7 +164,9 @@ export const registerRoutes = (app: express.Application, csrfToken: string) => {
       macroPolicy: readOrEmpty('macro_policy.json'),
       context: readOrEmpty('llm_context.json'),
       proposal: readOrEmpty('proposal.json'),
-      risk: readOrEmpty('risk_report.json')
+      risk: readOrEmpty('risk_report.json'),
+      rebalance: readOrEmpty('rebalance.json'),
+      executionPlan: readOrEmpty('execution_plan.json')
     };
   };
 
@@ -262,7 +264,11 @@ export const registerRoutes = (app: express.Application, csrfToken: string) => {
       round2: summarize({ flags: data.round2, regimes: data.regimes, eligibility: data.eligibility }),
       round3: summarize({ flags: data.round3, news: data.news, memo: data.memo, macro: data.macroPolicy }),
       round4: summarize({ context: data.context }),
-      round5: summarize({ proposal: data.proposal, risk: data.risk }),
+      round5: summarize({
+        proposal: data.proposal,
+        risk: data.risk,
+        rebalance: data.rebalance
+      }),
       status,
       macroLagNote
     });

@@ -8,6 +8,21 @@
   "minCashPct": 0.00,
   "maxNotionalTradedPctPerRun": 1.0,
   "minHoldHours": 0,
+  "rebalance": {
+    "enabled": true,
+    "portfolioDriftThreshold": 0.05,
+    "positionDriftThreshold": 0.05,
+    "minTradeNotionalUSD": 25,
+    "alwaysRebalanceOnRegimeChange": true,
+    "regimeChangeKeys": [
+      "equityRegime.label",
+      "equityRegime.confidence",
+      "volRegime.label",
+      "ratesRegime.label"
+    ],
+    "fullExitRemovedSymbols": true,
+    "rebalanceDustSharesThreshold": 0
+  },
   "policyGateMode": "scale",
   "cadence": "weekly",
   "round0MacroLagPolicy": "flags_warn",
