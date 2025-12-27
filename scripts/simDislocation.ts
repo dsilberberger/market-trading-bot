@@ -45,7 +45,7 @@ interface SimWeek {
   tlTPrice: number;
 }
 
-const priceSeq = [
+const basePriceSeq = [
   { spy: 100, qqq: 110, tlt: 85 },
   { spy: 93, qqq: 101, tlt: 86 }, // trigger
   { spy: 85, qqq: 92, tlt: 87 },
@@ -55,6 +55,18 @@ const priceSeq = [
   { spy: 94, qqq: 102, tlt: 90 },
   { spy: 98, qqq: 108, tlt: 90 }
 ];
+
+// Extend path through HOLD and into REINTEGRATE with gradual equity recovery > bonds
+const extraWeeks = 16; // enough to cover HOLD+REINTEGRATE drift
+const priceSeq = [...basePriceSeq];
+for (let i = 0; i < extraWeeks; i++) {
+  const last = priceSeq[priceSeq.length - 1];
+  priceSeq.push({
+    spy: +(last.spy * 1.015).toFixed(2),
+    qqq: +(last.qqq * 1.015).toFixed(2),
+    tlt: +(last.tlt * 1.002).toFixed(2)
+  });
+}
 
 const makeWeeklyTimeline = (startISO: string, weeksCount: number) => {
   const start = new Date(startISO);
@@ -158,6 +170,7 @@ export interface WeekResult {
   controls: ReturnType<typeof deriveLifecycleBooleans>;
   overlayBudgetUSD: number;
   overlayOrders: any[];
+  orders: any[];
   cash: number;
   equity: number;
   holdings: PortfolioState['holdings'];
@@ -291,6 +304,36 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
       // when inspecting INACTIVE phases.
     }
 
+    // Simple reintegrate drift-based sells: reduce invested toward base cap after HOLD
+    if (lifecycle.state.phase === 'REINTEGRATE') {
+      const investedNow = sim.portfolio.holdings.reduce((acc, h) => acc + h.quantity * (quotes[h.symbol] || 0), 0);
+      const desiredInvest = sim.portfolio.equity * cfg.baseExposureCapPct;
+      const pfDrift = baseConfig.rebalance?.portfolioDriftThreshold ?? 0.05;
+      const minTrade = baseConfig.rebalance?.minTradeNotionalUSD ?? 0;
+      if (investedNow > desiredInvest * (1 + pfDrift)) {
+        let needSell = investedNow - desiredInvest;
+        const sellCandidates = [...sim.portfolio.holdings].sort(
+          (a, b) => (quotes[b.symbol] || 0) - (quotes[a.symbol] || 0)
+        );
+        for (const h of sellCandidates) {
+          if (needSell <= 0) break;
+          const price = quotes[h.symbol] || 0;
+          if (price <= 0) continue;
+          const targetQty = Math.min(h.quantity, Math.ceil(needSell / price));
+          if (targetQty * price < minTrade) continue;
+          rebalance.combinedOrders.push({
+            symbol: h.symbol,
+            side: 'SELL',
+            orderType: 'MARKET',
+            quantity: targetQty,
+            notionalUSD: targetQty * price,
+            note: 'reintegration-drift'
+          });
+          needSell -= targetQty * price;
+        }
+      }
+    }
+
     const orders = [...rebalance.combinedOrders, ...dislocationBuys];
     // Assert overlay buys only in ADD
     orders.forEach((o) => {
@@ -380,6 +423,7 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
       controls: deriveLifecycleBooleans(lifecycle.state.phase),
       overlayBudgetUSD: dislocationBuys.reduce((a, o) => a + (o.notionalUSD || 0), 0),
       overlayOrders: dislocationBuys,
+      orders: JSON.parse(JSON.stringify(orders)),
       cash: sim.portfolio.cash,
       equity: sim.portfolio.equity,
       holdings: JSON.parse(JSON.stringify(sim.portfolio.holdings)),

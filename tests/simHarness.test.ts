@@ -25,4 +25,16 @@ describe('dislocation sim harness', () => {
     const overlay = res.find((w) => w.overlayOrders.length > 0);
     expect(overlay).toBeUndefined();
   });
+
+  it('reintegrate resumes sells and stops overlay', () => {
+    const res = runSimulation({ baselineInitMode: 'respect_cap' });
+    const reintegrateWeeks = res.filter((w) => w.phase === 'REINTEGRATE');
+    expect(reintegrateWeeks.length).toBeGreaterThan(0);
+    reintegrateWeeks.forEach((w) => {
+      expect(w.controls.protectFromSells).toBe(false);
+      expect(w.overlayOrders.length).toBe(0);
+    });
+    const anyReintegrateSell = reintegrateWeeks.some((w) => w.orders.some((o) => o.side === 'SELL'));
+    expect(anyReintegrateSell).toBe(true);
+  });
 });
