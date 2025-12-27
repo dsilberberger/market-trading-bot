@@ -2,15 +2,20 @@ import { ExecutionPlan, ExecutionPlanOrder } from './wholeSharePlanner';
 import { BotConfig } from '../core/types';
 
 interface DislocationPlannerInput {
-  extraCapPct: number; // incremental exposure cap (absolute pct of equity)
-  equity: number;
+  overlayTargets: Array<{ symbol: string; weight: number }>;
+  overlayBudgetUSD: number;
   prices: Record<string, number>;
-  config: BotConfig;
+  maxSpendOverride?: number;
 }
 
-export const buildDislocationBuys = ({ extraCapPct, equity, prices, config }: DislocationPlannerInput): ExecutionPlan => {
-  const maxSpend = Math.max(0, extraCapPct * equity);
-  const targets = (config.dislocation?.deploymentTargets || []).filter((t) => prices[t.symbol] && prices[t.symbol] > 0);
+export const buildDislocationBuys = ({
+  overlayTargets,
+  overlayBudgetUSD,
+  prices,
+  maxSpendOverride
+}: DislocationPlannerInput): ExecutionPlan => {
+  const maxSpend = Math.max(0, maxSpendOverride !== undefined ? maxSpendOverride : overlayBudgetUSD);
+  const targets = (overlayTargets || []).filter((t) => prices[t.symbol] && prices[t.symbol] > 0);
   if (!targets.length || maxSpend <= 0) {
     return {
       status: 'OK',

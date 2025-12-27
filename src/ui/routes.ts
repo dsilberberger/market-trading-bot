@@ -587,6 +587,21 @@ export const registerRoutes = (app: express.Application, csrfToken: string) => {
       ? `Risk blocked: ${(risk as any).blockedReasons?.join('; ') || 'unknown reason'}`
       : '';
 
+    const narrativeFiles = [
+      'round0_summary.md',
+      'round1_summary.md',
+      'round2_summary.md',
+      'round3_summary.md',
+      'round4_summary.md',
+      'round5_summary.md',
+      'round6_metrics.json',
+      'round6_retrospective.md'
+    ];
+    const narrativeLinks = narrativeFiles
+      .filter((f) => fs.existsSync(path.resolve(process.cwd(), 'runs', runId, f)))
+      .map((f) => `<li><a href="/runs/${runId}/${f}">${f}</a></li>`)
+      .join('') || '<li>No narratives yet</li>';
+
     const loadFlags = (name: string) => readRunArtifact<any[]>(runId, name) || [];
     const flagToText = (f: any) =>
       typeof f === 'string' ? f : `${f.severity ?? 'info'}: ${f.message ?? f.code ?? 'flag'}`;
@@ -686,6 +701,7 @@ export const registerRoutes = (app: express.Application, csrfToken: string) => {
       riskSummary,
       stageNotice,
       timeline,
+      narratives: narrativeLinks,
       csrfToken,
       banner: bannerForStatus()
     });

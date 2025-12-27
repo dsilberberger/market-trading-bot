@@ -26,6 +26,19 @@ export interface SleeveLifecycleResult {
   flags: Array<{ code: string; severity: 'info' | 'warn' | 'error'; message: string; observed?: any }>;
 }
 
+export const deriveLifecycleBooleans = (phase: SleevePhase | undefined) => {
+  switch (phase) {
+    case 'ADD':
+      return { active: true, allowAdd: true, protectFromSells: true, allowReintegration: false };
+    case 'HOLD':
+      return { active: true, allowAdd: false, protectFromSells: true, allowReintegration: false };
+    case 'REINTEGRATE':
+      return { active: false, allowAdd: false, protectFromSells: false, allowReintegration: true };
+    default:
+      return { active: false, allowAdd: false, protectFromSells: false, allowReintegration: false };
+  }
+};
+
 export const runSleeveLifecycle = ({
   asOf,
   config,
@@ -52,8 +65,24 @@ export const runSleeveLifecycle = ({
     anchorPrice &&
     anchorPrice <= state.entryAnchorPrice * (1 - deepFailsafePct);
 
+  // If state has triggered but missing windows, recompute
+  if (state.triggeredAtISO) {
+    const addWeeksCfg = cfg.durationWeeksAdd ?? 3;
+    const holdWeeksCfg = cfg.durationWeeksHold ?? 10;
+    if (!state.addUntilISO) state.addUntilISO = addWeeks(state.triggeredAtISO, addWeeksCfg);
+    if (!state.holdUntilISO) state.holdUntilISO = addWeeks(state.triggeredAtISO, addWeeksCfg + holdWeeksCfg);
+    if (!state.reintegrateAfterISO) state.reintegrateAfterISO = state.holdUntilISO;
+  }
+  // Recompute phase from dates if state exists
+  if (state.triggeredAtISO && state.addUntilISO && state.holdUntilISO) {
+    const nowDate = new Date(now);
+    if (nowDate <= new Date(state.addUntilISO)) state.phase = 'ADD';
+    else if (nowDate <= new Date(state.holdUntilISO)) state.phase = 'HOLD';
+    else state.phase = 'REINTEGRATE';
+  }
+
   // New trigger
-  if (!state.active && dislocationActive) {
+  if ((!state.active || state.phase === 'INACTIVE' || !state.phase) && dislocationActive) {
     const addWeeksCfg = cfg.durationWeeksAdd ?? 3;
     const holdWeeksCfg = cfg.durationWeeksHold ?? 10;
     state = {
@@ -76,13 +105,10 @@ export const runSleeveLifecycle = ({
   }
   if (state.phase === 'HOLD' && state.holdUntilISO && new Date(now) > new Date(state.holdUntilISO)) {
     state.phase = 'REINTEGRATE';
-    state.active = false;
-    state.cooldownUntilISO = addWeeks(now, cfg.cooldownWeeks ?? 0);
   }
 
   if (earlyExitEnabled && (deepFailsafe || (riskOff && riskConf >= riskOffThreshold))) {
     state.phase = 'REINTEGRATE';
-    state.active = false;
     state.cooldownUntilISO = addWeeks(now, cfg.cooldownWeeks ?? 0);
     flags.push({
       code: deepFailsafe ? 'DISLOCATION_FAILSAFE_TRIGGERED' : 'DISLOCATION_EARLY_EXIT_RISK_OFF',
@@ -92,12 +118,28 @@ export const runSleeveLifecycle = ({
     });
   }
 
+  // Derive active/controls from phase
+  const derived = deriveLifecycleBooleans(state.phase);
+  state.active = derived.active;
+  const { allowAdd, protectFromSells, allowReintegration } = derived;
+
+  // Invariant check (warn; in tests we can assert)
+  const invariantOk =
+    (state.phase === 'ADD' && allowAdd && protectFromSells && state.active) ||
+    (state.phase === 'HOLD' && !allowAdd && protectFromSells && state.active) ||
+    (state.phase === 'REINTEGRATE' && !allowAdd && !protectFromSells) ||
+    (!state.phase && !allowAdd && !protectFromSells);
+  if (!invariantOk) {
+    flags.push({
+      code: 'DISLOCATION_STATE_INVARIANT',
+      severity: 'warn',
+      message: 'Lifecycle invariant violated; derived controls used',
+      observed: { phase: state.phase, allowAdd, protectFromSells, active: state.active }
+    });
+  }
+
   // Save state
   saveSleeveState(state);
-
-  const allowAdd = state.phase === 'ADD';
-  const protectFromSells = state.phase === 'ADD' || state.phase === 'HOLD';
-  const allowReintegration = state.phase === 'REINTEGRATE';
 
   return { state, allowAdd, protectFromSells, allowReintegration, flags };
 };

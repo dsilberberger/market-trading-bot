@@ -1,4 +1,5 @@
 import { TradeOrder } from '../core/types';
+import { ExposureGroups, symbolToExposureKey } from '../core/exposureGroups';
 
 export interface TargetInput {
   symbol: string;
@@ -27,6 +28,7 @@ export interface ExecutionPlanOrder {
   thesis?: string;
   invalidation?: string;
   confidence?: number;
+  exposureKey?: string;
 }
 
 export interface ExecutionSubstitution {
@@ -64,6 +66,7 @@ interface PlannerParams {
   allowProxies?: boolean;
   maxProxyTrackingErrorAbs?: number;
   proxyCascade?: boolean;
+  exposureGroups?: ExposureGroups;
 }
 
 const normalizeWeights = (targets: TargetInput[]) => {
@@ -93,7 +96,8 @@ export const planWholeShareExecution = ({
   proxyMap,
   allowProxies,
   maxProxyTrackingErrorAbs,
-  proxyCascade
+  proxyCascade,
+  exposureGroups
 }: PlannerParams): ExecutionPlan => {
   const flags: ExecutionPlan['flags'] = [];
   const skipped: ExecutionPlan['skipped'] = [];
@@ -151,7 +155,13 @@ export const planWholeShareExecution = ({
       priceExecuted: resolvedPrice,
       targetWeight: tw
     });
-    return { originalSymbol: sym, symbol: resolvedSym, price: resolvedPrice || 0, targetWeight: tw, priority: t.priority };
+    return {
+      originalSymbol: sym,
+      symbol: resolvedSym,
+      price: resolvedPrice || 0,
+      targetWeight: tw,
+      priority: t.priority
+    };
   });
 
   const dropUnaffordable = (list: any[]) => {
@@ -342,7 +352,8 @@ export const planWholeShareExecution = ({
     side: 'BUY',
     quantity: shares[i],
     estNotionalUSD: shares[i] * (c.price || 0),
-    estPrice: c.price || 0
+    estPrice: c.price || 0,
+    exposureKey: exposureGroups ? symbolToExposureKey(exposureGroups, c.symbol) : undefined
   }));
   const invested = orders.reduce((acc, o) => acc + o.estNotionalUSD, 0);
   const achievedWeights: Record<string, number> = {};

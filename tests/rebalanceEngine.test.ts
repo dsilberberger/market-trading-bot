@@ -117,4 +117,29 @@ describe('rebalancePortfolio', () => {
     expect(res.sellOrders.length).toBe(1);
     expect(res.sellOrders[0].notionalUSD).toBeCloseTo(240);
   });
+
+  it('freezes base sells during add/hold when configured', () => {
+    const res = rebalancePortfolio({
+      asOf: '2025-01-01',
+      portfolio: {
+        cash: 0,
+        equity: 300,
+        holdings: [{ symbol: 'SPYM', quantity: 3, avgPrice: 80 }]
+      },
+      prices: { SPYM: 80 },
+      targetPlan: {
+        ...targetPlan,
+        orders: [{ symbol: 'SPYM', side: 'BUY', quantity: 0, estNotionalUSD: 0, estPrice: 80 }]
+      },
+      regimes: { equityRegime: { label: 'neutral', confidence: 0.5 } },
+      priorRegimes: {},
+      proxyParentMap: {},
+      config: baseConfig,
+      protectFromSells: true,
+      freezeBaseRebalance: true,
+      sleevePositions: { SPYM: { baseQty: 3, dislocationQty: 0, updatedAtISO: '2025-01-01' } }
+    });
+    expect(res.sellOrders.length).toBe(0);
+    expect(res.flags.some((f) => f.code === 'BASE_REBALANCE_FROZEN')).toBe(true);
+  });
 });

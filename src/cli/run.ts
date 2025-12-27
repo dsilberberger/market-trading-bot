@@ -25,6 +25,12 @@ import { rebalancePortfolio } from '../execution/rebalanceEngine';
 import { detectDislocation } from '../dislocation/dislocationDetector';
 import { buildDislocationBuys } from '../execution/dislocationPlanner';
 import { runSleeveLifecycle } from '../dislocation/sleeveLifecycle';
+import { generateRoundNarrative } from '../narratives/roundNarrative';
+import { generateRound6Metrics } from '../retrospective/metrics';
+import { generateRound6Retrospective } from '../retrospective/retrospective';
+import { computeOverlayBudget } from '../dislocation/overlayBudget';
+import { loadExposureGroups, symbolToExposureKey, canonicalSymbolForExposure } from '../core/exposureGroups';
+import { planCanonicalization } from '../execution/canonicalizeExposureGroups';
 import {
   loadSleevePositions,
   reconcileSleevePositions,
@@ -220,6 +226,9 @@ export const runBot = async (options: RunOptions) => {
     config.allowExecutionProxies && config.proxiesFile
       ? readJSONFile<Record<string, string[]>>(path.resolve(process.cwd(), config.proxiesFile))
       : {};
+  const exposureGroups = config.enableExposureGrouping
+    ? loadExposureGroups(config.exposureGroupsFile)
+    : {};
   const round0FlagsPath = path.join(runDir, 'round0_flags.json');
   const round0Flags = fs.existsSync(round0FlagsPath) ? JSON.parse(fs.readFileSync(round0FlagsPath, 'utf-8')) : [];
   if (config.allowExecutionProxies) {
@@ -306,7 +315,8 @@ export const runBot = async (options: RunOptions) => {
     maxAbsWeightError: 0.2,
     proxyMap: proxiesMap,
     allowProxies: config.allowExecutionProxies,
-    maxProxyTrackingErrorAbs: config.maxProxyTrackingErrorAbs
+    maxProxyTrackingErrorAbs: config.maxProxyTrackingErrorAbs,
+    exposureGroups
   });
   writeRunArtifact(runId, 'execution_plan.json', planner);
   writeRunArtifact(runId, 'execution_substitutions.json', planner.substitutions || []);
@@ -418,6 +428,11 @@ export const runBot = async (options: RunOptions) => {
     }
   }
   const priorRegimes = loadPreviousRegimes(runId);
+  const freezeBase = (config.dislocation?.freezeBaseRebalanceDuringAddHold ?? true) &&
+    (sleeveLifecycle.state.phase === 'ADD' || sleeveLifecycle.state.phase === 'HOLD');
+  const riskOffExit =
+    llmContext?.regimes?.equityRegime?.label === 'risk_off' &&
+    (llmContext?.regimes?.equityRegime?.confidence ?? 0) >= (config.dislocation?.earlyExit?.riskOffConfidenceThreshold ?? 0.7);
   const rebalance = rebalancePortfolio({
     asOf,
     portfolio: inputs.portfolio,
@@ -429,7 +444,10 @@ export const runBot = async (options: RunOptions) => {
     config,
     protectFromSells: sleeveLifecycle.protectFromSells,
     protectedSymbols: (config.dislocation?.deploymentTargets || []).map((t) => proxyParentMap[t.symbol] || t.symbol),
-    sleevePositions
+    sleevePositions,
+    freezeBaseRebalance: freezeBase,
+    riskOffExit,
+    exposureGroups
   });
   writeRunArtifact(runId, 'rebalance.json', rebalance);
 
@@ -451,42 +469,120 @@ export const runBot = async (options: RunOptions) => {
   // Opportunistic dislocation buys (incremental)
   let dislocationExtraOrders: TradeOrder[] = [];
   if (sleeveLifecycle.allowAdd && config.dislocation?.enabled) {
-    const extra = config.dislocation.opportunisticExtraExposurePct ?? 0;
+    const extra = config.dislocation.overlayExtraExposurePct ?? config.dislocation.opportunisticExtraExposurePct ?? 0;
     const maxTotal = config.dislocation.maxTotalExposureCapPct ?? 1.0;
-    const dislocationCap = Math.min(maxTotal, baseExposureCap + extra);
-    const extraCapPct = Math.max(0, dislocationCap - baseExposureCap);
-    if (extraCapPct > 0) {
-      const extraPlan = buildDislocationBuys({
-        extraCapPct,
-        equity: inputs.portfolio.equity ?? rawBudget,
-        prices: priceMap,
-        config
+    if (extra > 0) {
+      let basePlannedBuysUSD = 0;
+      let basePlannedSellsUSD = 0;
+      for (const o of rebalance.combinedOrders || []) {
+        if (o.side === 'BUY') basePlannedBuysUSD += o.notionalUSD || 0;
+        else basePlannedSellsUSD += o.notionalUSD || 0;
+      }
+      const currentInvestedUSD = (inputs.portfolio.equity ?? 0) - (inputs.portfolio.cash ?? 0);
+  const overlayTargets =
+    (config.dislocation.overlayTargets && config.dislocation.overlayTargets.length
+      ? config.dislocation.overlayTargets
+      : []) || [];
+  const overlayExposureKeys = config.dislocation.overlayExposureKeys || [];
+  const overlaySymbolsFromExposure: Array<{ symbol: string; weight: number }> = [];
+  if (overlayExposureKeys.length && exposureGroups) {
+    overlayExposureKeys.forEach((key) => {
+      const canonical = canonicalSymbolForExposure(exposureGroups, key, priceMap, config.dislocation?.overlayMinOneShareRule);
+      if (canonical) overlaySymbolsFromExposure.push({ symbol: canonical, weight: 1 });
+    });
+  }
+  const overlayTargetsEffective =
+    overlayTargets.length > 0 ? overlayTargets : overlaySymbolsFromExposure.length ? overlaySymbolsFromExposure : [];
+  const cheapestOverlayPrice = overlayTargetsEffective
+    .map((t) => priceMap[t.symbol])
+    .filter((p) => typeof p === 'number' && p > 0)
+    .sort((a, b) => a - b)[0];
+      const overlayBudget = computeOverlayBudget({
+        equityUSD: inputs.portfolio.equity ?? rawBudget,
+        cashUSD: inputs.portfolio.cash ?? 0,
+        minCashUSD,
+        overlayExtraExposurePct: extra,
+        maxTotalExposureCapPct: maxTotal,
+        currentInvestedUSD,
+        cheapestOverlayPrice,
+        overlayMinBudgetUSD: config.dislocation.overlayMinBudgetUSD
       });
-      dislocationExtraOrders = extraPlan.orders.map((o) => ({
-        symbol: o.symbol,
-        side: o.side || 'BUY',
-        orderType: 'MARKET',
-        notionalUSD: o.estNotionalUSD ?? o.quantity * (o.estPrice || priceMap[o.symbol] || 0),
-        thesis: o.thesis || 'Opportunistic dislocation buy.',
-        invalidation: o.invalidation || '',
-        confidence: o.confidence ?? 0.6,
-        portfolioLevel: { targetHoldDays: 30, netExposureTarget: 1 },
-        sleeve: 'dislocation'
-      }));
-      if (dislocationExtraOrders.length) {
-        const existingFlags =
-          (fs.existsSync(path.join(runDir, 'round5_flags.json'))
-            ? JSON.parse(fs.readFileSync(path.join(runDir, 'round5_flags.json'), 'utf-8'))
-            : []) || [];
-        existingFlags.push({
-          code: 'DISLOCATION_ACTIVE',
-          severity: 'info',
-          message: 'Opportunistic dislocation buys added',
-          observed: { extraCapPct, dislocationCap, baseExposureCap }
+      const maxSpendOverride = overlayBudget.overlayBudgetUSD;
+      if (maxSpendOverride > 0 && overlayTargetsEffective.length) {
+        const extraPlan = buildDislocationBuys({
+          overlayTargets: overlayTargetsEffective,
+          overlayBudgetUSD: maxSpendOverride,
+          prices: priceMap,
+          maxSpendOverride
         });
+        dislocationExtraOrders = extraPlan.orders.map((o) => ({
+          symbol: o.symbol,
+          side: o.side || 'BUY',
+          orderType: 'MARKET',
+          notionalUSD: o.estNotionalUSD ?? o.quantity * (o.estPrice || priceMap[o.symbol] || 0),
+          thesis: o.thesis || 'Opportunistic dislocation buy.',
+          invalidation: o.invalidation || '',
+          confidence: o.confidence ?? 0.6,
+          portfolioLevel: { targetHoldDays: 30, netExposureTarget: 1 },
+          sleeve: 'dislocation'
+        }));
+        if (dislocationExtraOrders.length) {
+          const existingFlags =
+            (fs.existsSync(path.join(runDir, 'round5_flags.json'))
+              ? JSON.parse(fs.readFileSync(path.join(runDir, 'round5_flags.json'), 'utf-8'))
+              : []) || [];
+          existingFlags.push({
+            code: 'DISLOCATION_ACTIVE',
+            severity: 'info',
+            message: 'Opportunistic dislocation buys added',
+            observed: { extraPct: extra, dislocationCap: maxTotal, baseExposureCap, overlayBudgetUSD: maxSpendOverride }
+          });
+          writeRunArtifact(runId, 'round5_flags.json', existingFlags);
+        }
+      }
+      const overlayBudgetPath = path.join(runDir, 'overlay_budget.json');
+      fs.writeFileSync(overlayBudgetPath, JSON.stringify(overlayBudget, null, 2));
+      const existingFlags =
+        (fs.existsSync(path.join(runDir, 'round5_flags.json'))
+          ? JSON.parse(fs.readFileSync(path.join(runDir, 'round5_flags.json'), 'utf-8'))
+          : []) || [];
+      if (overlayBudget.flags.length) {
+        writeRunArtifact(runId, 'round5_flags.json', [...existingFlags, ...overlayBudget.flags]);
+      } else {
         writeRunArtifact(runId, 'round5_flags.json', existingFlags);
       }
     }
+  }
+
+  // Canonicalization during reintegrate phase
+  if (
+    config.canonicalizeExposureGroups &&
+    (config.canonicalizeOnlyInPhase || ['REINTEGRATE']).includes(sleeveLifecycle.state.phase || '') &&
+    exposureGroups &&
+    Object.keys(exposureGroups).length
+  ) {
+    const canonicalPlan = planCanonicalization({
+      exposureGroups,
+      holdings: inputs.portfolio.holdings || [],
+      prices: priceMap,
+      sleevePositions,
+      config,
+      phase: sleeveLifecycle.state.phase || '',
+      protectFromSells: sleeveLifecycle.protectFromSells,
+      protectedSymbols: (config.dislocation?.deploymentTargets || []).map((t) => proxyParentMap[t.symbol] || t.symbol),
+      equity: inputs.portfolio.equity ?? rawBudget
+    });
+    if (canonicalPlan.orders.length) {
+      proposal.intent.orders = [...proposal.intent.orders, ...canonicalPlan.orders];
+    }
+    if (canonicalPlan.flags.length) {
+      const existingFlags =
+        (fs.existsSync(path.join(runDir, 'round5_flags.json'))
+          ? JSON.parse(fs.readFileSync(path.join(runDir, 'round5_flags.json'), 'utf-8'))
+          : []) || [];
+      writeRunArtifact(runId, 'round5_flags.json', [...existingFlags, ...canonicalPlan.flags]);
+    }
+    writeRunArtifact(runId, 'canonicalization_plan.json', canonicalPlan);
   }
 
   const thesisMap = new Map(targetOrdersEnriched.map((o) => [o.symbol, o]));
@@ -540,6 +636,9 @@ export const runBot = async (options: RunOptions) => {
     appendEvent(makeEvent(runId, 'RUN_FAILED', { reason: riskReport.blockedReasons }));
     console.error('Run blocked by risk engine.');
     console.error(`Reasons: ${riskReport.blockedReasons.join('; ')}`);
+    [0, 1, 2, 3, 4, 5].forEach((r) => generateRoundNarrative(runId, r as any));
+    generateRound6Metrics(runId);
+    generateRound6Retrospective(runId);
     return;
   }
 
@@ -560,12 +659,18 @@ export const runBot = async (options: RunOptions) => {
         : []) || [];
     existingFlags.push({ code: 'EXECUTION_SKIPPED_PENDING_APPROVAL', severity: 'info', message: 'Awaiting approval' });
     writeRunArtifact(runId, 'round5_flags.json', existingFlags);
+    [0, 1, 2, 3, 4, 5].forEach((r) => generateRoundNarrative(runId, r as any));
+    generateRound6Metrics(runId);
+    generateRound6Retrospective(runId);
     return;
   }
 
   if (dry) {
     appendEvent(makeEvent(runId, 'RUN_COMPLETED', { dryRun: true }));
     console.log(`Dry run completed for ${runId}.`);
+    [0, 1, 2, 3, 4, 5].forEach((r) => generateRoundNarrative(runId, r as any));
+    generateRound6Metrics(runId);
+    generateRound6Retrospective(runId);
     return;
   }
 
@@ -576,6 +681,9 @@ export const runBot = async (options: RunOptions) => {
   });
   appendEvent(makeEvent(runId, 'RUN_COMPLETED', { fills: execution.fills.length }));
   console.log(`Run ${runId} completed with ${execution.fills.length} fills.`);
+  [0, 1, 2, 3, 4, 5].forEach((r) => generateRoundNarrative(runId, r as any));
+  generateRound6Metrics(runId);
+  generateRound6Retrospective(runId);
 };
 
 const run = async () => {

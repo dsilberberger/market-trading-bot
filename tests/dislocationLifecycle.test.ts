@@ -4,10 +4,13 @@ import { DislocationSleeveState } from '../src/dislocation/sleeveState';
 import { PriceBar } from '../src/data/marketData.types';
 import fs from 'fs';
 import path from 'path';
+import { deriveLifecycleBooleans } from '../src/dislocation/sleeveLifecycle';
 
 const resetState = () => {
   const p = path.resolve(process.cwd(), 'data_cache', 'dislocation_sleeve_state.json');
   if (fs.existsSync(p)) fs.unlinkSync(p);
+  const p2 = path.resolve(process.cwd(), 'data_cache', 'dislocation_state.json');
+  if (fs.existsSync(p2)) fs.unlinkSync(p2);
 };
 
 const baseConfig: any = {
@@ -77,6 +80,46 @@ describe('dislocation lifecycle', () => {
     });
     expect(life3.allowReintegration).toBe(true);
     expect(life3.protectFromSells).toBe(false);
+  });
+
+  it('uses date-based progression for many weeks', () => {
+    const history = { SPY: makeBars([100, 98, 95, 90, 85]) };
+    const quotes = { SPY: 85 };
+    const det = detectDislocation('2025-01-07', baseConfig as any, history as any, quotes);
+    runSleeveLifecycle({
+      asOf: '2025-01-07',
+      config: baseConfig as any,
+      dislocationActive: det.active,
+      anchorPrice: quotes.SPY,
+      regimes: { equityRegime: { label: 'neutral', confidence: 0.5 } }
+    });
+    // After add window ends -> HOLD
+    const lifeHold = runSleeveLifecycle({
+      asOf: '2025-02-05',
+      config: baseConfig as any,
+      dislocationActive: true,
+      anchorPrice: 90,
+      regimes: { equityRegime: { label: 'neutral', confidence: 0.5 } }
+    });
+    expect(lifeHold.state.phase).toBe('HOLD');
+    // After hold window -> REINTEGRATE
+    const lifeReint = runSleeveLifecycle({
+      asOf: '2025-03-15',
+      config: baseConfig as any,
+      dislocationActive: false,
+      anchorPrice: 95,
+      regimes: { equityRegime: { label: 'neutral', confidence: 0.5 } }
+    });
+    expect(lifeReint.allowReintegration).toBe(true);
+  });
+
+  it('derives controls from phase consistently', () => {
+    const phases: Array<DislocationSleeveState['phase']> = ['ADD', 'HOLD', 'REINTEGRATE', 'INACTIVE'];
+    for (const ph of phases) {
+      const derived = deriveLifecycleBooleans(ph);
+      if (ph === 'ADD') expect(derived.active).toBe(true);
+      if (ph === 'REINTEGRATE') expect(derived.protectFromSells).toBe(false);
+    }
   });
 
   it('early exit on risk_off high confidence', () => {

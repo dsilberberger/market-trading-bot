@@ -75,6 +75,15 @@ export interface BotConfig {
     breadthMinDownCount?: number;
     confirmVolatility?: boolean;
     opportunisticExtraExposurePct?: number;
+    overlayExtraExposurePct?: number;
+    overlayTargets?: Array<{ symbol: string; weight: number }>;
+    overlayExposureKeys?: string[];
+    proxyOnlyOverlay?: boolean;
+    overlayAllowedSymbols?: string[];
+    overlayFundingPolicy?: 'cash_only' | 'allow_trim_base';
+    overlayMinBudgetUSD?: number;
+    overlayMinBudgetPolicy?: 'gate' | 'warn';
+    overlayMinOneShareRule?: boolean;
     maxTotalExposureCapPct?: number;
     deploymentTargets?: Array<{ symbol: string; weight: number }>;
     durationWeeks?: number;
@@ -85,6 +94,7 @@ export interface BotConfig {
     recoveryPctFromLow?: number;
     sleeveTag?: string;
     reintegrationMode?: 'passive';
+    freezeBaseRebalanceDuringAddHold?: boolean;
     earlyExit?: {
       enabled?: boolean;
       riskOffConfidenceThreshold?: number;
@@ -103,6 +113,13 @@ export interface BotConfig {
   proxiesFile?: string;
   proxySelectionMode?: 'first_executable';
   maxProxyTrackingErrorAbs?: number;
+  enableExposureGrouping?: boolean;
+  exposureGroupsFile?: string;
+  canonicalizeExposureGroups?: boolean;
+  canonicalizeOnlyInPhase?: string[];
+  canonicalizeMaxNotionalPctPerRun?: number;
+  canonicalizeMinDriftToAct?: number;
+  canonicalizeOnlyIfAffordable?: boolean;
   universeFile: string;
   baselinesEnabled: boolean;
   slippageBps: number;

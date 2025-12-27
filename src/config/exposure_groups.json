@@ -1,0 +1,42 @@
+{
+  "US_LARGE_CAP": {
+    "members": ["SPY", "SPYM", "SPLG", "IVV", "VOO"],
+    "canonicalPreference": ["SPY", "SPLG", "SPYM"],
+    "description": "US large-cap broad market"
+  },
+  "NASDAQ_100": {
+    "members": ["QQQ", "QQQM"],
+    "canonicalPreference": ["QQQ", "QQQM"],
+    "description": "US Nasdaq-100"
+  },
+  "US_SMALL_CAP": {
+    "members": ["IWM", "VTWO", "IJR"],
+    "canonicalPreference": ["IWM", "VTWO"],
+    "description": "US small cap"
+  },
+  "DEV_EX_US": {
+    "members": ["EFA", "IEFA"],
+    "canonicalPreference": ["EFA", "IEFA"],
+    "description": "Developed ex-US"
+  },
+  "EM": {
+    "members": ["EEM", "IEMG", "VWO"],
+    "canonicalPreference": ["EEM", "IEMG"],
+    "description": "Emerging markets"
+  },
+  "US_LONG_TREASURY": {
+    "members": ["TLT", "VGLT", "EDV"],
+    "canonicalPreference": ["TLT", "VGLT"],
+    "description": "Long duration US Treasuries"
+  },
+  "CASH_PROXY": {
+    "members": ["SHY", "BIL", "SGOV", "SHV"],
+    "canonicalPreference": ["SHY", "SGOV", "BIL"],
+    "description": "Cash / short-term Treasuries"
+  },
+  "GOLD": {
+    "members": ["GLD", "IAU", "GLDM", "SGOL"],
+    "canonicalPreference": ["GLD", "IAU", "GLDM"],
+    "description": "Gold"
+  }
+}

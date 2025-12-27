@@ -1,4 +1,5 @@
 import { BotConfig, PortfolioState, SleevePositions, TradeOrder } from '../core/types';
+import { ExposureGroups, symbolToExposureKey } from '../core/exposureGroups';
 import { ExecutionPlan } from './wholeSharePlanner';
 
 export interface RebalanceInput {
@@ -13,6 +14,9 @@ export interface RebalanceInput {
   protectFromSells?: boolean;
   protectedSymbols?: string[];
   sleevePositions?: SleevePositions;
+  freezeBaseRebalance?: boolean;
+  riskOffExit?: boolean;
+  exposureGroups?: ExposureGroups;
 }
 
 export interface RebalanceResult {
@@ -48,7 +52,10 @@ export const rebalancePortfolio = ({
   config,
   protectFromSells = false,
   protectedSymbols = [],
-  sleevePositions
+  sleevePositions,
+  freezeBaseRebalance = false,
+  riskOffExit = false,
+  exposureGroups
 }: RebalanceInput): RebalanceResult => {
   const flags: RebalanceResult['flags'] = [];
   const skipped: RebalanceResult['skipped'] = [];
@@ -74,16 +81,22 @@ export const rebalancePortfolio = ({
   const pfDriftTh = config.rebalance.portfolioDriftThreshold ?? 0.05;
   const minTrade = config.rebalance.minTradeNotionalUSD ?? 0;
 
-  // Build current state aggregated by parent symbol, with sleeve splits
+  const exposureKeyFor = (sym: string) =>
+    (config.enableExposureGrouping && exposureGroups && symbolToExposureKey(exposureGroups, sym)) ||
+    (proxyParentMap?.[sym] || sym);
+
+  // Build current state aggregated by parent/exposure, with sleeve splits
   const currentValueByParent: Record<string, number> = {};
   const currentQtyByParent: Record<string, number> = {};
   const baseQtyByParent: Record<string, number> = {};
   const dislocQtyByParent: Record<string, number> = {};
+  const heldSymbolByParent: Record<string, string> = {};
   for (const h of portfolio.holdings || []) {
-    const parent = toParent(h.symbol, proxyParentMap);
+    const parent = exposureKeyFor(h.symbol);
     const px = prices[h.symbol] ?? prices[parent] ?? 0;
     currentValueByParent[parent] = (currentValueByParent[parent] || 0) + h.quantity * px;
     currentQtyByParent[parent] = (currentQtyByParent[parent] || 0) + h.quantity;
+    if (!heldSymbolByParent[parent]) heldSymbolByParent[parent] = h.symbol;
     const sleeveEntry = sleevePositions?.[h.symbol];
     const baseQty = sleeveEntry ? sleeveEntry.baseQty || 0 : h.quantity;
     const dislocQty = sleeveEntry ? sleeveEntry.dislocationQty || 0 : 0;
@@ -99,7 +112,7 @@ export const rebalancePortfolio = ({
   const targetQtyByParent: Record<string, number> = {};
   const executedSymbolByParent: Record<string, string> = {};
   for (const o of targetPlan.orders || []) {
-    const parent = toParent(o.symbol, proxyParentMap);
+    const parent = exposureKeyFor(o.symbol);
     const px = prices[o.symbol] ?? prices[parent] ?? o.estPrice ?? 0;
     const val = o.quantity * px;
     targetValueByParent[parent] = (targetValueByParent[parent] || 0) + val;
@@ -168,6 +181,15 @@ export const rebalancePortfolio = ({
     if (targetQty < currQty) {
       const delta = currQty - targetQty;
       let sellQty = delta;
+      if (freezeBaseRebalance && !riskOffExit) {
+        flags.push({
+          code: 'BASE_REBALANCE_FROZEN',
+          severity: 'info',
+          message: `Base sells frozen during dislocation protection for ${p}`,
+          observed: { symbol: p, requestedSellQty: delta }
+        });
+        continue;
+      }
       if (protectFromSells && protectedSet.has(p)) {
         const baseQty = baseQtyByParent[p] || 0;
         sellQty = Math.min(delta, baseQty);
@@ -189,7 +211,7 @@ export const rebalancePortfolio = ({
         continue;
       }
       if (sellQty <= 0) continue;
-      const symToSell = executedSymbolByParent[p] || p;
+      const symToSell = executedSymbolByParent[p] || heldSymbolByParent[p] || p;
       const px = prices[symToSell] ?? prices[p] ?? 0;
       const notion = sellQty * px;
       if (notion < minTrade) {
