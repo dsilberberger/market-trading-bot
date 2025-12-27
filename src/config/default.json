@@ -26,24 +26,48 @@
   "dislocation": {
     "enabled": true,
     "anchorSymbol": "SPY",
+    "barInterval": "1w",
+    "fastWindowWeeks": 1,
+    "slowWindowWeeks": 4,
+    "peakLookbackWeeks": 26,
+    "minActiveTier": 2,
+    "tiers": [
+      { "tier": 0, "name": "inactive",     "peakDrawdownGte": 0.00, "overlayExtraExposurePct": 0.00 },
+      { "tier": 1, "name": "mild",         "peakDrawdownGte": 0.10, "overlayExtraExposurePct": 0.15 },
+      { "tier": 2, "name": "dislocation",  "peakDrawdownGte": 0.20, "overlayExtraExposurePct": 0.30 },
+      { "tier": 3, "name": "capitulation", "peakDrawdownGte": 0.30, "overlayExtraExposurePct": 0.40 }
+    ],
+    "fastDrawdownEscalation": {
+      "enabled": true,
+      "tier2FastDrawdownGte": 0.12,
+      "tier3FastDrawdownGte": 0.18
+    },
+    "slowDrawdownEscalation": {
+      "enabled": true,
+      "tier2SlowDrawdownGte": 0.15,
+      "tier3SlowDrawdownGte": 0.25
+    },
+    "tierHysteresisPct": 0.02,
+    "minWeeksBetweenTierChanges": 1,
     "durationWeeksAdd": 3,
     "durationWeeksHold": 10,
-    "lookbackDaysFast": 5,
-    "lookbackDaysSlow": 20,
-    "triggerFastDrawdownPct": 0.05,
-    "triggerSlowDrawdownPct": 0.10,
-    "confirmBreadth": true,
-    "breadthUniverseSymbols": ["QQQ", "IWM"],
-    "breadthMinDownCount": 1,
-    "confirmVolatility": false,
-    "overlayExtraExposurePct": 0.30,
-    "opportunisticExtraExposurePct": 0.30,
+    "cooldownWeeks": 2,
     "maxTotalExposureCapPct": 0.70,
+    "pacing": {
+      "tierMaxDeployPctOfOverlayPerWeek": {
+        "1": 0.50,
+        "2": 0.75,
+        "3": 1.00
+      }
+    },
+    "overlayTargets": [
+      { "symbol": "SPYM", "weight": 0.70 },
+      { "symbol": "QQQM", "weight": 0.30 }
+    ],
+    "overlayAllowedSymbols": ["SPYM", "QQQM"],
     "overlayExposureKeys": ["US_LARGE_CAP", "NASDAQ_100"],
-    "overlayTargets": [],
     "deploymentTargets": [],
     "proxyOnlyOverlay": true,
-    "overlayAllowedSymbols": [],
     "overlayFundingPolicy": "cash_only",
     "overlayMinBudgetUSD": 200,
     "overlayMinBudgetPolicy": "gate",
@@ -56,11 +80,7 @@
       "riskOffConfidenceThreshold": 0.70,
       "requiresRiskOffLabel": true,
       "deepDrawdownFailsafePct": 0.30
-    },
-    "durationWeeks": 3,
-    "cooldownWeeks": 2,
-    "exitCondition": "time_or_recovery",
-    "recoveryPctFromLow": 0.05
+    }
   },
   "policyGateMode": "scale",
   "cadence": "weekly",

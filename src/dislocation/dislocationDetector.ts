@@ -1,15 +1,21 @@
 import fs from 'fs';
 import path from 'path';
 import { BotConfig, PriceBar } from '../core/types';
+import { computeDislocationSeverity } from './dislocationSeverity';
 
 export interface DislocationResult {
   asOf: string;
-  active: boolean;
+  tierEngaged: boolean;
+  active?: boolean;
+  tier?: number;
+  tierName?: string;
+  overlayExtraExposurePct?: number;
   triggeredThisRun: boolean;
   reason: string[];
   metrics: {
     spyDrawdownFastPct: number;
     spyDrawdownSlowPct: number;
+    peakDrawdownPct?: number;
     breadthConfirm?: { symbolsChecked: string[]; downCount: number };
     troughDate?: string;
     troughPrice?: number;
@@ -88,6 +94,7 @@ export const detectDislocation = (
   if (!cfg.enabled) {
     return {
       asOf,
+      tierEngaged: false,
       active: false,
       triggeredThisRun: false,
       reason: ['disabled'],
@@ -97,13 +104,15 @@ export const detectDislocation = (
     };
   }
   const anchor = cfg.anchorSymbol || 'SPY';
-  const fastBars = Math.max(1, Math.round((cfg.lookbackDaysFast || 5) / 5)); // weekly approx
-  const slowBars = Math.max(1, Math.round((cfg.lookbackDaysSlow || 20) / 5)); // weekly approx
   const series = getCloseSeries(history?.[anchor]);
-  const fast = drawdownPct(series, Math.min(series.length, fastBars));
-  const slow = drawdownPct(series, Math.min(series.length, slowBars));
+  const severity = computeDislocationSeverity(series, config);
+  let tier = severity.tier;
+  const fast = severity.metrics.fastDrawdownPct;
+  const slow = severity.metrics.slowDrawdownPct;
+  const peak = severity.metrics.peakDrawdownPct || 0;
 
   const breadthSyms = cfg.breadthUniverseSymbols || [];
+  const slowBars = cfg.slowWindowWeeks || 4;
   let breadthDown = 0;
   for (const s of breadthSyms) {
     const hh = getCloseSeries(history?.[s]);
@@ -113,13 +122,11 @@ export const detectDislocation = (
 
   const state = loadState();
   const expiresISO = state.expiresISO;
-  let active = Boolean(state.active) && expiresISO ? new Date(expiresISO) > new Date(asOf) : false;
   const cooldownUntil = state.cooldownUntilISO && new Date(state.cooldownUntilISO);
   const inCooldown = cooldownUntil ? cooldownUntil > new Date(asOf) : false;
 
-  const triggerFast = fast <= -(cfg.triggerFastDrawdownPct || 0.05);
-  const triggerSlow = slow <= -(cfg.triggerSlowDrawdownPct || 0.1);
-  const breadthOk = cfg.confirmBreadth ? breadthDown >= (cfg.breadthMinDownCount || 1) : true;
+  const minTier = cfg.minActiveTier ?? 0;
+  const tierEngaged = severity.tierEngaged && !inCooldown;
 
   let triggeredThisRun = false;
   let windowStart = state.windowStartISO || asOf;
@@ -127,54 +134,48 @@ export const detectDislocation = (
   let troughPrice = state.troughPrice;
   let troughDate = state.troughDate;
 
-  // Recovery exit
   const currentPx = prices[anchor] ?? (series.length ? series[series.length - 1].close : undefined);
-  if (active && cfg.recoveryPctFromLow && troughPrice && currentPx) {
-    const rebound = (currentPx - troughPrice) / troughPrice;
-    if (rebound >= cfg.recoveryPctFromLow) {
-      active = false;
+
+  // First activation based purely on tier
+  if (tierEngaged) {
+    const addWeeksCfg = cfg.durationWeeksAdd ?? cfg.durationWeeks ?? 3;
+    if (!state.active) triggeredThisRun = true;
+    windowStart = triggeredThisRun ? asOf : state.windowStartISO || asOf;
+    const defaultExpiry = addWeeks(windowStart, addWeeksCfg);
+    // If previous expiry is stale, refresh it deterministically
+    if (!state.expiresISO || new Date(state.expiresISO) <= new Date(asOf)) {
+      windowExpires = defaultExpiry;
+    } else {
+      windowExpires = state.expiresISO;
+    }
+    if (!troughPrice) {
+      troughPrice = currentPx;
+      troughDate = asOf;
     }
   }
-  if (active && expiresISO && new Date(expiresISO) <= new Date(asOf)) {
-    active = false;
+
+  // Recovery exit
+  if (tierEngaged && cfg.recoveryPctFromLow && troughPrice && currentPx) {
+    const rebound = (currentPx - troughPrice) / troughPrice;
+    if (rebound >= cfg.recoveryPctFromLow) {
+      // recovery exits severity engagement; lifecycle handled elsewhere
+    }
   }
 
-  if (!active && !inCooldown && (triggerFast || triggerSlow) && breadthOk) {
-    active = true;
-    triggeredThisRun = true;
-    windowStart = asOf;
-    windowExpires = addWeeks(asOf, cfg.durationWeeks || 3);
-    troughPrice = currentPx;
-    troughDate = asOf;
-    reason.push(triggerFast ? 'fast_drawdown' : 'slow_drawdown');
-    if (cfg.confirmBreadth) reason.push('breadth_confirmed');
-    const cdUntil = addWeeks(windowExpires, cfg.cooldownWeeks || 0);
-    saveState({
-      active,
-      windowStartISO: windowStart,
-      expiresISO: windowExpires,
-      triggeredAtRun: asOf,
-      troughPrice,
-      troughDate,
-      anchorSymbol: anchor,
-      cooldownUntilISO: cdUntil
-    });
-  } else {
-    // persist any changes
-    saveState({
-      active,
-      windowStartISO: windowStart,
-      expiresISO: windowExpires,
-      triggeredAtRun: state.triggeredAtRun,
-      troughPrice,
-      troughDate,
-      anchorSymbol: anchor,
-      cooldownUntilISO: state.cooldownUntilISO
-    });
-  }
+  // persist state
+  saveState({
+    active: tierEngaged,
+    windowStartISO: windowStart,
+    expiresISO: windowExpires,
+    triggeredAtRun: triggeredThisRun ? asOf : state.triggeredAtRun,
+    troughPrice,
+    troughDate,
+    anchorSymbol: anchor,
+    cooldownUntilISO: state.cooldownUntilISO
+  });
 
   const remainingWeeks = Math.max(0, Math.round(weeksBetween(asOf, windowExpires)));
-  if (active) {
+  if (tierEngaged) {
     flags.push({
       code: triggeredThisRun ? 'DISLOCATION_TRIGGERED' : 'DISLOCATION_ACTIVE',
       severity: 'info',
@@ -185,12 +186,19 @@ export const detectDislocation = (
 
   return {
     asOf,
-    active,
+    // keep legacy field name for callers expecting it
+    tierEngaged,
+    // deprecated alias for backward compatibility
+    active: tierEngaged,
+    tier: severity.tier,
+    tierName: severity.tierName,
+    overlayExtraExposurePct: severity.overlayExtraExposurePct,
     triggeredThisRun,
     reason,
     metrics: {
       spyDrawdownFastPct: fast,
       spyDrawdownSlowPct: slow,
+      peakDrawdownPct: peak,
       breadthConfirm: cfg.confirmBreadth ? { symbolsChecked: breadthSyms, downCount: breadthDown } : undefined,
       troughDate,
       troughPrice,

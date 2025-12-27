@@ -27,6 +27,9 @@ export interface SimConfig {
   debugPrintBudgets?: boolean;
 }
 
+const envDebug =
+  process.env.DEBUG && process.env.DEBUG !== '0' && process.env.DEBUG.toLowerCase() !== 'false';
+
 const defaultSim: SimConfig = {
   startingCash: 1900,
   baseExposureCapPct: 0.35,
@@ -35,7 +38,7 @@ const defaultSim: SimConfig = {
   baselineInitMode: 'respect_cap',
   enforceNoNegativeCash: true,
   allowSellsInInactive: false,
-  debugPrintBudgets: true
+  debugPrintBudgets: !!envDebug
 };
 
 interface SimWeek {
@@ -45,15 +48,20 @@ interface SimWeek {
   tlTPrice: number;
 }
 
+// Base path designed to hit multiple tiers:
+// - Week 2: ~7% drop (tier1)
+// - Week 3-4: ~20%+ drop (tier2)
+// - Week 5: ~30%+ drop (tier3/capitulation)
+// Then gradual recovery.
 const basePriceSeq = [
   { spy: 100, qqq: 110, tlt: 85 },
-  { spy: 93, qqq: 101, tlt: 86 }, // trigger
-  { spy: 85, qqq: 92, tlt: 87 },
-  { spy: 84, qqq: 90, tlt: 87 },
-  { spy: 87, qqq: 93, tlt: 88 },
-  { spy: 90, qqq: 96, tlt: 89 },
-  { spy: 94, qqq: 102, tlt: 90 },
-  { spy: 98, qqq: 108, tlt: 90 }
+  { spy: 93, qqq: 101, tlt: 86 }, // tier1 region
+  { spy: 85, qqq: 92, tlt: 87 },  // tier2 region
+  { spy: 78, qqq: 84, tlt: 87 },  // deeper tier2
+  { spy: 70, qqq: 76, tlt: 88 },  // ~30% drawdown -> tier3
+  { spy: 75, qqq: 82, tlt: 88 },
+  { spy: 82, qqq: 90, tlt: 89 },
+  { spy: 90, qqq: 98, tlt: 90 }
 ];
 
 // Extend path through HOLD and into REINTEGRATE with gradual equity recovery > bonds
@@ -119,11 +127,35 @@ const baseConfig: BotConfig = {
   dislocation: {
     enabled: true,
     anchorSymbol: 'SPY',
+    barInterval: '1w',
+    minActiveTier: 2,
+    fastWindowWeeks: 1,
+    slowWindowWeeks: 4,
+    peakLookbackWeeks: 26,
+    tiers: [
+      { tier: 0, name: 'inactive', peakDrawdownGte: 0, overlayExtraExposurePct: 0 },
+      { tier: 1, name: 'mild', peakDrawdownGte: 0.1, overlayExtraExposurePct: 0.15 },
+      { tier: 2, name: 'dislocation', peakDrawdownGte: 0.2, overlayExtraExposurePct: 0.3 },
+      { tier: 3, name: 'capitulation', peakDrawdownGte: 0.3, overlayExtraExposurePct: 0.4 }
+    ],
+    fastDrawdownEscalation: {
+      enabled: true,
+      tier2FastDrawdownGte: 0.12,
+      tier3FastDrawdownGte: 0.18
+    },
+    slowDrawdownEscalation: {
+      enabled: true,
+      tier2SlowDrawdownGte: 0.15,
+      tier3SlowDrawdownGte: 0.25
+    },
+    tierHysteresisPct: 0.02,
+    minWeeksBetweenTierChanges: 1,
     durationWeeksAdd: 3,
     durationWeeksHold: 10,
     cooldownWeeks: 2,
     overlayExtraExposurePct: 0.3,
     maxTotalExposureCapPct: 0.7,
+    overlayMinBudgetPolicy: 'gate',
     overlayMinBudgetUSD: 200,
     overlayMinOneShareRule: true,
     proxyOnlyOverlay: true,
@@ -193,6 +225,8 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
 
   const results: WeekResult[] = [];
   let baseInitialized = false;
+  const spyHistory: PricePoint[] = [...historyPoints];
+  const disableOverlay = cfg.baselineInitMode === 'fully_invested';
 
   for (const week of weeks) {
     const quotes: Record<string, number> = {
@@ -202,14 +236,16 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
       SPYM: week.spyPrice * 0.4,
       QQQM: week.qqqPrice * 0.4
     };
-    const history = { SPY: makeHistory([...historyPoints, { date: week.asOf, close: week.spyPrice }]) };
+    spyHistory.push({ date: week.asOf, close: week.spyPrice });
+    const history = { SPY: makeHistory(spyHistory) };
     const dislocation = detectDislocation(week.asOf, baseConfig, history as any, quotes);
     const lifecycle = runSleeveLifecycle({
       asOf: week.asOf,
       config: baseConfig,
-      dislocationActive: dislocation.active,
+      dislocationActive: dislocation.tierEngaged,
       anchorPrice: quotes[baseConfig.dislocation?.anchorSymbol || 'SPY'],
-      regimes: { equityRegime: { label: dislocation.active ? 'neutral' : 'risk_on', confidence: 0.5 } }
+      regimes: { equityRegime: { label: dislocation.tierEngaged ? 'neutral' : 'risk_on', confidence: 0.5 } },
+      tier: dislocation.tier
     });
 
     // Baseline init week respecting base exposure cap
@@ -250,6 +286,26 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
           sp.updatedAtISO = week.asOf;
           sim.sleevePositions[o.symbol] = sp;
         }
+        // For fully_invested mode, greedily spend remaining cash on highest-priced base symbols to reduce overlay cash.
+        if (cfg.baselineInitMode === 'fully_invested') {
+          const baseSyms = ['SPY', 'QQQ', 'TLT'];
+          const minBase = Math.min(...baseSyms.map((s) => quotes[s]).filter((p) => p > 0));
+          const overlayMin = Math.min(quotes.SPYM || Infinity, quotes.QQQM || Infinity);
+          const spendFloor = Math.min(minBase, overlayMin || minBase);
+          while (sim.portfolio.cash >= spendFloor) {
+            const pick = [...baseSyms].sort((a, b) => (quotes[b] || 0) - (quotes[a] || 0))[0];
+            const px = quotes[pick] || 0;
+            if (px <= 0 || px > sim.portfolio.cash) break;
+            sim.portfolio.cash -= px;
+            const existing = sim.portfolio.holdings.find((h) => h.symbol === pick);
+            if (existing) existing.quantity += 1;
+            else sim.portfolio.holdings.push({ symbol: pick, quantity: 1, avgPrice: px });
+            const sp = sim.sleevePositions[pick] || { baseQty: 0, dislocationQty: 0, updatedAtISO: week.asOf };
+            sp.baseQty += 1;
+            sp.updatedAtISO = week.asOf;
+            sim.sleevePositions[pick] = sp;
+          }
+        }
       }
       baseInitialized = true;
     }
@@ -261,8 +317,8 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
     const rebalance = { combinedOrders: [] as any[] };
 
     let dislocationBuys: any[] = [];
-    if (lifecycle.state.phase === 'ADD' && dislocation.active) {
-      const extra = cfg.overlayExtraExposurePct;
+    if (!disableOverlay && lifecycle.state.phase === 'ADD' && dislocation.tierEngaged) {
+      const extra = dislocation.overlayExtraExposurePct ?? cfg.overlayExtraExposurePct;
       const maxTotal = cfg.maxTotalExposureCapPct;
       const cheapestOverlayPrice = Math.min(
         ...['SPYM', 'QQQM'].map((s) => quotes[s]).filter((p) => typeof p === 'number' && p > 0)
@@ -280,7 +336,7 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
         phase: lifecycle.state.phase,
         baseExposureCapPct: cfg.baseExposureCapPct,
         allowAdd: lifecycle.allowAdd,
-        dislocationActive: dislocation.active
+        dislocationActive: dislocation.tierEngaged
       });
       const overlayTargets = [
         { symbol: 'SPYM', weight: 0.7 },
@@ -353,7 +409,20 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
       console.log(
         `\n=== Week ${week.asOf} | SPY ${week.spyPrice} | Dislocation phase: ${lifecycle.state.phase || 'INACTIVE'} ===`
       );
-      console.log('Controls:', deriveLifecycleBooleans(lifecycle.state.phase));
+      console.log('Dislocation:', {
+        tierEngaged: dislocation.tierEngaged,
+        tier: dislocation.tier,
+        peak: dislocation.metrics.peakDrawdownPct,
+        fast: dislocation.metrics.spyDrawdownFastPct,
+        slow: dislocation.metrics.spyDrawdownSlowPct
+      });
+      console.log(
+        'Controls:',
+        deriveLifecycleBooleans(
+          lifecycle.state.phase,
+          dislocation.tierEngaged && lifecycle.state.phase === 'ADD'
+        )
+      );
       console.log(
         'Portfolio:',
         { cash: sim.portfolio.cash.toFixed(2), invested: invested.toFixed(2), equity: sim.portfolio.equity.toFixed(2) }

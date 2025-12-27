@@ -17,15 +17,34 @@ const baseConfig: any = {
   dislocation: {
     enabled: true,
     anchorSymbol: 'SPY',
-    triggerFastDrawdownPct: 0.05,
-    triggerSlowDrawdownPct: 0.1,
+    minActiveTier: 1,
+    barInterval: '1w',
+    fastWindowWeeks: 1,
+    slowWindowWeeks: 4,
+    peakLookbackWeeks: 26,
+    tiers: [
+      { tier: 0, name: 'inactive', peakDrawdownGte: 0, overlayExtraExposurePct: 0 },
+      { tier: 1, name: 'mild', peakDrawdownGte: 0.1, overlayExtraExposurePct: 0.15 },
+      { tier: 2, name: 'dislocation', peakDrawdownGte: 0.2, overlayExtraExposurePct: 0.3 }
+    ],
+    fastDrawdownEscalation: {
+      enabled: true,
+      tier2FastDrawdownGte: 0.12,
+      tier3FastDrawdownGte: 0.18
+    },
+    slowDrawdownEscalation: {
+      enabled: true,
+      tier2SlowDrawdownGte: 0.15,
+      tier3SlowDrawdownGte: 0.25
+    },
+    tierHysteresisPct: 0.02,
+    minWeeksBetweenTierChanges: 1,
     confirmBreadth: false,
-    opportunisticExtraExposurePct: 0.15,
-    maxTotalExposureCapPct: 0.6,
+    maxTotalExposureCapPct: 0.7,
     durationWeeksAdd: 3,
     durationWeeksHold: 2,
     cooldownWeeks: 2,
-    deploymentTargets: [{ symbol: 'SPYM', weight: 1 }],
+    overlayTargets: [{ symbol: 'SPYM', weight: 1 }],
     earlyExit: {
       enabled: true,
       riskOffConfidenceThreshold: 0.7,
@@ -51,11 +70,11 @@ describe('dislocation lifecycle', () => {
     const quotes = { SPY: 85 };
     const asOf = '2025-01-15';
     const det = detectDislocation(asOf, baseConfig as any, history as any, quotes);
-    expect(det.active).toBe(true);
+    expect(det.tierEngaged).toBe(true);
     const life1 = runSleeveLifecycle({
       asOf,
       config: baseConfig as any,
-      dislocationActive: det.active,
+      dislocationActive: det.tierEngaged,
       anchorPrice: quotes.SPY,
       regimes: { equityRegime: { label: 'neutral', confidence: 0.5 } }
     });
@@ -89,7 +108,7 @@ describe('dislocation lifecycle', () => {
     runSleeveLifecycle({
       asOf: '2025-01-07',
       config: baseConfig as any,
-      dislocationActive: det.active,
+      dislocationActive: det.tierEngaged,
       anchorPrice: quotes.SPY,
       regimes: { equityRegime: { label: 'neutral', confidence: 0.5 } }
     });
@@ -130,7 +149,7 @@ describe('dislocation lifecycle', () => {
     runSleeveLifecycle({
       asOf,
       config: baseConfig as any,
-      dislocationActive: det.active,
+      dislocationActive: det.tierEngaged,
       anchorPrice: quotes.SPY,
       regimes: { equityRegime: { label: 'neutral', confidence: 0.5 } }
     });

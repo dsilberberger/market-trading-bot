@@ -394,9 +394,10 @@ export const runBot = async (options: RunOptions) => {
   const sleeveLifecycle = runSleeveLifecycle({
     asOf,
     config,
-    dislocationActive: dislocation.active,
+    dislocationActive: dislocation.tierEngaged ?? false,
     anchorPrice: quotes[config.dislocation?.anchorSymbol || 'SPY'],
-    regimes: llmContext?.regimes
+    regimes: llmContext?.regimes,
+    tier: dislocation.tier
   });
   writeRunArtifact(runId, 'dislocation_state.json', sleeveLifecycle.state);
   if (sleeveLifecycle.flags.length) {
@@ -415,7 +416,7 @@ export const runBot = async (options: RunOptions) => {
     if (!priceMap[h.symbol]) priceMap[h.symbol] = h.avgPrice || 0;
   }
   // Ensure deployment target quotes are available for opportunistic buys
-  if (dislocation.active && config.dislocation?.deploymentTargets) {
+  if (dislocation.tierEngaged && config.dislocation?.deploymentTargets) {
     for (const t of config.dislocation.deploymentTargets) {
       if (!priceMap[t.symbol]) {
         try {

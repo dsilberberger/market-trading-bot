@@ -27,6 +27,7 @@ export interface OverlayBudgetInput {
   baseExposureCapPct?: number;
   allowAdd?: boolean;
   dislocationActive?: boolean;
+  pacingDeployPct?: number;
 }
 
 export interface OverlayBudgetResult {
@@ -49,7 +50,8 @@ export const computeOverlayBudget = ({
   phase,
   baseExposureCapPct = 0,
   allowAdd = true,
-  dislocationActive = true
+  dislocationActive = true,
+  pacingDeployPct = 1
 }: OverlayBudgetInput): OverlayBudgetResult => {
   const flags: OverlayBudgetResult['flags'] = [];
   const isAddPhase = phase === 'ADD' && allowAdd === true && dislocationActive === true;
@@ -102,6 +104,9 @@ export const computeOverlayBudget = ({
   const remainingInvestCapacityUSD = Math.max(0, totalAllowedInvestedUSD - currentInvestedUSD);
 
   let overlayBudgetUSD = Math.min(overlayNominalBudget, remainingInvestCapacityUSD, availableCashUSD);
+  if (pacingDeployPct < 1) {
+    overlayBudgetUSD = Math.min(overlayBudgetUSD, overlayNominalBudget * pacingDeployPct);
+  }
   if (overlayBudgetUSD <= 0) {
     flags.push({
       code: 'OVERLAY_CAP_LIMIT',

@@ -66,15 +66,30 @@ export interface BotConfig {
   dislocation?: {
     enabled?: boolean;
     anchorSymbol?: string;
-    lookbackDaysFast?: number;
-    lookbackDaysSlow?: number;
-    triggerFastDrawdownPct?: number;
-    triggerSlowDrawdownPct?: number;
+    barInterval?: string;
+    fastWindowWeeks?: number;
+    slowWindowWeeks?: number;
+    peakLookbackWeeks?: number;
+    minActiveTier?: number;
+    tiers?: Array<{ tier: number; name?: string; peakDrawdownGte: number; overlayExtraExposurePct: number }>;
+    fastDrawdownEscalation?: {
+      enabled?: boolean;
+      tier2FastDrawdownGte?: number;
+      tier3FastDrawdownGte?: number;
+    };
+    slowDrawdownEscalation?: {
+      enabled?: boolean;
+      tier2SlowDrawdownGte?: number;
+      tier3SlowDrawdownGte?: number;
+    };
     confirmBreadth?: boolean;
     breadthUniverseSymbols?: string[];
     breadthMinDownCount?: number;
-    confirmVolatility?: boolean;
+    triggerFastDrawdownPct?: number;
+    triggerSlowDrawdownPct?: number;
     opportunisticExtraExposurePct?: number;
+    tierHysteresisPct?: number;
+    minWeeksBetweenTierChanges?: number;
     overlayExtraExposurePct?: number;
     overlayTargets?: Array<{ symbol: string; weight: number }>;
     overlayExposureKeys?: string[];
@@ -92,6 +107,9 @@ export interface BotConfig {
     cooldownWeeks?: number;
     exitCondition?: 'time_or_recovery';
     recoveryPctFromLow?: number;
+    pacing?: {
+      tierMaxDeployPctOfOverlayPerWeek?: Record<string, number>;
+    };
     sleeveTag?: string;
     reintegrationMode?: 'passive';
     freezeBaseRebalanceDuringAddHold?: boolean;

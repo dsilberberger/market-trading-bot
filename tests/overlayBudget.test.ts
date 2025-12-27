@@ -37,7 +37,7 @@ describe('overlay budget', () => {
 
 describe('lifecycle booleans', () => {
   it('derives consistent flags', () => {
-    expect(deriveLifecycleBooleans('ADD')).toEqual({
+    expect(deriveLifecycleBooleans('ADD', true)).toEqual({
       active: true,
       allowAdd: true,
       protectFromSells: true,

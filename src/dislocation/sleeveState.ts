@@ -17,6 +17,9 @@ export interface DislocationSleeveState {
   lastSeenAnchorPrice?: number;
   cooldownUntilISO?: string;
   notes?: string[];
+  currentTier?: number;
+  lastTierChangeISO?: string;
+  lastTier?: number;
 }
 
 const statePath = path.resolve(process.cwd(), 'data_cache', 'dislocation_sleeve_state.json');

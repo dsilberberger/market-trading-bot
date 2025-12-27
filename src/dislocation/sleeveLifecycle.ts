@@ -16,6 +16,7 @@ export interface SleeveLifecycleInput {
   dislocationActive: boolean;
   anchorPrice?: number;
   regimes?: any;
+  tier?: number;
 }
 
 export interface SleeveLifecycleResult {
@@ -23,13 +24,14 @@ export interface SleeveLifecycleResult {
   allowAdd: boolean;
   protectFromSells: boolean;
   allowReintegration: boolean;
+  tierEngaged: boolean;
   flags: Array<{ code: string; severity: 'info' | 'warn' | 'error'; message: string; observed?: any }>;
 }
 
-export const deriveLifecycleBooleans = (phase: SleevePhase | undefined) => {
+export const deriveLifecycleBooleans = (phase: SleevePhase | undefined, engaged = false) => {
   switch (phase) {
     case 'ADD':
-      return { active: true, allowAdd: true, protectFromSells: true, allowReintegration: false };
+      return { active: true, allowAdd: !!engaged, protectFromSells: true, allowReintegration: false };
     case 'HOLD':
       return { active: true, allowAdd: false, protectFromSells: true, allowReintegration: false };
     case 'REINTEGRATE':
@@ -44,12 +46,18 @@ export const runSleeveLifecycle = ({
   config,
   dislocationActive,
   anchorPrice,
-  regimes
+  regimes,
+  tier = 0
 }: SleeveLifecycleInput): SleeveLifecycleResult => {
   const flags: SleeveLifecycleResult['flags'] = [];
   const cfg = config.dislocation || {};
   let state = loadSleeveState();
   const now = nowIso(asOf);
+  const minWeeksBetweenTier = cfg.minWeeksBetweenTierChanges ?? 0;
+  const hysteresis = cfg.tierHysteresisPct ?? 0;
+  const minActiveTier = cfg.minActiveTier ?? 0;
+  let requestedTier = tier || 0;
+  if (dislocationActive && requestedTier < minActiveTier) requestedTier = minActiveTier;
 
   // Early exit: risk_off with high confidence
   const riskOff = regimes?.equityRegime?.label === 'risk_off';
@@ -81,21 +89,43 @@ export const runSleeveLifecycle = ({
     else state.phase = 'REINTEGRATE';
   }
 
-  // New trigger
-  if ((!state.active || state.phase === 'INACTIVE' || !state.phase) && dislocationActive) {
+  // tier management with hysteresis and cadence
+  const prevTier = state.currentTier ?? 0;
+  let currentTier = requestedTier;
+  if (currentTier < prevTier && hysteresis > 0) {
+    const tierCfg = (cfg.tiers || []).find((t) => t.tier === prevTier);
+    const boundary = tierCfg?.peakDrawdownGte ?? 0;
+    if (tier < prevTier && tier > 0 && tier > boundary - hysteresis) {
+      currentTier = prevTier;
+    }
+  }
+  if (prevTier !== currentTier) {
+    const weeksSinceChange = state.lastTierChangeISO ? (new Date(now).getTime() - new Date(state.lastTierChangeISO).getTime()) / (1000 * 60 * 60 * 24 * 7) : Infinity;
+    if (weeksSinceChange < minWeeksBetweenTier) currentTier = prevTier;
+    else {
+      state.lastTier = prevTier;
+      state.lastTierChangeISO = now;
+    }
+  }
+  state.currentTier = currentTier;
+
+  const engaged = isDislocationActive(currentTier, minActiveTier);
+
+  // New trigger only allowed from INACTIVE
+  if ((!state.phase || state.phase === 'INACTIVE') && engaged) {
     const addWeeksCfg = cfg.durationWeeksAdd ?? 3;
     const holdWeeksCfg = cfg.durationWeeksHold ?? 10;
-    state = {
-      active: true,
-      phase: 'ADD',
-      triggeredAtISO: now,
-      addUntilISO: addWeeks(now, addWeeksCfg),
-      holdUntilISO: addWeeks(now, addWeeksCfg + holdWeeksCfg),
-      reintegrateAfterISO: addWeeks(now, addWeeksCfg + holdWeeksCfg),
-      entryAnchorPrice: anchorPrice,
-      troughAnchorPrice: anchorPrice,
-      troughDateISO: now
-    };
+    if (!state.triggeredAtISO) state.triggeredAtISO = now;
+    if (!state.addUntilISO) state.addUntilISO = addWeeks(state.triggeredAtISO, addWeeksCfg);
+    if (!state.holdUntilISO) state.holdUntilISO = addWeeks(state.triggeredAtISO, addWeeksCfg + holdWeeksCfg);
+    if (!state.reintegrateAfterISO) state.reintegrateAfterISO = state.holdUntilISO;
+    state.phase = 'ADD';
+    state.entryAnchorPrice = state.entryAnchorPrice ?? anchorPrice;
+    if (!state.troughAnchorPrice || (anchorPrice && anchorPrice < state.troughAnchorPrice)) {
+      state.troughAnchorPrice = anchorPrice;
+      state.troughDateISO = now;
+    }
+    state.active = true;
     flags.push({ code: 'DISLOCATION_SLEEVE_TRIGGERED', severity: 'info', message: 'Dislocation sleeve triggered' });
   }
 
@@ -105,6 +135,16 @@ export const runSleeveLifecycle = ({
   }
   if (state.phase === 'HOLD' && state.holdUntilISO && new Date(now) > new Date(state.holdUntilISO)) {
     state.phase = 'REINTEGRATE';
+  }
+
+  // Once in REINTEGRATE, ignore future triggers until returning to INACTIVE
+  if (state.phase === 'REINTEGRATE' && engaged) {
+    flags.push({
+      code: 'DISLOCATION_TRIGGER_IGNORED_DURING_REINTEGRATE',
+      severity: 'info',
+      message: 'Trigger ignored during reintegrate phase',
+      observed: { tier: currentTier }
+    });
   }
 
   if (earlyExitEnabled && (deepFailsafe || (riskOff && riskConf >= riskOffThreshold))) {
@@ -119,13 +159,21 @@ export const runSleeveLifecycle = ({
   }
 
   // Derive active/controls from phase
-  const derived = deriveLifecycleBooleans(state.phase);
+  const derived = deriveLifecycleBooleans(state.phase, engaged && state.phase === 'ADD');
   state.active = derived.active;
   const { allowAdd, protectFromSells, allowReintegration } = derived;
+  if (currentTier === 0 && allowAdd) {
+    flags.push({
+      code: 'DISLOCATION_IGNORED_TIER0_ADD_ATTEMPT',
+      severity: 'error',
+      message: 'Tier 0 cannot allow ADD buys',
+      observed: { phase: state.phase }
+    });
+  }
 
   // Invariant check (warn; in tests we can assert)
   const invariantOk =
-    (state.phase === 'ADD' && allowAdd && protectFromSells && state.active) ||
+    (state.phase === 'ADD' && protectFromSells && state.active) ||
     (state.phase === 'HOLD' && !allowAdd && protectFromSells && state.active) ||
     (state.phase === 'REINTEGRATE' && !allowAdd && !protectFromSells) ||
     (!state.phase && !allowAdd && !protectFromSells);
@@ -141,5 +189,6 @@ export const runSleeveLifecycle = ({
   // Save state
   saveSleeveState(state);
 
-  return { state, allowAdd, protectFromSells, allowReintegration, flags };
+  return { state, allowAdd, protectFromSells, allowReintegration, tierEngaged: engaged, flags };
 };
+const isDislocationActive = (tier: number, minActiveTier: number) => tier >= minActiveTier;
