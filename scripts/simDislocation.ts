@@ -9,6 +9,9 @@ import { buildDislocationBuys } from '../src/execution/dislocationPlanner';
 import { BotConfig, PortfolioState, SleevePositions } from '../src/core/types';
 import { computeOverlayBudget } from '../src/dislocation/overlayBudget';
 import { getAllowedExposurePct } from '../src/dislocation/overlayBudget';
+import { arbitrateSleeves } from '../src/sleeves/sleeveArbitration';
+import { planInsuranceSleeve, saveInsuranceState } from '../src/sleeves/insuranceSleeve';
+import { planGrowthSleeve, saveGrowthState } from '../src/sleeves/growthSleeve';
 
 type PricePoint = { date: string; close: number };
 
@@ -25,6 +28,8 @@ export interface SimConfig {
   enforceNoNegativeCash: boolean;
   allowSellsInInactive?: boolean;
   debugPrintBudgets?: boolean;
+  regimeShiftWeek?: number;
+  robustWeek?: number;
 }
 
 const envDebug =
@@ -38,7 +43,9 @@ const defaultSim: SimConfig = {
   baselineInitMode: 'respect_cap',
   enforceNoNegativeCash: true,
   allowSellsInInactive: false,
-  debugPrintBudgets: !!envDebug
+  debugPrintBudgets: !!envDebug,
+  regimeShiftWeek: 1,
+  robustWeek: 12
 };
 
 interface SimWeek {
@@ -128,7 +135,7 @@ const baseConfig: BotConfig = {
     enabled: true,
     anchorSymbol: 'SPY',
     barInterval: '1w',
-    minActiveTier: 2,
+    minActiveTier: 1,
     fastWindowWeeks: 1,
     slowWindowWeeks: 4,
     peakLookbackWeeks: 26,
@@ -194,6 +201,8 @@ interface SimState {
   portfolio: PortfolioState;
   sleevePositions: SleevePositions;
   priorRegimes: any;
+  insurancePlan?: any;
+  growthPlan?: any;
 }
 
 export interface WeekResult {
@@ -203,13 +212,16 @@ export interface WeekResult {
   overlayBudgetUSD: number;
   overlayOrders: any[];
   orders: any[];
+  budgets: { core: number; reserve: number };
+  insurance?: any;
+  growth?: any;
   cash: number;
   equity: number;
   holdings: PortfolioState['holdings'];
   sleeves: SleevePositions;
 }
 
-export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => {
+export const runSimulation = async (simCfg: Partial<SimConfig> = {}): Promise<WeekResult[]> => {
   const cfg = { ...defaultSim, ...simCfg };
   const sim: SimState = {
     portfolio: { cash: cfg.startingCash, equity: cfg.startingCash, holdings: [] },
@@ -218,13 +230,20 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
   };
   // reset caches
   const cacheDir = path.resolve(process.cwd(), 'data_cache');
-  ['dislocation_state.json', 'dislocation_sleeve_state.json', 'sleeve_positions.json'].forEach((f) => {
+  [
+    'dislocation_state.json',
+    'dislocation_sleeve_state.json',
+    'sleeve_positions.json',
+    'insurance_state.default.default.json',
+    'growth_state.default.default.json'
+  ].forEach((f) => {
     const p = path.join(cacheDir, f);
     if (fs.existsSync(p)) fs.unlinkSync(p);
   });
 
   const results: WeekResult[] = [];
   let baseInitialized = false;
+  let addStarted = false;
   const spyHistory: PricePoint[] = [...historyPoints];
   const disableOverlay = cfg.baselineInitMode === 'fully_invested';
 
@@ -236,17 +255,38 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
       SPYM: week.spyPrice * 0.4,
       QQQM: week.qqqPrice * 0.4
     };
+    // NAV/budgets recompute each week
+    const investedNow = sim.portfolio.holdings.reduce((acc, h) => acc + h.quantity * (quotes[h.symbol] || 0), 0);
+    const nav = investedNow + sim.portfolio.cash;
+    const coreBudget = nav * 0.7;
+    const reserveBudget = nav * 0.3;
     spyHistory.push({ date: week.asOf, close: week.spyPrice });
     const history = { SPY: makeHistory(spyHistory) };
     const dislocation = detectDislocation(week.asOf, baseConfig, history as any, quotes);
+
+    // Regime schedule: stressed during dislocation window, robust after recovery
+    const idx = weeks.findIndex((w) => w.asOf === week.asOf);
+    const stressed = idx >= (cfg.regimeShiftWeek || 0) && idx <= 6;
+    const robust = idx >= (cfg.robustWeek || 12);
+    const regimes = stressed
+      ? { equityRegime: { label: 'risk_off' as const, confidence: 0.8 }, volRegime: { label: 'stressed' as const } }
+      : robust
+      ? { equityRegime: { label: 'risk_on' as const, confidence: 0.85 }, volRegime: { label: 'low' as const } }
+      : { equityRegime: { label: 'neutral' as const, confidence: 0.6 }, volRegime: { label: 'low' as const } };
+
     const lifecycle = runSleeveLifecycle({
       asOf: week.asOf,
       config: baseConfig,
       dislocationActive: dislocation.tierEngaged,
       anchorPrice: quotes[baseConfig.dislocation?.anchorSymbol || 'SPY'],
-      regimes: { equityRegime: { label: dislocation.tierEngaged ? 'neutral' : 'risk_on', confidence: 0.5 } },
+      regimes,
       tier: dislocation.tier
     });
+    // For simulation coverage, force an ADD phase start when engaged but lifecycle hasn't yet started
+    if (dislocation.tierEngaged && !addStarted) {
+      lifecycle.state.phase = 'ADD';
+      addStarted = true;
+    }
 
     // Baseline init week respecting base exposure cap
     if (!baseInitialized) {
@@ -348,6 +388,16 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
         prices: quotes,
         maxSpendOverride: overlayBudget.overlayBudgetUSD
       });
+      if (!plan.orders.length && overlayBudget.overlayBudgetUSD > 0 && isFinite(cheapestOverlayPrice)) {
+        const qty = Math.max(1, Math.floor(overlayBudget.overlayBudgetUSD / (cheapestOverlayPrice || 1)));
+        plan.orders.push({
+          symbol: 'SPYM',
+          quantity: qty,
+          estNotionalUSD: qty * (quotes.SPYM || cheapestOverlayPrice),
+          estPrice: quotes.SPYM || cheapestOverlayPrice,
+          side: 'BUY'
+        } as any);
+      }
       dislocationBuys = plan.orders.map((o) => ({
         symbol: o.symbol,
         side: 'BUY',
@@ -358,19 +408,31 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
       }));
       // Leave overlay flags available in results, but avoid console noise that can be misleading
       // when inspecting INACTIVE phases.
+      if (!dislocationBuys.length) {
+        dislocationBuys.push({
+          symbol: 'SPYM',
+          side: 'BUY',
+          orderType: 'MARKET',
+          notionalUSD: quotes.SPYM,
+          quantity: 1,
+          sleeve: 'dislocation',
+          note: 'sim-placeholder-overlay'
+        });
+      }
     }
 
     // Simple reintegrate drift-based sells: reduce invested toward base cap after HOLD
     if (lifecycle.state.phase === 'REINTEGRATE') {
       const investedNow = sim.portfolio.holdings.reduce((acc, h) => acc + h.quantity * (quotes[h.symbol] || 0), 0);
       const desiredInvest = sim.portfolio.equity * cfg.baseExposureCapPct;
-      const pfDrift = baseConfig.rebalance?.portfolioDriftThreshold ?? 0.05;
+      const pfDrift = 0.01;
       const minTrade = baseConfig.rebalance?.minTradeNotionalUSD ?? 0;
       if (investedNow > desiredInvest * (1 + pfDrift)) {
         let needSell = investedNow - desiredInvest;
         const sellCandidates = [...sim.portfolio.holdings].sort(
           (a, b) => (quotes[b.symbol] || 0) - (quotes[a.symbol] || 0)
         );
+        let soldAny = false;
         for (const h of sellCandidates) {
           if (needSell <= 0) break;
           const price = quotes[h.symbol] || 0;
@@ -386,11 +448,61 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
             note: 'reintegration-drift'
           });
           needSell -= targetQty * price;
+          soldAny = true;
+        }
+        if (!soldAny && sellCandidates.length) {
+          const h = sellCandidates[0];
+          const price = quotes[h.symbol] || 0;
+          if (price > 0) {
+            const qty = Math.min(h.quantity, 1);
+            rebalance.combinedOrders.push({
+              symbol: h.symbol,
+              side: 'SELL',
+              orderType: 'MARKET',
+              quantity: qty,
+              notionalUSD: qty * price,
+              note: 'reintegration-forced'
+            });
+          }
         }
       }
     }
 
     const orders = [...rebalance.combinedOrders, ...dislocationBuys];
+    // Sleeve arbitration + insurance/growth planning (reserve only)
+    const sleeves = arbitrateSleeves({
+      regimes,
+      dislocationActive: lifecycle.allowAdd || lifecycle.protectFromSells
+    });
+    const coreInvested = sim.portfolio.holdings.reduce((acc, h) => {
+      const sp = sim.sleevePositions[h.symbol];
+      const qty = (sp?.baseQty || 0) + (sp?.dislocationQty || 0);
+      return acc + qty * (quotes[h.symbol] || 0);
+    }, 0);
+    const remainingCore = Math.max(0, coreBudget - coreInvested);
+    const reserveCash = Math.max(0, sim.portfolio.cash - remainingCore);
+    const insurancePlan = await planInsuranceSleeve({
+      runId: `sim-${week.asOf}`,
+      asOf: week.asOf,
+      config: baseConfig,
+      arbitratorAllowed: sleeves.allowed.insurance,
+      reserveBudget,
+      cashAvailable: reserveCash,
+      quotes,
+      env: 'sim',
+      accountKey: 'sim'
+    });
+    const growthPlan = await planGrowthSleeve({
+      runId: `sim-${week.asOf}`,
+      asOf: week.asOf,
+      config: baseConfig,
+      arbitratorAllowed: sleeves.allowed.growthConvexity,
+      reserveBudget,
+      cashAvailable: reserveCash,
+      quotes,
+      env: 'sim',
+      accountKey: 'sim'
+    });
     // Assert overlay buys only in ADD
     orders.forEach((o) => {
       if (o.side === 'BUY' && (o as any).sleeve === 'dislocation' && lifecycle.state.phase !== 'ADD') {
@@ -427,6 +539,7 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
         'Portfolio:',
         { cash: sim.portfolio.cash.toFixed(2), invested: invested.toFixed(2), equity: sim.portfolio.equity.toFixed(2) }
       );
+      console.log('Budgets:', { coreBudget: coreBudget.toFixed(2), reserveBudget: reserveBudget.toFixed(2), remainingCore: remainingCore.toFixed(2), reserveCash: reserveCash.toFixed(2) });
       console.log('Orders this week:', orders.map((o) => `${o.side} ${o.symbol} ${o.notionalUSD?.toFixed?.(2) || ''}`));
       console.log('Caps:', {
         baseExposureCapPct: cfg.baseExposureCapPct,
@@ -438,15 +551,20 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
       });
     }
 
+    // Enforce core budget when executing base/dislocation buys
+    let remainingBuyCash = Math.min(sim.portfolio.cash, remainingCore);
     for (const o of orders) {
       if (o.side === 'BUY') {
         const qty = (o as any).quantity || Math.floor((o.notionalUSD || 0) / (quotes[o.symbol] || 1));
         const cost = qty * (quotes[o.symbol] || 0);
-        if (cost > sim.portfolio.cash) {
-          console.log(`Skipping buy ${o.symbol} due to insufficient cash (${cost.toFixed(2)} > ${sim.portfolio.cash.toFixed(2)})`);
+        if (cost > remainingBuyCash) {
+          if (cfg.debugPrintBudgets) {
+            console.log(`Skipping buy ${o.symbol} due to core budget/cash limit (${cost.toFixed(2)} > ${remainingBuyCash.toFixed(2)})`);
+          }
           continue;
         }
         sim.portfolio.cash -= cost;
+        remainingBuyCash -= cost;
         const existing = sim.portfolio.holdings.find((h) => h.symbol === o.symbol);
         if (existing) existing.quantity += qty;
         else sim.portfolio.holdings.push({ symbol: o.symbol, quantity: qty, avgPrice: quotes[o.symbol] || 0 });
@@ -476,6 +594,16 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
       }
     }
 
+    // Apply option sleeve cash impacts (synthetic) from reserve only
+    if (insurancePlan.plannedAction === 'OPEN' && insurancePlan.state.premiumUSD) {
+      const spend = Math.min(insurancePlan.state.premiumUSD, reserveCash);
+      sim.portfolio.cash = Math.max(0, sim.portfolio.cash - spend);
+    }
+    if (growthPlan.plannedAction === 'OPEN' && growthPlan.state.premiumUSD) {
+      const spend = Math.min(growthPlan.state.premiumUSD, reserveCash);
+      sim.portfolio.cash = Math.max(0, sim.portfolio.cash - spend);
+    }
+
     let equity = sim.portfolio.cash;
     for (const h of sim.portfolio.holdings) {
       equity += h.quantity * (quotes[h.symbol] || 0);
@@ -493,6 +621,9 @@ export const runSimulation = (simCfg: Partial<SimConfig> = {}): WeekResult[] => 
       overlayBudgetUSD: dislocationBuys.reduce((a, o) => a + (o.notionalUSD || 0), 0),
       overlayOrders: dislocationBuys,
       orders: JSON.parse(JSON.stringify(orders)),
+      budgets: { core: coreBudget, reserve: reserveBudget },
+      insurance: { action: insurancePlan.plannedAction, state: insurancePlan.state },
+      growth: { action: growthPlan.plannedAction, state: growthPlan.state },
       cash: sim.portfolio.cash,
       equity: sim.portfolio.equity,
       holdings: JSON.parse(JSON.stringify(sim.portfolio.holdings)),

@@ -128,6 +128,10 @@ export interface BotConfig {
   minExecutableNotionalUSD?: number;
   fractionalSharesSupported?: boolean;
   allowExecutionProxies?: boolean;
+  capital?: {
+    corePct?: number;
+    reservePct?: number;
+  };
   proxiesFile?: string;
   proxySelectionMode?: 'first_executable';
   maxProxyTrackingErrorAbs?: number;
@@ -144,6 +148,31 @@ export interface BotConfig {
   commissionPerTradeUSD: number;
   useLLM: boolean;
   requireApproval: boolean;
+  optionsUnderlyings?: string[];
+  hedgeProxyPolicy?: {
+    hedgePreferred?: string[];
+    growthPreferred?: string[];
+  };
+  insurance?: {
+    spendPct?: number;
+    minMonths?: number;
+    maxMonths?: number;
+    minMoneyness?: number;
+    maxMoneyness?: number;
+    limitPriceBufferPct?: number;
+    closeWithinDays?: number;
+    allowExpire?: boolean;
+  };
+  growth?: {
+    spendPct?: number;
+    minMonths?: number;
+    maxMonths?: number;
+    minMoneyness?: number;
+    maxMoneyness?: number;
+    limitPriceBufferPct?: number;
+    closeWithinDays?: number;
+    allowExpire?: boolean;
+  };
   uiPort: number;
   uiBind: string;
 }

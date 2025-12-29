@@ -90,6 +90,10 @@
   "minExecutableNotionalUSD": 1,
   "fractionalSharesSupported": true,
   "allowExecutionProxies": true,
+  "capital": {
+    "corePct": 0.7,
+    "reservePct": 0.3
+  },
   "proxiesFile": "src/config/proxies.json",
   "proxySelectionMode": "first_executable",
   "maxProxyTrackingErrorAbs": 0.1,
@@ -106,6 +110,31 @@
   "commissionPerTradeUSD": 0,
   "useLLM": true,
   "requireApproval": true,
+  "optionsUnderlyings": ["IWM", "DIA", "SPY", "QQQ"],
+  "hedgeProxyPolicy": {
+    "hedgePreferred": ["IWM", "DIA", "SPY", "QQQ"],
+    "growthPreferred": ["QQQ", "SPY", "IWM"]
+  },
+  "insurance": {
+    "spendPct": 0.85,
+    "minMonths": 3,
+    "maxMonths": 6,
+    "minMoneyness": 0.95,
+    "maxMoneyness": 1.0,
+    "limitPriceBufferPct": 0.05,
+    "closeWithinDays": 21,
+    "allowExpire": false
+  },
+  "growth": {
+    "spendPct": 0.20,
+    "minMonths": 3,
+    "maxMonths": 6,
+    "minMoneyness": 1.03,
+    "maxMoneyness": 1.10,
+    "limitPriceBufferPct": 0.05,
+    "closeWithinDays": 21,
+    "allowExpire": false
+  },
   "uiPort": 8787,
   "uiBind": "127.0.0.1"
 }

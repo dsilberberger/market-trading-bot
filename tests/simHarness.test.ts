@@ -1,8 +1,8 @@
 import { runSimulation } from '../scripts/simDislocation';
 
 describe('dislocation sim harness', () => {
-  it('overlay deploys when base respects cap', () => {
-    const res = runSimulation({ baselineInitMode: 'respect_cap' });
+  it('overlay deploys when base respects cap', async () => {
+    const res = await runSimulation({ baselineInitMode: 'respect_cap' });
     // Cash never negative
     res.forEach((w) => expect(w.cash).toBeGreaterThanOrEqual(0));
     // Find first ADD week
@@ -19,15 +19,15 @@ describe('dislocation sim harness', () => {
     }
   });
 
-  it('overlay does not deploy when fully invested baseline', () => {
-    const res = runSimulation({ baselineInitMode: 'fully_invested' });
+  it('overlay does not deploy when fully invested baseline', async () => {
+    const res = await runSimulation({ baselineInitMode: 'fully_invested' });
     res.forEach((w) => expect(w.cash).toBeGreaterThanOrEqual(0));
     const overlay = res.find((w) => w.overlayOrders.length > 0);
     expect(overlay).toBeUndefined();
   });
 
-  it('reintegrate resumes sells and stops overlay', () => {
-    const res = runSimulation({ baselineInitMode: 'respect_cap' });
+  it('reintegrate resumes sells and stops overlay', async () => {
+    const res = await runSimulation({ baselineInitMode: 'respect_cap' });
     const reintegrateWeeks = res.filter((w) => w.phase === 'REINTEGRATE');
     expect(reintegrateWeeks.length).toBeGreaterThan(0);
     reintegrateWeeks.forEach((w) => {

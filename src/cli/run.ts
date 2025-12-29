@@ -37,6 +37,11 @@ import {
   saveSleevePositions,
   snapshotSleevePositions
 } from '../dislocation/sleevePositions';
+import { computeBudgets, computeNav, clampBuyOrdersToBudget } from '../core/capital';
+import { arbitrateSleeves } from '../sleeves/sleeveArbitration';
+import { selectOptionsUnderlying } from '../sleeves/optionsUnderlying';
+import { planInsuranceSleeve, saveInsuranceState } from '../sleeves/insuranceSleeve';
+import { planGrowthSleeve } from '../sleeves/growthSleeve';
 
 const program = new Command();
 
@@ -134,6 +139,19 @@ export const runBot = async (options: RunOptions) => {
   appendEvent(makeEvent(runId, 'RUN_STARTED', { mode: runMode, dryRun: dry, asOf }));
   writeRunArtifact(runId, 'inputs.json', inputs);
   appendEvent(makeEvent(runId, 'INPUTS_WRITTEN', { symbols: universe.length }));
+
+  // Capital partition (core/reserve)
+  const navResult = computeNav(inputs.portfolio.holdings || [], inputs.portfolio.cash || 0, inputs.quotes || {});
+  const budgets = computeBudgets(navResult.nav, config);
+  const coreCashBudget = Math.max(0, (inputs.portfolio.cash || 0) - budgets.reserveBudget);
+  writeRunArtifact(runId, 'capital_budgets.json', {
+    nav: navResult.nav,
+    invested: navResult.invested,
+    cash: navResult.cash,
+    coreBudget: budgets.coreBudget,
+    reserveBudget: budgets.reserveBudget,
+    coreCashBudget
+  });
 
   // Sleeve positions (base vs dislocation) tracking and reconciliation
   const sleeveEnv = process.env.ETRADE_ENV || 'default';
@@ -603,6 +621,62 @@ export const runBot = async (options: RunOptions) => {
 
   // Combine rebalance orders with dislocation incremental buys
   proposal.intent.orders = [...rebalanceOrdersEnriched, ...dislocationExtraOrders];
+
+  // Sleeve arbitration (for future options sleeves)
+  const sleeves = arbitrateSleeves({
+    regimes: llmContext?.regimes,
+    dislocationActive: sleeveLifecycle.allowAdd || sleeveLifecycle.protectFromSells
+  });
+  const hedgeUnderlying = selectOptionsUnderlying('HEDGE', config);
+  const growthUnderlying = selectOptionsUnderlying('GROWTH', config);
+  writeRunArtifact(runId, 'sleeve_decisions.json', {
+    allowedSleeves: sleeves.allowed,
+    reasons: sleeves.reasons,
+    selectedUnderlying: {
+      hedge: hedgeUnderlying.symbol,
+      hedgeTried: hedgeUnderlying.tried,
+      growth: growthUnderlying.symbol,
+      growthTried: growthUnderlying.tried
+    },
+    note: 'Dislocation sleeve unchanged; options sleeves not yet active.'
+  });
+
+  // Insurance sleeve planning (reserve budget only)
+  const reserveOnlyCash = Math.max(0, (inputs.portfolio.cash || 0) - budgets.coreBudget);
+  const insurancePlan = await planInsuranceSleeve({
+    runId,
+    asOf,
+    config,
+    arbitratorAllowed: sleeves.allowed.insurance,
+    reserveBudget: budgets.reserveBudget,
+    cashAvailable: reserveOnlyCash,
+    quotes,
+    env: process.env.ETRADE_ENV,
+    accountKey: process.env.ETRADE_ACCOUNT_ID_KEY
+  });
+  writeRunArtifact(runId, 'insurance_plan.json', insurancePlan);
+  const growthPlan = await planGrowthSleeve({
+    runId,
+    asOf,
+    config,
+    arbitratorAllowed: sleeves.allowed.growthConvexity,
+    reserveBudget: budgets.reserveBudget,
+    cashAvailable: reserveOnlyCash,
+    quotes,
+    env: process.env.ETRADE_ENV,
+    accountKey: process.env.ETRADE_ACCOUNT_ID_KEY
+  });
+  writeRunArtifact(runId, 'growth_plan.json', growthPlan);
+
+  // Enforce core/reserve budget: scale BUY notionals if they exceed allowed cash/core budget
+  const sellProceeds = proposal.intent.orders
+    .filter((o) => o.side === 'SELL')
+    .reduce((acc, o) => acc + (o.notionalUSD || 0), 0);
+  const allowedBuyBudget = Math.max(
+    0,
+    Math.min(budgets.coreBudget, coreCashBudget + sellProceeds)
+  );
+  proposal.intent.orders = clampBuyOrdersToBudget(proposal.intent.orders, allowedBuyBudget);
 
   // Decision policy gate (exposure/confidence caps)
   let riskReport = evaluateRisk(proposal.intent, config, inputs.portfolio, { drawdown });
