@@ -2,16 +2,14 @@
 import fs from 'fs';
 import path from 'path';
 import { planWholeShareExecution } from '../src/execution/wholeSharePlanner';
-import { rebalancePortfolio } from '../src/execution/rebalanceEngine';
 import { detectDislocation } from '../src/dislocation/dislocationDetector';
 import { runSleeveLifecycle, deriveLifecycleBooleans } from '../src/dislocation/sleeveLifecycle';
 import { buildDislocationBuys } from '../src/execution/dislocationPlanner';
-import { BotConfig, PortfolioState, SleevePositions } from '../src/core/types';
-import { computeOverlayBudget } from '../src/dislocation/overlayBudget';
-import { getAllowedExposurePct } from '../src/dislocation/overlayBudget';
+import { BotConfig, PortfolioState, SleevePositions, RegimeContext } from '../src/core/types';
+import { computeOverlayBudget, getAllowedExposurePct } from '../src/dislocation/overlayBudget';
 import { arbitrateSleeves } from '../src/sleeves/sleeveArbitration';
-import { planInsuranceSleeve, saveInsuranceState } from '../src/sleeves/insuranceSleeve';
-import { planGrowthSleeve, saveGrowthState } from '../src/sleeves/growthSleeve';
+import { planInsuranceSleeve } from '../src/sleeves/insuranceSleeve';
+import { planGrowthSleeve } from '../src/sleeves/growthSleeve';
 
 type PricePoint = { date: string; close: number };
 
@@ -50,62 +48,8 @@ const defaultSim: SimConfig = {
 
 interface SimWeek {
   asOf: string;
-  spyPrice: number;
-  qqqPrice: number;
-  tlTPrice: number;
+  prices: Record<string, { price: number; source: 'ETRADE_REAL' | 'SYNTHETIC' | 'SYNTHETIC_FALLBACK' }>;
 }
-
-// Base path designed to hit multiple tiers:
-// - Week 2: ~7% drop (tier1)
-// - Week 3-4: ~20%+ drop (tier2)
-// - Week 5: ~30%+ drop (tier3/capitulation)
-// Then gradual recovery.
-const basePriceSeq = [
-  { spy: 100, qqq: 110, tlt: 85 },
-  { spy: 93, qqq: 101, tlt: 86 }, // tier1 region
-  { spy: 85, qqq: 92, tlt: 87 },  // tier2 region
-  { spy: 78, qqq: 84, tlt: 87 },  // deeper tier2
-  { spy: 70, qqq: 76, tlt: 88 },  // ~30% drawdown -> tier3
-  { spy: 75, qqq: 82, tlt: 88 },
-  { spy: 82, qqq: 90, tlt: 89 },
-  { spy: 90, qqq: 98, tlt: 90 }
-];
-
-// Extend path through HOLD and into REINTEGRATE with gradual equity recovery > bonds
-const extraWeeks = 16; // enough to cover HOLD+REINTEGRATE drift
-const priceSeq = [...basePriceSeq];
-for (let i = 0; i < extraWeeks; i++) {
-  const last = priceSeq[priceSeq.length - 1];
-  priceSeq.push({
-    spy: +(last.spy * 1.015).toFixed(2),
-    qqq: +(last.qqq * 1.015).toFixed(2),
-    tlt: +(last.tlt * 1.002).toFixed(2)
-  });
-}
-
-const makeWeeklyTimeline = (startISO: string, weeksCount: number) => {
-  const start = new Date(startISO);
-  return Array.from({ length: weeksCount }, (_, i) => {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i * 7);
-    return d.toISOString().slice(0, 10);
-  });
-};
-
-const weeks: SimWeek[] = makeWeeklyTimeline('2025-01-07', priceSeq.length).map((d, idx) => ({
-  asOf: d,
-  spyPrice: priceSeq[idx].spy,
-  qqqPrice: priceSeq[idx].qqq,
-  tlTPrice: priceSeq[idx].tlt
-}));
-
-const historyPoints: PricePoint[] = [
-  { date: '2024-12-03', close: 100 },
-  { date: '2024-12-10', close: 102 },
-  { date: '2024-12-17', close: 103 },
-  { date: '2024-12-24', close: 104 },
-  { date: '2024-12-31', close: 105 }
-];
 
 const proxiesMap: Record<string, string[]> = {
   SPY: ['SPYM'],
@@ -210,6 +154,7 @@ export interface WeekResult {
   phase: string;
   controls: ReturnType<typeof deriveLifecycleBooleans>;
   overlayBudgetUSD: number;
+  priceSource: 'ETRADE_REAL' | 'SYNTHETIC' | 'SYNTHETIC_FALLBACK';
   overlayOrders: any[];
   orders: any[];
   budgets: { core: number; reserve: number };

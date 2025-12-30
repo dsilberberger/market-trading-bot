@@ -132,6 +132,7 @@ export const runBot = async (options: RunOptions) => {
     console.log(`Run directory ${runDir} already exists. Use --force to override.`);
     return;
   }
+  let llmContext: any;
   ensureDir(runDir);
 
   const { inputs } = await generateBaseArtifacts(asOf, runId, config, universe, marketData, { mode: runMode }, broker);
@@ -183,10 +184,14 @@ export const runBot = async (options: RunOptions) => {
   }
 
   if (!proposal) {
+    const regimesPath = path.join(runDir, 'regimes.json');
+    const regimes =
+      llmContext?.regimes ||
+      (fs.existsSync(regimesPath) ? (JSON.parse(fs.readFileSync(regimesPath, 'utf-8')) as any) : undefined);
     if (chosenStrategy === 'random') {
       proposal = await runRandomBaseline(asOf, universe, config, inputs.portfolio, marketData);
     } else {
-      proposal = await runDeterministicBaseline(asOf, universe, config, inputs.portfolio, marketData);
+      proposal = await runDeterministicBaseline(asOf, universe, config, inputs.portfolio, marketData, regimes);
     }
   }
 
@@ -204,9 +209,7 @@ export const runBot = async (options: RunOptions) => {
 
   // Load LLM context (round 4) for exposure-cap aware planning
   const ctxPath = path.resolve(process.cwd(), 'runs', runId, 'llm_context.json');
-  const llmContext = fs.existsSync(ctxPath)
-    ? (JSON.parse(fs.readFileSync(ctxPath, 'utf-8')) as any)
-    : undefined;
+  llmContext = fs.existsSync(ctxPath) ? (JSON.parse(fs.readFileSync(ctxPath, 'utf-8')) as any) : undefined;
 
   // Whole-share execution planner (closest fit + proxies, with exposure cap awareness)
   const quotes = (inputs as any)?.quotes || {};
@@ -528,13 +531,21 @@ export const runBot = async (options: RunOptions) => {
       });
       const maxSpendOverride = overlayBudget.overlayBudgetUSD;
       if (maxSpendOverride > 0 && overlayTargetsEffective.length) {
-        const extraPlan = buildDislocationBuys({
-          overlayTargets: overlayTargetsEffective,
-          overlayBudgetUSD: maxSpendOverride,
+        const overlayPlan = planWholeShareExecution({
+          targets: overlayTargetsEffective.map((t) => ({ symbol: t.symbol, notionalUSD: maxSpendOverride * (t.weight || 0), priority: 1 })),
           prices: priceMap,
-          maxSpendOverride
+          buyBudgetUSD: maxSpendOverride,
+          minCashUSD,
+          allowPartial: true,
+          minViablePositions: 1,
+          maxAbsWeightError: 0.5,
+          proxyMap: proxiesMap,
+          allowProxies: config.allowExecutionProxies,
+          maxProxyTrackingErrorAbs: config.maxProxyTrackingErrorAbs,
+          proxyCascade: true,
+          exposureGroups
         });
-        dislocationExtraOrders = extraPlan.orders.map((o) => ({
+        dislocationExtraOrders = overlayPlan.orders.map((o) => ({
           symbol: o.symbol,
           side: o.side || 'BUY',
           orderType: 'MARKET',

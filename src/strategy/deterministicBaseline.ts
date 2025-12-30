@@ -1,9 +1,11 @@
-import { BotConfig, PortfolioState, ProposalResult, TradeIntent, TradeOrder } from '../core/types';
+import { BotConfig, PortfolioState, ProposalResult, TradeIntent, TradeOrder, RegimeContext } from '../core/types';
 import { MarketDataProvider } from '../data/marketData.types';
+import { regimeTiltForSymbol } from './regimeTilts';
 
 interface RankedSymbol {
   symbol: string;
   momentum: number;
+  score: number;
 }
 
 const lookbackDays = 7 * 12;
@@ -13,7 +15,8 @@ export const runDeterministicBaseline = async (
   universe: string[],
   config: BotConfig,
   portfolio: PortfolioState,
-  marketData: MarketDataProvider
+  marketData: MarketDataProvider,
+  regimes?: RegimeContext
 ): Promise<ProposalResult> => {
   const ranks: RankedSymbol[] = [];
   for (const symbol of universe) {
@@ -22,10 +25,12 @@ export const runDeterministicBaseline = async (
     const first = history[0].close;
     const last = history[history.length - 1].close;
     const momentum = (last - first) / first;
-    ranks.push({ symbol, momentum });
+    const tilt = regimeTiltForSymbol(regimes, symbol).multiplier;
+    const score = momentum * tilt;
+    ranks.push({ symbol, momentum, score });
   }
 
-  ranks.sort((a, b) => b.momentum - a.momentum);
+  ranks.sort((a, b) => b.score - a.score);
   const targetSymbols = ranks.slice(0, Math.min(config.maxPositions, ranks.length)).map((r) => r.symbol);
   const holdingsMap = new Map(portfolio.holdings.map((h) => [h.symbol, h]));
   const orders: TradeOrder[] = [];
@@ -54,7 +59,7 @@ export const runDeterministicBaseline = async (
   const plannedExits = new Set(orders.filter((o) => o.side === 'SELL').map((o) => o.symbol));
   const remainingHoldings = portfolio.holdings.filter((h) => !plannedExits.has(h.symbol) && h.quantity > 0);
   if (remainingHoldings.length > config.maxPositions) {
-    const rankMap = new Map(ranks.map((r) => [r.symbol, r.momentum]));
+    const rankMap = new Map(ranks.map((r) => [r.symbol, r.score]));
     const sorted = remainingHoldings.sort((a, b) => {
       const ra = rankMap.get(a.symbol) ?? -Infinity;
       const rb = rankMap.get(b.symbol) ?? -Infinity;
@@ -95,9 +100,9 @@ export const runDeterministicBaseline = async (
       side: 'BUY',
       orderType: 'MARKET',
       notionalUSD: Number(per.toFixed(2)),
-      thesis: target ? `12-week momentum rank ${(target.momentum * 100).toFixed(2)}%` : 'Momentum-based allocation',
+      thesis: target ? `Momentum score ${(target.momentum * 100).toFixed(2)}% (regime tilt applied)` : 'Momentum-based allocation',
       invalidation: 'Momentum reverses below short-term trend.',
-      confidence: target ? Math.min(1, Math.max(0.3, target.momentum + 0.5)) : 0.5,
+      confidence: target ? Math.min(1, Math.max(0.3, target.score + 0.5)) : 0.5,
       portfolioLevel: { targetHoldDays: 60, netExposureTarget: 1 }
     });
   }

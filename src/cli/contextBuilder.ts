@@ -282,7 +282,7 @@ const evaluateRound0 = (
   return { flags, diagnostics, summary: { symbols: diagnostics, macroLatest: macroLagResult.macroLatest, macroLagDays: macroLagResult.macroLagDays } };
 };
 
-const buildFeatures = (
+export const buildFeatures = (
   universe: string[],
   quotes: Record<string, number>,
   history: Record<string, PriceBar[]>,
@@ -437,7 +437,7 @@ const buildMacroPolicy = (macro: MacroSeries[], flags: DataQualityFlag[]): Recor
   return policy;
 };
 
-const buildRegimes = (
+export const buildRegimes = (
   asOf: string,
   features: SymbolFeature[],
   macro: MacroSeries[],

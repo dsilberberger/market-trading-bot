@@ -153,6 +153,7 @@ export interface BotConfig {
     hedgePreferred?: string[];
     growthPreferred?: string[];
   };
+  insuranceReserveMode?: 'light' | 'full';
   insurance?: {
     spendPct?: number;
     minMonths?: number;
