@@ -1,7 +1,7 @@
 {
   "startingCapitalUSD": 250,
   "maxPositions": 4,
-  "rebalanceDay": "TUESDAY",
+  "rebalanceDay": "WEDNESDAY",
   "maxTradesPerRun": 4,
   "maxPositionPct": 0.35,
   "maxWeeklyDrawdownPct": 0.10,

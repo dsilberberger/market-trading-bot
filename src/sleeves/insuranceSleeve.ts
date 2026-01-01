@@ -21,11 +21,39 @@ export interface OptionChainProvider {
   getPutCandidates: (symbol: string, asOf: string) => Promise<OptionCandidate[]>;
 }
 
+export interface OptionPositionSnapshot {
+  underlying: string | null;
+  optionSymbol: string | null;
+  type: 'CALL' | 'PUT' | null;
+  strike: number | null;
+  expiry: string | null;
+  contracts: number | null;
+  multiplier: number | null;
+  avgOpenPrice: number | null;
+  openDate: string | null;
+  marketPrice: number | null;
+  marketValueUsd: number | null;
+  unrealizedPnlUsd: number | null;
+}
+
+export interface OptionMarkSnapshot {
+  positionId: string;
+  underlying: string | null;
+  type: 'CALL' | 'PUT' | null;
+  strike: number | null;
+  expiry: string | null;
+  daysToExpiry: number | null;
+  marketPrice: number | null;
+  marketValueUsd: number | null;
+  estimatedMark: number | null;
+}
+
 export interface InsurancePlanResult {
   state: InsuranceSleeveState;
   plannedAction: 'OPEN' | 'CLOSE' | 'HOLD' | 'NONE';
   order?: any;
   reason?: string;
+  reserveContext?: { reservePoolUsd: number; sleeveBudgetUsd: number; consumedUsd: number; availableUsd: number };
   flags: Array<{ code: string; severity: 'info' | 'warn' | 'error'; message: string; observed?: any }>;
 }
 
@@ -104,9 +132,12 @@ export interface InsurancePlannerInput {
   asOf: string;
   config: BotConfig;
   arbitratorAllowed: boolean;
-  reserveBudget: number;
-  cashAvailable: number;
+  reserveBudget?: number;
+  reservePoolUsd?: number;
+  cashAvailable?: number;
   quotes: Record<string, number>;
+  optionPositions?: OptionPositionSnapshot[];
+  optionMarks?: OptionMarkSnapshot[];
   chainProvider?: OptionChainProvider;
   env?: string;
   accountKey?: string;
@@ -119,8 +150,11 @@ export const planInsuranceSleeve = async (input: InsurancePlannerInput): Promise
     config,
     arbitratorAllowed,
     reserveBudget,
+    reservePoolUsd,
     cashAvailable,
     quotes,
+    optionPositions,
+    optionMarks,
     chainProvider,
     env,
     accountKey
@@ -128,50 +162,87 @@ export const planInsuranceSleeve = async (input: InsurancePlannerInput): Promise
   const flags: InsurancePlanResult['flags'] = [];
   const state = loadInsuranceState(env, accountKey);
   const spendPct = config.insurance?.spendPct ?? 0.85;
-  const budget = reserveBudget * spendPct;
+  const reservePool = reservePoolUsd ?? reserveBudget ?? 0;
+  const sleeveBudget = reservePool * spendPct;
+  const relevantPositions = (optionPositions || []).filter((p) => p.type === 'PUT');
+  const premiumForPosition = (p: OptionPositionSnapshot) => {
+    const px = p.avgOpenPrice ?? p.marketPrice ?? 0;
+    const mult = p.multiplier ?? 100;
+    const contracts = p.contracts ?? 0;
+    return px * mult * contracts;
+  };
+  const consumedReserve = relevantPositions.reduce((acc, p) => acc + premiumForPosition(p), 0);
+  const availableReserve = Math.max(0, sleeveBudget - consumedReserve);
 
   const sameDay = state.openedAsOf && state.openedAsOf.slice(0, 10) === asOf.slice(0, 10);
   const nearExpiryDays = config.insurance?.closeWithinDays ?? 21;
   const allowExpire = config.insurance?.allowExpire ?? false;
 
+  const findMark = (p: OptionPositionSnapshot): OptionMarkSnapshot | undefined => {
+    const id = `${p.underlying || 'UNK'}:${p.type || 'UNK'}:${p.strike || 'UNK'}:${p.expiry || 'UNK'}`;
+    return (optionMarks || []).find((m) => m.positionId === id);
+  };
+
+  const deriveStateFromPositions = (): InsuranceSleeveState => {
+    if (!relevantPositions.length) return state;
+    const p = relevantPositions[0];
+    return {
+      status: 'DEPLOYED',
+      openedRunId: state.openedRunId,
+      openedAsOf: state.openedAsOf,
+      underlying: p.underlying || undefined,
+      strike: p.strike || undefined,
+      expiry: p.expiry || undefined,
+      contracts: p.contracts || undefined,
+      premiumUSD: premiumForPosition(p) || undefined
+    };
+  };
+
+  const workingState = state.status === 'INACTIVE' && relevantPositions.length ? deriveStateFromPositions() : state;
+
   const result: InsurancePlanResult = {
-    state,
+    state: workingState,
     plannedAction: 'NONE',
-    flags
+    flags,
+    reserveContext: { reservePoolUsd: reservePool, sleeveBudgetUsd: sleeveBudget, consumedUsd: consumedReserve, availableUsd: availableReserve }
   };
 
   // If arbitrator blocks insurance
   if (!arbitratorAllowed) {
-    if (state.status === 'DEPLOYED' && !sameDay) {
+    if (workingState.status === 'DEPLOYED' && !sameDay) {
       result.plannedAction = 'CLOSE';
-      result.order = stateToCloseOrder(state, config);
+      result.order = stateToCloseOrder(workingState, config);
       flags.push({ code: 'INSURANCE_UNWIND_DUE_TO_ARBITRATOR', severity: 'info', message: 'Regime normalized; unwind.' });
-      state.status = 'UNWINDING';
+      workingState.status = 'UNWINDING';
     } else {
       result.reason = 'Insurance not allowed';
     }
-    saveInsuranceState(state, env, accountKey);
+    saveInsuranceState(workingState, env, accountKey);
     return result;
   }
 
   // If already deployed
-  if (state.status === 'DEPLOYED') {
-    const expiryDate = state.expiry ? new Date(state.expiry) : undefined;
+  if (workingState.status === 'DEPLOYED') {
+    const expiryDate = workingState.expiry ? new Date(workingState.expiry) : undefined;
     const asOfDate = new Date(asOf);
+    const mark = relevantPositions.length ? findMark(relevantPositions[0]) : undefined;
+    const dteFromMark = mark?.daysToExpiry ?? null;
+    const daysOverride = dteFromMark !== null && dteFromMark !== undefined ? dteFromMark : undefined;
     if (expiryDate) {
-      const days = (expiryDate.getTime() - asOfDate.getTime()) / (1000 * 60 * 60 * 24);
+      const daysCalc = (expiryDate.getTime() - asOfDate.getTime()) / (1000 * 60 * 60 * 24);
+      const days = daysOverride ?? daysCalc;
       if (days <= nearExpiryDays && !sameDay) {
         if (allowExpire) {
           flags.push({ code: 'INSURANCE_NEAR_EXPIRY', severity: 'info', message: 'Option near expiry; allow to expire.' });
           result.plannedAction = 'HOLD';
         } else {
           result.plannedAction = 'CLOSE';
-          result.order = stateToCloseOrder(state, config);
-          state.status = 'UNWINDING';
+          result.order = stateToCloseOrder(workingState, config);
+          workingState.status = 'UNWINDING';
         }
       }
     }
-    saveInsuranceState(state, env, accountKey);
+    saveInsuranceState(workingState, env, accountKey);
     return result;
   }
 
@@ -193,7 +264,7 @@ export const planInsuranceSleeve = async (input: InsurancePlannerInput): Promise
     return result;
   }
   const perContract = contract.premium;
-  const maxSpend = Math.min(budget, cashAvailable);
+  const maxSpend = cashAvailable !== undefined ? Math.min(availableReserve, cashAvailable) : availableReserve;
   const contracts = Math.floor(maxSpend / perContract);
   if (contracts < 1) {
     result.reason = 'Budget insufficient for 1 contract';
@@ -201,14 +272,14 @@ export const planInsuranceSleeve = async (input: InsurancePlannerInput): Promise
   }
 
   const notional = perContract * contracts;
-  state.status = 'DEPLOYED';
-  state.openedRunId = runId;
-  state.openedAsOf = asOf;
-  state.underlying = contract.symbol;
-  state.expiry = contract.expiry;
-  state.strike = contract.strike;
-  state.contracts = contracts;
-  state.premiumUSD = notional;
+  workingState.status = 'DEPLOYED';
+  workingState.openedRunId = runId;
+  workingState.openedAsOf = asOf;
+  workingState.underlying = contract.symbol;
+  workingState.expiry = contract.expiry;
+  workingState.strike = contract.strike;
+  workingState.contracts = contracts;
+  workingState.premiumUSD = notional;
 
   result.plannedAction = 'OPEN';
   result.order = buildBuyToOpenPut(contract, contracts, config);
@@ -218,7 +289,7 @@ export const planInsuranceSleeve = async (input: InsurancePlannerInput): Promise
     message: 'Insurance sleeve opening',
     observed: { notional, contracts, underlying: contract.symbol, strike: contract.strike, expiry: contract.expiry }
   });
-  saveInsuranceState(state, env, accountKey);
+  saveInsuranceState(workingState, env, accountKey);
   return result;
 };
 

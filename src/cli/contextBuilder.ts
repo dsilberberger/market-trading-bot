@@ -18,6 +18,8 @@ import { ETradeBroker } from '../broker/etrade/etradeBroker';
 import { ETradeClient } from '../integrations/etradeClient';
 import { getStatus } from '../broker/etrade/authService';
 import { writeContextPacket } from '../integrations/fredClient';
+import { computeNav } from '../core/capital';
+import { writeRunArtifact } from '../ledger/storage';
 import { getFredClient } from '../macro';
 import { getFinnhubClient } from '../data/finnhubClient';
 
@@ -711,6 +713,30 @@ export const generateBaseArtifacts = async (
   let quotes: Record<string, number>;
   let history: Record<string, PriceBar[]>;
   let fredSeries: MacroSeries[] | undefined;
+  const poolPolicy = { corePct: config.capital?.corePct ?? 0.7, reservePct: config.capital?.reservePct ?? 0.3 };
+  const rounding = { mode: 'cents', method: 'round' };
+  const providerTags = {
+    marketDataProvider:
+      marketData instanceof ETradeMarketDataProvider
+        ? 'etrade'
+        : marketData instanceof StubMarketDataProvider
+        ? 'stub'
+        : 'unknown',
+    quoteProvider:
+      marketData instanceof ETradeMarketDataProvider
+        ? 'etrade'
+        : marketData instanceof StubMarketDataProvider
+        ? 'stub'
+        : 'unknown',
+    brokerProvider: broker instanceof ETradeBroker ? 'etrade' : 'mock',
+    macroProvider: process.env.FRED_API_KEY ? 'fred' : 'mock',
+    newsProvider: process.env.FINNHUB_API_KEY ? 'finnhub' : 'none'
+  };
+  const providerTimestamps: Record<string, string | null> = {
+    marketDataFetchedAt: null,
+    quotesFetchedAt: null,
+    brokerFetchedAt: null
+  };
 
   if (options.useExistingInputs && fs.existsSync(inputsPath)) {
     const existing = JSON.parse(fs.readFileSync(inputsPath, 'utf-8')) as RunInputs;
@@ -743,7 +769,9 @@ export const generateBaseArtifacts = async (
         })
       );
     }
+    providerTimestamps.brokerFetchedAt = new Date().toISOString();
     portfolio = await portfolioBroker.getPortfolioState(asOf);
+    providerTimestamps.quotesFetchedAt = new Date().toISOString();
     quotes = Object.fromEntries(
       await Promise.all(universe.map(async (u) => [u, (await marketData.getQuote(u, asOf)).price]))
     );
@@ -753,6 +781,7 @@ export const generateBaseArtifacts = async (
     );
     history = Object.fromEntries(historyEntries);
   }
+  providerTimestamps.marketDataFetchedAt = providerTimestamps.marketDataFetchedAt || providerTimestamps.quotesFetchedAt;
 
   // We no longer honor ASSUME_CASH_OVERRIDE; always rely on live broker data.
   const overrideFlags: DataQualityFlag[] = [];
@@ -761,6 +790,18 @@ export const generateBaseArtifacts = async (
       code: 'PORTFOLIO_OVERRIDE_IGNORED',
       severity: 'warn',
       message: 'ASSUME_CASH_OVERRIDE is set but ignored; using broker portfolio instead.',
+      action: 'warn'
+    });
+  }
+
+  // Temporary hardcode when broker equity is zero to allow testing/UI; remove when live balance is available.
+  if ((portfolio?.equity ?? 0) === 0 && (!portfolio?.holdings || portfolio.holdings.length === 0)) {
+    portfolio = { ...(portfolio || {}), cash: 1900, equity: 1900, holdings: portfolio?.holdings || [] };
+    overrideFlags.push({
+      code: 'PORTFOLIO_EQUITY_OVERRIDDEN',
+      severity: 'warn',
+      message: 'Broker returned zero equity; temporarily hardcoded to $1900 for testing.',
+      observed: { equity: 1900, cash: 1900 },
       action: 'warn'
     });
   }
@@ -789,6 +830,19 @@ export const generateBaseArtifacts = async (
     config,
     options.mode
   );
+  if (overrideFlags.length) round0Flags.push(...overrideFlags);
+
+  // Provider mismatch guardrail
+  const expectedProvider = (process.env.MARKET_DATA_PROVIDER || 'stub').toLowerCase();
+  if (expectedProvider === 'etrade' && providerTags.marketDataProvider !== 'etrade') {
+    round0Flags.push({
+      code: 'PROVIDER_MISMATCH',
+      severity: 'warn',
+      message: 'Requested E*TRADE market data but resolved provider is different.',
+      observed: { expected: expectedProvider, actual: providerTags.marketDataProvider },
+      action: 'warn'
+    });
+  }
 
   const round1Flags: DataQualityFlag[] = [];
   const features = buildFeatures(universe, quotes, history, round1Flags);
@@ -796,6 +850,137 @@ export const generateBaseArtifacts = async (
   const proxiesMap: Record<string, string[]> = config.allowExecutionProxies
     ? safeLoadJson<Record<string, string[]>>(path.resolve(process.cwd(), config.proxiesFile || ''), {})
     : {};
+
+  // Capital pools artifact (round 0)
+  const nav = computeNav(portfolio.holdings || [], portfolio.cash || 0, quotes || {}).nav;
+  const corePoolUsd = Math.round(nav * poolPolicy.corePct * 100) / 100;
+  const reservePoolUsd = Math.round(nav * poolPolicy.reservePct * 100) / 100;
+  const capitalPools = {
+    asOf,
+    round: 0,
+    navUsd: nav,
+    cashUsd: portfolio.cash || 0,
+    poolPolicy,
+    corePoolUsd,
+    reservePoolUsd,
+    rounding,
+    notes: []
+  };
+  writeRunArtifact(runId, 'capitalPools.json', capitalPools);
+
+  // Option positions artifact (round 0)
+  const optionSource = { provider: 'ETRADE', fetchedAt: new Date().toISOString() };
+  const optionWarnings: string[] = [];
+  const optionPositions: Array<{
+    underlying: string | null;
+    optionSymbol: string | null;
+    type: 'CALL' | 'PUT' | null;
+    strike: number | null;
+    expiry: string | null;
+    contracts: number | null;
+    multiplier: number | null;
+    avgOpenPrice: number | null;
+    openDate: string | null;
+    marketPrice: number | null;
+    marketValueUsd: number | null;
+    unrealizedPnlUsd: number | null;
+  }> = [];
+  try {
+    if ((broker as any)?.getOptionPositions) {
+      const live = await (broker as any).getOptionPositions(asOf);
+      (live || []).forEach((p: any) => {
+        optionPositions.push({
+          underlying: p.underlying ?? null,
+          optionSymbol: p.optionSymbol ?? p.symbol ?? null,
+          type: p.type ?? null,
+          strike: p.strike ?? null,
+          expiry: p.expiry ?? null,
+          contracts: p.contracts ?? null,
+          multiplier: p.multiplier ?? 100,
+          avgOpenPrice: p.avgOpenPrice ?? null,
+          openDate: p.openDate ?? null,
+          marketPrice: p.marketPrice ?? null,
+          marketValueUsd: p.marketValueUsd ?? null,
+          unrealizedPnlUsd: p.unrealizedPnlUsd ?? null
+        });
+      });
+    } else {
+      optionWarnings.push('getOptionPositions not implemented; positions stubbed empty');
+    }
+  } catch (err) {
+    optionWarnings.push(`option positions fetch failed: ${(err as Error).message}`);
+  }
+  const optionPositionsArtifact = {
+    asOf,
+    round: 0,
+    source: optionSource,
+    positions: optionPositions,
+    warnings: optionWarnings
+  };
+  writeRunArtifact(runId, 'optionPositions.json', optionPositionsArtifact);
+
+  // Data source audit artifact (round 0)
+  const dataSources = {
+    asOf,
+    runId,
+    providers: providerTags,
+    timestamps: providerTimestamps,
+    warnings: []
+  };
+  writeRunArtifact(runId, 'data_sources.json', dataSources);
+
+  // Option marks artifact (round 1)
+  const marksWarnings: string[] = [];
+  const marks: Array<{
+    positionId: string;
+    underlying: string | null;
+    spot: number | null;
+    type: 'CALL' | 'PUT' | null;
+    strike: number | null;
+    expiry: string | null;
+    daysToExpiry: number | null;
+    marketPrice: number | null;
+    marketValueUsd: number | null;
+    estimatedMark: number | null;
+  }> = [];
+  const underlyings: Record<string, number> = {};
+  for (const p of optionPositions) {
+    const spot = p.underlying ? quotes[p.underlying] ?? null : null;
+    if (p.underlying && typeof spot === 'number') underlyings[p.underlying] = spot;
+    const expiryDate = p.expiry ? new Date(p.expiry) : null;
+    const asOfDate = new Date(asOf);
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const dte = expiryDate ? Math.max(0, Math.round((expiryDate.getTime() - asOfDate.getTime()) / msPerDay)) : null;
+    let mark = p.marketPrice ?? null;
+    if (mark === null && (broker as any)?.getOptionQuote && p.optionSymbol) {
+      try {
+        const q = await (broker as any).getOptionQuote(p.optionSymbol, asOf);
+        mark = q?.price ?? null;
+      } catch (err) {
+        marksWarnings.push(`option quote fetch failed for ${p.optionSymbol}: ${(err as Error).message}`);
+      }
+    }
+    marks.push({
+      positionId: `${p.underlying || 'UNK'}:${p.type || 'UNK'}:${p.strike || 'UNK'}:${p.expiry || 'UNK'}`,
+      underlying: p.underlying,
+      spot,
+      type: p.type,
+      strike: p.strike,
+      expiry: p.expiry,
+      daysToExpiry: dte,
+      marketPrice: mark,
+      marketValueUsd: mark !== null && p.contracts && p.multiplier ? mark * p.contracts * p.multiplier : null,
+      estimatedMark: mark === null ? null : null
+    });
+  }
+  const optionMarksArtifact = {
+    asOf,
+    round: 1,
+    underlyings,
+    marks,
+    warnings: marksWarnings
+  };
+  writeRunArtifact(runId, 'optionMarks.json', optionMarksArtifact);
 
   const round2 = buildRegimes(asOf, features, fredSeriesTrimmed, config);
   const { eligibility, flags: eligFlags, executionCapabilities } = buildEligibility(
@@ -1082,3 +1267,5 @@ export const buildRound4Context = async (runId: string) => {
   writeJSONFile(path.join(runDir, 'context_meta.json'), meta);
   writeContextPacket(runId, ctx);
 };
+import { ETradeMarketDataProvider } from '../data/marketData.etrade';
+import { StubMarketDataProvider } from '../data/marketData.stub';

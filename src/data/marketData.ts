@@ -7,26 +7,35 @@ import { Mode } from '../core/types';
 import { resolveTokenStorePath } from '../integrations/etradeTokenStore';
 
 export const getMarketDataProvider = (mode: Mode = 'paper'): MarketDataProvider => {
-  const provider = (process.env.MARKET_DATA_PROVIDER || 'stub').toLowerCase();
+  // Default to real E*TRADE provider outside of tests/backtest unless explicitly overridden.
+  const providerEnv = (process.env.MARKET_DATA_PROVIDER || '').toLowerCase();
+  const provider = providerEnv || (process.env.NODE_ENV === 'test' || mode === 'backtest' ? 'stub' : 'etrade');
+  if (mode === 'backtest' || process.env.NODE_ENV === 'test') {
+    return defaultMarketData;
+  }
+
   const useLiveInPaper = process.env.USE_LIVE_DATA_IN_PAPER === 'true';
   const env = (process.env.ETRADE_ENV as 'sandbox' | 'prod') || 'sandbox';
   const sandboxLive = env === 'sandbox' && process.env.USE_SANDBOX_MARKET_DATA === 'true';
   const shouldUseLive =
     provider === 'etrade' && (mode === 'live' || (mode === 'paper' && useLiveInPaper)) && (env === 'prod' || sandboxLive);
+
+  if (provider === 'stub') {
+    if (mode === 'paper' || mode === 'live') {
+      console.warn('MARKET_DATA_PROVIDER=stub in live/paper; returning stub (healthchecks should fail closed).');
+    }
+    return defaultMarketData;
+  }
+
   if (shouldUseLive) {
     const consumerKey = process.env.ETRADE_CONSUMER_KEY;
     const consumerSecret = process.env.ETRADE_CONSUMER_SECRET;
     if (!consumerKey || !consumerSecret) {
-      console.warn('MARKET_DATA_PROVIDER=etrade but E*TRADE keys missing; using stub market data.');
-      return defaultMarketData;
+      throw new Error('E*TRADE keys missing; cannot use stub market data in live/paper mode.');
     }
     const status = getStatus();
     if (status.status !== 'ACTIVE') {
-      if (mode === 'live') {
-        throw new Error(`E*TRADE auth not active (${status.status}); live market data unavailable.`);
-      }
-      console.warn(`E*TRADE auth not active (${status.status}); using stub market data.`);
-      return defaultMarketData;
+      throw new Error(`E*TRADE auth not active (${status.status}); market data unavailable for mode=${mode}.`);
     }
     const client = new ETradeClient({
       consumerKey,
@@ -37,9 +46,9 @@ export const getMarketDataProvider = (mode: Mode = 'paper'): MarketDataProvider 
     });
     return new ETradeMarketDataProvider(client, client.getAuthStatus().env);
   }
-  if (provider === 'etrade' && env === 'sandbox' && !sandboxLive) {
-    console.warn('ETRADE_ENV=sandbox and USE_SANDBOX_MARKET_DATA not true; using stub market data to avoid placeholder prices.');
-  }
+
+  // Fallback: provider requested etrade but conditions not met (e.g., paper without useLive flag)
+  console.warn('Falling back to stub market data (live provider not enabled for this mode/config).');
   return defaultMarketData;
 };
 

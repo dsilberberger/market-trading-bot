@@ -266,6 +266,20 @@ interface ConversionAction {
   cashAfterConversionSells?: number;
   canonicalMinShareCostUSD?: number;
   canonicalAffordableShares?: number;
+  baseAllowedInvestUsd?: number | null;
+  sleeveAllowedInvestUsd?: number | null;
+  spentByBaseBuysBeforeConversionUsd?: number | null;
+  spentByDislocationBuysBeforeConversionUsd?: number | null;
+  remainingBaseDeployBudgetUsdBefore?: number | null;
+  remainingBaseDeployBudgetUsdAfter?: number | null;
+  remainingDislocationDeployBudgetUsdBefore?: number | null;
+  remainingDislocationDeployBudgetUsdAfter?: number | null;
+  maxSharesByDeployBudget?: number | null;
+  buyQtyAfterDeployClamp?: number | null;
+  stage?: string;
+  remainingDeployFromAllowedMinusSpentUsd?: number | null;
+  remainingDeployAfterConstraintsUsd?: number | null;
+  constraintReasons?: string[];
 }
 
 
@@ -756,37 +770,71 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
     state.reserveUsedGrowth = positionReserveAtCost(state.growth.position);
     const minCashBufferUSD = Math.max(0, (baseConfig.minCashPct ?? 0) * navPostInfusion);
 
+    const spentByBaseBuysBeforeConversion = state.cashEvents
+      .filter((ev) => ev.type === 'ETF_BUY_DEBIT' && ev.reason === 'rebalance' && ev.sleeve !== 'dislocation')
+      .reduce((acc, ev) => acc + Math.abs(ev.amount || 0), 0);
+    const spentByDislocationBuysBeforeConversion = state.cashEvents
+      .filter((ev) => ev.type === 'ETF_BUY_DEBIT' && (ev.reason === 'rebalance_dislocation' || ev.sleeve === 'dislocation'))
+      .reduce((acc, ev) => acc + Math.abs(ev.amount || 0), 0);
+    const remainingBaseDeployFromAllowedMinusSpentUsd = Math.max(0, baseAllowedInvest - spentByBaseBuysBeforeConversion);
+    const remainingDislocDeployFromAllowedMinusSpentUsd = Math.max(
+      0,
+      (dislocationAllowedInvest || 0) - spentByDislocationBuysBeforeConversion
+    );
+    let baseDeployBudgetRemaining = remainingBaseDeployFromAllowedMinusSpentUsd;
+    let dislocationDeployBudgetRemaining = remainingDislocDeployFromAllowedMinusSpentUsd;
     const orders: any[] = [];
     const applyBuy = (o: any, sleeve: 'base' | 'dislocation' | 'growth') => {
       if (!Number.isInteger(o.quantity)) throw new Error('Non-integer qty detected');
       const symbol = o.symbol;
       const price = o.estPrice || pricesUsed[symbol] || 0;
-      const cost = o.quantity * price;
+      let qtyPlanned = o.quantity;
+      if (sleeve === 'base') {
+        const maxByDeploy = price > 0 ? Math.floor(baseDeployBudgetRemaining / price) : 0;
+        qtyPlanned = Math.min(qtyPlanned, maxByDeploy);
+        if (qtyPlanned <= 0) {
+          orders.push({ symbol, side: 'SKIP', reason: 'deployBudget', quantity: o.quantity, sleeve });
+          return;
+        }
+      }
+      if (sleeve === 'dislocation') {
+        const maxByDeploy = price > 0 ? Math.floor(dislocationDeployBudgetRemaining / price) : 0;
+        qtyPlanned = Math.min(qtyPlanned, maxByDeploy);
+        if (qtyPlanned <= 0) {
+          orders.push({ symbol, side: 'SKIP', reason: 'deployBudget', quantity: o.quantity, sleeve });
+          return;
+        }
+      }
+      const cost = qtyPlanned * price;
       if (cost > state.portfolio.cash) {
-        orders.push({ symbol, side: 'SKIP', reason: 'cash', quantity: o.quantity, sleeve });
+        orders.push({ symbol, side: 'SKIP', reason: 'cash', quantity: qtyPlanned, sleeve });
         return;
       }
       if (sleeve !== 'growth' && state.portfolio.cash - cost < minCashBufferUSD) {
-        orders.push({ symbol, side: 'SKIP', reason: 'cashBuffer', quantity: o.quantity, sleeve });
+        orders.push({ symbol, side: 'SKIP', reason: 'cashBuffer', quantity: qtyPlanned, sleeve });
         return;
       }
-      orders.push({ symbol, side: 'BUY', quantity: o.quantity, notionalUSD: cost, sleeve });
+      orders.push({ symbol, side: 'BUY', quantity: qtyPlanned, notionalUSD: cost, sleeve });
       state.cashEvents.push({ type: 'ETF_BUY_DEBIT', amount: -cost, reason: 'rebalance', symbol, sleeve });
       state.portfolio.cash -= cost;
       const existing = state.portfolio.holdings.find((h) => h.symbol === symbol);
-      if (existing) existing.quantity += o.quantity;
-      else state.portfolio.holdings.push({ symbol, quantity: o.quantity, avgPrice: price });
+      if (existing) existing.quantity += qtyPlanned;
+      else state.portfolio.holdings.push({ symbol, quantity: qtyPlanned, avgPrice: price });
       const sp = state.sleeves[symbol] || { baseQty: 0, dislocationQty: 0, updatedAtISO: week.date };
-      if (sleeve === 'base') sp.baseQty += o.quantity;
+      if (sleeve === 'base') {
+        sp.baseQty += qtyPlanned;
+        baseDeployBudgetRemaining = Math.max(0, baseDeployBudgetRemaining - cost);
+      }
       else if (sleeve === 'dislocation') {
-        sp.dislocationQty += o.quantity;
+        sp.dislocationQty += qtyPlanned;
+        dislocationDeployBudgetRemaining = Math.max(0, dislocationDeployBudgetRemaining - cost);
         const plannedReintegrateWeekIndex =
           (state.dislocation.episodeStartWeek ?? idx) +
           (baseConfig.dislocation?.durationWeeksAdd ?? 3) +
           (baseConfig.dislocation?.durationWeeksHold ?? 10);
         state.dislocationLots.push({
           symbol: o.symbol,
-          quantity: o.quantity,
+          quantity: qtyPlanned,
           openedWeekIndex: idx,
           openedWeekISO: week.date,
           plannedReintegrateWeekIndex
@@ -868,13 +916,29 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
         const cashAfterSell = state.portfolio.cash;
         let buyQty = 0;
         let blockedReason: string | undefined;
+        let remainingBefore = sleeve === 'base' ? baseDeployBudgetRemaining : dislocationDeployBudgetRemaining;
+        let maxSharesByDeployBudget = 0;
+        let constraintReasons: string[] = [];
+        let remainingAfterConstraints = remainingBefore;
         if (priceTo > 0) {
           const affordable = Math.floor(cashAfterSell / priceTo);
-          buyQty = affordable;
-          if (affordable <= 0) {
-            blockedReason = 'insufficient_cash_after_sells';
+          maxSharesByDeployBudget =
+            sleeve === 'base'
+              ? Math.floor(baseDeployBudgetRemaining / priceTo)
+              : Math.floor(dislocationDeployBudgetRemaining / priceTo);
+          buyQty = Math.min(affordable, maxSharesByDeployBudget, qty);
+          if (buyQty <= 0) {
+            blockedReason = 'DEPLOY_BUDGET_LIMIT';
+            constraintReasons.push('DEPLOY_BUDGET_LIMIT');
           } else {
             applyBuy({ symbol: toSymbol, quantity: buyQty, estPrice: priceTo }, sleeve);
+            if (sleeve === 'base') {
+              baseDeployBudgetRemaining = Math.max(0, baseDeployBudgetRemaining - buyQty * priceTo);
+              remainingAfterConstraints = baseDeployBudgetRemaining;
+            } else {
+              dislocationDeployBudgetRemaining = Math.max(0, dislocationDeployBudgetRemaining - buyQty * priceTo);
+              remainingAfterConstraints = dislocationDeployBudgetRemaining;
+            }
           }
         } else {
           blockedReason = 'price_missing';
@@ -894,7 +958,22 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
           cashBeforeConversion: cashBefore,
           cashAfterConversionSells: cashAfterSell,
           canonicalMinShareCostUSD: priceTo,
-          canonicalAffordableShares: priceTo > 0 ? Math.floor(cashAfterSell / priceTo) : 0
+          canonicalAffordableShares: priceTo > 0 ? Math.floor(cashAfterSell / priceTo) : 0,
+          baseAllowedInvestUsd: sleeve === 'base' ? baseAllowedInvest : null,
+          sleeveAllowedInvestUsd: sleeve === 'base' ? baseAllowedInvest : dislocationAllowedInvest,
+          spentByBaseBuysBeforeConversionUsd: sleeve === 'base' ? spentByBaseBuysBeforeConversion : null,
+          spentByDislocationBuysBeforeConversionUsd: sleeve === 'dislocation' ? spentByDislocationBuysBeforeConversion : null,
+          remainingDeployFromAllowedMinusSpentUsd:
+            sleeve === 'base' ? remainingBaseDeployFromAllowedMinusSpentUsd : remainingDislocDeployFromAllowedMinusSpentUsd,
+          remainingBaseDeployBudgetUsdBefore: sleeve === 'base' ? remainingBefore : null,
+          remainingBaseDeployBudgetUsdAfter: sleeve === 'base' ? remainingAfterConstraints : null,
+          remainingDislocationDeployBudgetUsdBefore: sleeve === 'dislocation' ? remainingBefore : null,
+          remainingDislocationDeployBudgetUsdAfter: sleeve === 'dislocation' ? remainingAfterConstraints : null,
+          remainingDeployAfterConstraintsUsd: remainingAfterConstraints,
+          constraintReasons,
+          maxSharesByDeployBudget,
+          buyQtyAfterDeployClamp: buyQty,
+          stage: 'CANONICALIZE'
         });
       };
 
@@ -1328,7 +1407,7 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
     const holdingsMarketValue = state.portfolio.holdings.reduce((acc, h) => acc + h.quantity * (pricesUsed[h.symbol] || 0), 0);
     const nav = state.portfolio.cash + holdingsMarketValue + optionsMarketValue;
     state.portfolio.equity = nav;
-    const invariantViolations: string[] = [];
+    const invariantViolations: Array<string | any> = [];
     if (!Number.isFinite(nav)) invariantViolations.push('nav not finite');
     // cash reconciliation
     const expectedCash = priorCash + [...state.cashEvents, ...conversionCashEvents].reduce((acc, ev) => acc + ev.amount, 0);
@@ -1342,13 +1421,25 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
     }
     if (!reserveInvariantOk) {
       reserveInvariantViolations.forEach((v) => invariantViolations.push(v));
+      if (reserveUsedTotal > budgets.reserveBudget + 1e-6) {
+        const deltaUsd = reserveUsedTotal - budgets.reserveBudget;
+        invariantViolations.push({
+          code: 'RESERVE_BUDGET_VIOLATION',
+          asOf: week.date,
+          scenarioName: scenarioToUse.name || scenarioKey,
+          allowedUsd: budgets.reserveBudget,
+          actualUsd: reserveUsedTotal,
+          deltaUsd
+        });
+        invariantViolations.push('RESERVE_BUDGET_VIOLATION');
+        throw new Error(`RESERVE_BUDGET_VIOLATION: ${reserveUsedTotal} > ${budgets.reserveBudget}`);
+      }
     }
     const cashReconciliationOk = invariantViolations.findIndex((v) => v.includes('Unexplained cash delta')) === -1;
     const cashEventsOut = [...state.cashEvents, ...conversionCashEvents];
     const cashDeltaFromEvents = cashEventsOut.reduce((acc, ev) => acc + ev.amount, 0);
-    const invariantOk = invariantViolations.length === 0;
 
-    const mdHealth = idx === 0 ? await marketDataHealthcheck(week1.requestSymbols) : undefined;
+    const mdHealth = idx === 0 ? await marketDataHealthcheck(week1.requestSymbols, 'harness') : undefined;
     const acctHealth = idx === 0 ? await accountApiHealthcheck() : undefined;
 
     // Net orders (rebalance + conversion) to remove churn (BUY+SELL same symbol/sleeve)
@@ -1371,6 +1462,66 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
       else if (netQty < 0) netOrders.push({ symbol: e.symbol, side: 'SELL', quantity: Math.abs(netQty), notionalUSD: Math.abs(netQty) * (e.price || 0), sleeve: e.sleeve });
     });
     const combinedOrders = netOrders;
+
+    // Deploy budget invariant for base sleeve (NET deploy = buys - sells)
+    const baseOrders = combinedOrders.filter((o) => o.sleeve === 'base');
+    const totalBaseBuyNotionalUsd = baseOrders.filter((o) => o.side === 'BUY').reduce((acc, o) => acc + (o.notionalUSD || 0), 0);
+    const totalBaseSellNotionalUsd = baseOrders.filter((o) => o.side === 'SELL').reduce((acc, o) => acc + (o.notionalUSD || 0), 0);
+    const netBaseDeployUsd = Math.max(0, totalBaseBuyNotionalUsd - totalBaseSellNotionalUsd);
+    if (netBaseDeployUsd > baseAllowedInvest + 1e-6) {
+      const deltaUsd = netBaseDeployUsd - baseAllowedInvest;
+      invariantViolations.push({
+        code: 'BASE_NET_DEPLOY_CAP_VIOLATION',
+        asOf: week.date,
+        scenarioName: scenarioToUse.name || scenarioKey,
+        sleeve: 'base',
+        allowedUsd: baseAllowedInvest,
+        actualUsd: netBaseDeployUsd,
+        deltaUsd,
+        contributingOrders: baseOrders
+      });
+      invariantViolations.push('BASE_NET_DEPLOY_CAP_VIOLATION');
+      throw new Error(`BASE_NET_DEPLOY_CAP_VIOLATION: ${netBaseDeployUsd} > ${baseAllowedInvest}`);
+    }
+
+    // Deploy budget invariant for dislocation sleeve (NET deploy = buys - sells)
+    const dislocationOrders = combinedOrders.filter((o) => o.sleeve === 'dislocation');
+    const totalDislocationBuyNotionalUsd = dislocationOrders
+      .filter((o) => o.side === 'BUY')
+      .reduce((acc, o) => acc + (o.notionalUSD || 0), 0);
+    const totalDislocationSellNotionalUsd = dislocationOrders
+      .filter((o) => o.side === 'SELL')
+      .reduce((acc, o) => acc + (o.notionalUSD || 0), 0);
+    const netDislocationDeployUsd = Math.max(0, totalDislocationBuyNotionalUsd - totalDislocationSellNotionalUsd);
+    if (netDislocationDeployUsd > dislocationAllowedInvest + 1e-6) {
+      const deltaUsd = netDislocationDeployUsd - dislocationAllowedInvest;
+      invariantViolations.push({
+        code: 'DISLOCATION_NET_DEPLOY_CAP_VIOLATION',
+        asOf: week.date,
+        scenarioName: scenarioToUse.name || scenarioKey,
+        sleeve: 'dislocation',
+        allowedUsd: dislocationAllowedInvest,
+        actualUsd: netDislocationDeployUsd,
+        deltaUsd,
+        contributingOrders: dislocationOrders
+      });
+      invariantViolations.push('DISLOCATION_NET_DEPLOY_CAP_VIOLATION');
+      throw new Error(`DISLOCATION_NET_DEPLOY_CAP_VIOLATION: ${netDislocationDeployUsd} > ${dislocationAllowedInvest}`);
+    }
+
+    // Hard-stop cash reconciliation failure if detected
+    if (!cashReconciliationOk) {
+      invariantViolations.push({
+        code: 'CASH_RECONCILIATION_FAILED',
+        asOf: week.date,
+        scenarioName: scenarioToUse.name || scenarioKey,
+        cashReconciliationDiff: (state.portfolio.cash || 0) - expectedCash
+      });
+      invariantViolations.push('CASH_RECONCILIATION_FAILED');
+      throw new Error('CASH_RECONCILIATION_FAILED');
+    }
+
+    const invariantOk = invariantViolations.length === 0;
 
     results.push({
       asOf: week.date,

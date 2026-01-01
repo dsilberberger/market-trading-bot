@@ -131,6 +131,7 @@ export interface BotConfig {
   capital?: {
     corePct?: number;
     reservePct?: number;
+    deployConfThreshold?: number;
   };
   proxiesFile?: string;
   proxySelectionMode?: 'first_executable';

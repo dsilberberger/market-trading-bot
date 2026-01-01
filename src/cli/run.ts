@@ -5,7 +5,7 @@ import fs from 'fs';
 import { parseAsOfDateTime } from '../core/time';
 import { loadConfig, loadUniverse, ensureDir, readJSONFile } from '../core/utils';
 import { getMarketDataProvider } from '../data/marketData';
-import { getBroker } from '../broker/broker';
+import { getBroker, ETradeBroker, StubBroker } from '../broker/broker';
 import { generateLLMProposal } from '../strategy/llmProposer';
 import { runDeterministicBaseline } from '../strategy/deterministicBaseline';
 import { runRandomBaseline } from '../strategy/randomBaseline';
@@ -37,11 +37,14 @@ import {
   saveSleevePositions,
   snapshotSleevePositions
 } from '../dislocation/sleevePositions';
-import { computeBudgets, computeNav, clampBuyOrdersToBudget } from '../core/capital';
+import { computeBudgets, computeNav, clampBuyOrdersToBudget, computeCoreDeployPct } from '../core/capital';
+import { spawnSync } from 'child_process';
 import { arbitrateSleeves } from '../sleeves/sleeveArbitration';
 import { selectOptionsUnderlying } from '../sleeves/optionsUnderlying';
 import { planInsuranceSleeve, saveInsuranceState } from '../sleeves/insuranceSleeve';
 import { planGrowthSleeve } from '../sleeves/growthSleeve';
+import { ETradeMarketDataProvider } from '../data/marketData.etrade';
+import { StubMarketDataProvider } from '../data/marketData.stub';
 
 const program = new Command();
 
@@ -110,7 +113,7 @@ export const runBot = async (options: RunOptions) => {
 
   const configPath = path.resolve(process.cwd(), 'src/config/default.json');
   const config: BotConfig = loadConfig(configPath);
-  const rebalanceDay = config.rebalanceDay?.toUpperCase?.() ?? 'FRIDAY';
+  const rebalanceDay = config.rebalanceDay?.toUpperCase?.() ?? 'WEDNESDAY';
   if (config.cadence === 'weekly' && !forceRun) {
     const day = new Date(asOf).getUTCDay(); // 0 Sunday ... 6 Saturday
     const dayName = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][day];
@@ -126,6 +129,16 @@ export const runBot = async (options: RunOptions) => {
   const marketData = getMarketDataProvider(runMode as any);
   const broker = getBroker(config, marketData, runMode as any);
   const brokerProvider = (process.env.BROKER_PROVIDER || 'stub').toLowerCase();
+  const resolvedProviders = {
+    marketData: marketData instanceof ETradeMarketDataProvider ? 'etrade' : marketData instanceof StubMarketDataProvider ? 'stub' : 'unknown',
+    broker: broker instanceof ETradeBroker ? 'etrade' : broker instanceof StubBroker ? 'stub' : 'unknown',
+    quotes: marketData instanceof ETradeMarketDataProvider ? 'etrade' : marketData instanceof StubMarketDataProvider ? 'stub' : 'unknown',
+    macro: process.env.FRED_API_KEY ? 'fred' : 'mock',
+    news: process.env.FINNHUB_API_KEY ? 'finnhub' : 'none'
+  };
+  console.log(
+    `DATA_SOURCES: marketDataProvider=${resolvedProviders.marketData} brokerProvider=${resolvedProviders.broker} quotes=${resolvedProviders.quotes} macro=${resolvedProviders.macro} news=${resolvedProviders.news}`
+  );
 
   const runDir = path.resolve(process.cwd(), 'runs', runId);
   if (!forceRun && fs.existsSync(runDir) && status !== 'UNKNOWN') {
@@ -134,6 +147,16 @@ export const runBot = async (options: RunOptions) => {
   }
   let llmContext: any;
   ensureDir(runDir);
+
+  const readArtifact = <T>(name: string, fallback: T): T => {
+    const p = path.join(runDir, name);
+    if (!fs.existsSync(p)) return fallback;
+    try {
+      return readJSONFile<T>(p);
+    } catch {
+      return fallback;
+    }
+  };
 
   const { inputs } = await generateBaseArtifacts(asOf, runId, config, universe, marketData, { mode: runMode }, broker);
 
@@ -144,14 +167,38 @@ export const runBot = async (options: RunOptions) => {
   // Capital partition (core/reserve)
   const navResult = computeNav(inputs.portfolio.holdings || [], inputs.portfolio.cash || 0, inputs.quotes || {});
   const budgets = computeBudgets(navResult.nav, config);
-  const coreCashBudget = Math.max(0, (inputs.portfolio.cash || 0) - budgets.reserveBudget);
+  const capitalPools = readArtifact<{ reservePoolUsd?: number; corePoolUsd?: number }>('capitalPools.json', {
+    reservePoolUsd: budgets.reserveBudget,
+    corePoolUsd: budgets.coreBudget
+  });
+  const reservePoolUsd = capitalPools?.reservePoolUsd ?? budgets.reserveBudget;
+  const corePoolUsd = capitalPools?.corePoolUsd ?? budgets.coreBudget;
+  const coreCashBudget = Math.max(0, (inputs.portfolio.cash || 0) - reservePoolUsd);
+  const optionPositionsArtifact = readArtifact<{ positions?: any[] }>('optionPositions.json', { positions: [] });
+  const optionMarksArtifact = readArtifact<{ marks?: any[] }>('optionMarks.json', { marks: [] });
+  const regimesArtifact = readArtifact<any>('regimes.json', {});
+  const { deployPct: coreDeployPct, confidenceScale } = computeCoreDeployPct(regimesArtifact, config);
+  const deployBudgetUsd = corePoolUsd * coreDeployPct;
   writeRunArtifact(runId, 'capital_budgets.json', {
     nav: navResult.nav,
     invested: navResult.invested,
     cash: navResult.cash,
-    coreBudget: budgets.coreBudget,
-    reserveBudget: budgets.reserveBudget,
+    coreBudget: corePoolUsd,
+    reserveBudget: reservePoolUsd,
     coreCashBudget
+  });
+  writeRunArtifact(runId, 'capital_deployment.json', {
+    asOf,
+    corePoolUsd,
+    reservePoolUsd,
+    coreDeployPct,
+    deployBudgetUsd,
+    basis: {
+      equityRegimeLabel: regimesArtifact?.equityRegime?.label ?? null,
+      equityRegimeConfidence: regimesArtifact?.equityRegime?.confidence ?? null,
+      confidenceScale
+    },
+    warnings: []
   });
 
   // Sleeve positions (base vs dislocation) tracking and reconciliation
@@ -214,7 +261,9 @@ export const runBot = async (options: RunOptions) => {
   // Whole-share execution planner (closest fit + proxies, with exposure cap awareness)
   const quotes = (inputs as any)?.quotes || {};
   const rawBudget =
-    typeof inputs?.portfolio?.cash === 'number' && inputs.portfolio.cash > 0
+    typeof deployBudgetUsd === 'number'
+      ? deployBudgetUsd
+      : typeof inputs?.portfolio?.cash === 'number' && inputs.portfolio.cash > 0
       ? inputs.portfolio.cash
       : inputs?.portfolio?.equity ?? 0;
   const minCashUSD = Math.max(0, config.minCashPct * (inputs?.portfolio?.equity ?? rawBudget));
@@ -241,8 +290,8 @@ export const runBot = async (options: RunOptions) => {
   if (transitionRisk === 'high') exposureCap = Math.min(exposureCap, 0.35);
   else if (transitionRisk === 'elevated') exposureCap = Math.min(exposureCap, 0.6);
   const baseExposureCap = exposureCap;
-  const capBudget = (inputs?.portfolio?.equity ?? rawBudget) * exposureCap;
-  const buyBudgetUSD = Math.max(0, Math.min(rawBudget - minCashUSD, capBudget));
+  const capBudget = Math.min(deployBudgetUsd, (inputs?.portfolio?.equity ?? rawBudget) * exposureCap);
+  const buyBudgetUSD = Math.max(0, Math.min(deployBudgetUsd, rawBudget - minCashUSD, capBudget));
   const proxiesMap: Record<string, string[]> =
     config.allowExecutionProxies && config.proxiesFile
       ? readJSONFile<Record<string, string[]>>(path.resolve(process.cwd(), config.proxiesFile))
@@ -345,13 +394,6 @@ export const runBot = async (options: RunOptions) => {
   if (combinedFlags.length) {
     writeRunArtifact(runId, 'round5_flags.json', combinedFlags);
   }
-  if (planner.status === 'UNEXECUTABLE') {
-    writeRunArtifact(runId, 'orders.json', []);
-    writeRunArtifact(runId, 'fills.json', [{ type: 'NO_FILL', reason: 'UNEXECUTABLE_WHOLE_SHARE' }]);
-    appendEvent(makeEvent(runId, 'RUN_FAILED', { reason: 'UNEXECUTABLE_WHOLE_SHARE' }));
-    console.error('Execution plan unexecutable; no orders generated.');
-    return;
-  }
   if (planner.status === 'PARTIAL') {
     console.warn('Execution plan is partial; proceeding with feasible subset.');
   }
@@ -382,7 +424,7 @@ export const runBot = async (options: RunOptions) => {
   };
 
   // Map planner target orders into enriched buy-only orders (used for target plan)
-  const targetOrdersEnriched = planner.orders.map((o) => {
+  const targetOrdersEnriched = (planner.status === 'UNEXECUTABLE' ? [] : planner.orders).map((o) => {
     const originalSymbol = originalByExecuted.get(o.symbol) || (o as any).originalSymbol || o.symbol;
     const baseOriginal = originalBySymbol.get(originalSymbol) || originalBySymbol.get(o.symbol);
     const basePL = baseOriginal?.portfolioLevel;
@@ -475,17 +517,11 @@ export const runBot = async (options: RunOptions) => {
 
   if (rebalance.status === 'SKIPPED_NO_DRIFT' || rebalance.status === 'SKIPPED_NO_CHANGES') {
     proposal.intent.orders = [];
-    writeRunArtifact(runId, 'orders.json', []);
-    writeRunArtifact(runId, 'fills.json', [{ type: 'NO_FILL', reason: 'NO_REBALANCE_DRIFT_BELOW_THRESHOLD' }]);
     console.log('Rebalance skipped due to drift thresholds.');
-    return;
   }
   if (rebalance.status === 'UNEXECUTABLE') {
     proposal.intent.orders = [];
-    writeRunArtifact(runId, 'orders.json', []);
-    writeRunArtifact(runId, 'fills.json', [{ type: 'NO_FILL', reason: 'REBALANCE_UNEXECUTABLE' }]);
-    appendEvent(makeEvent(runId, 'RUN_FAILED', { reason: 'REBALANCE_UNEXECUTABLE' }));
-    return;
+    console.warn('Rebalance unexecutable; continuing with options/policy gating only.');
   }
 
   // Opportunistic dislocation buys (incremental)
@@ -591,6 +627,11 @@ export const runBot = async (options: RunOptions) => {
     exposureGroups &&
     Object.keys(exposureGroups).length
   ) {
+    const currentBuyNotional = proposal.intent.orders
+      .filter((o) => o.side === 'BUY')
+      .reduce((acc, o) => acc + (o.notionalUSD || 0), 0);
+    const remainingDeployBudgetUsd = Math.max(0, deployBudgetUsd - currentBuyNotional);
+    const spentByBaseRebalanceBuysUsd = currentBuyNotional;
     const canonicalPlan = planCanonicalization({
       exposureGroups,
       holdings: inputs.portfolio.holdings || [],
@@ -600,7 +641,11 @@ export const runBot = async (options: RunOptions) => {
       phase: sleeveLifecycle.state.phase || '',
       protectFromSells: sleeveLifecycle.protectFromSells,
       protectedSymbols: (config.dislocation?.deploymentTargets || []).map((t) => proxyParentMap[t.symbol] || t.symbol),
-      equity: inputs.portfolio.equity ?? rawBudget
+      equity: inputs.portfolio.equity ?? rawBudget,
+      corePoolUsd: corePoolUsd,
+      deployBudgetUsd,
+      remainingDeployBudgetUsd,
+      spentByBaseRebalanceBuysUsd
     });
     if (canonicalPlan.orders.length) {
       proposal.intent.orders = [...proposal.intent.orders, ...canonicalPlan.orders];
@@ -653,15 +698,18 @@ export const runBot = async (options: RunOptions) => {
   });
 
   // Insurance sleeve planning (reserve budget only)
-  const reserveOnlyCash = Math.max(0, (inputs.portfolio.cash || 0) - budgets.coreBudget);
+  const reserveOnlyCash = Math.max(0, (inputs.portfolio.cash || 0) - corePoolUsd);
   const insurancePlan = await planInsuranceSleeve({
     runId,
     asOf,
     config,
     arbitratorAllowed: sleeves.allowed.insurance,
-    reserveBudget: budgets.reserveBudget,
+    reserveBudget: reservePoolUsd,
+    reservePoolUsd: reservePoolUsd,
     cashAvailable: reserveOnlyCash,
     quotes,
+    optionPositions: optionPositionsArtifact.positions || [],
+    optionMarks: optionMarksArtifact.marks || [],
     env: process.env.ETRADE_ENV,
     accountKey: process.env.ETRADE_ACCOUNT_ID_KEY
   });
@@ -671,23 +719,195 @@ export const runBot = async (options: RunOptions) => {
     asOf,
     config,
     arbitratorAllowed: sleeves.allowed.growthConvexity,
-    reserveBudget: budgets.reserveBudget,
+    reserveBudget: reservePoolUsd,
+    reservePoolUsd: reservePoolUsd,
     cashAvailable: reserveOnlyCash,
     quotes,
+    optionPositions: optionPositionsArtifact.positions || [],
+    optionMarks: optionMarksArtifact.marks || [],
     env: process.env.ETRADE_ENV,
     accountKey: process.env.ETRADE_ACCOUNT_ID_KEY
   });
   writeRunArtifact(runId, 'growth_plan.json', growthPlan);
 
-  // Enforce core/reserve budget: scale BUY notionals if they exceed allowed cash/core budget
+  const startingPositions = optionPositionsArtifact.positions || [];
+  const positionPremium = (p: any) => {
+    const px = p.avgOpenPrice ?? p.marketPrice ?? 0;
+    const mult = p.multiplier ?? 100;
+    const contracts = p.contracts ?? 0;
+    return px * mult * contracts;
+  };
+  const existingPremium = startingPositions.reduce((acc: number, p: any) => acc + positionPremium(p), 0);
+  const optionOrders: Array<{
+    action: 'OPEN' | 'CLOSE' | 'HOLD';
+    sleeve: 'INSURANCE' | 'GROWTH';
+    underlying: string | null;
+    type: 'PUT' | 'CALL' | null;
+    strike: number | null;
+    expiry: string | null;
+    contracts: number | null;
+    limitPrice: number | null;
+    estimatedPremiumUsd: number;
+    positionId: string;
+    reasonTags: string[];
+  }> = [];
+
+  const planToOrders = (plan: any, sleeve: 'INSURANCE' | 'GROWTH') => {
+    if (!plan) return;
+    const action = plan.plannedAction;
+    if (!action || action === 'NONE') return;
+    const order = plan.order || {};
+    const type = sleeve === 'INSURANCE' ? 'PUT' : 'CALL';
+    const reasonTags: string[] = [];
+    if (plan.reason) reasonTags.push(plan.reason);
+    if (Array.isArray(plan.flags)) {
+      reasonTags.push(...plan.flags.map((f: any) => f.code).filter(Boolean));
+    }
+    const contracts = order.quantity ?? plan.state?.contracts ?? null;
+    const limitPrice = order.limitPrice ?? null;
+    const estimatedPremiumUsd =
+      action === 'OPEN' && contracts ? (limitPrice ?? 0) * contracts * (order.multiplier ?? 100) : 0;
+    optionOrders.push({
+      action,
+      sleeve,
+      underlying: order.optionSymbol ?? plan.state?.underlying ?? null,
+      type,
+      strike: order.strike ?? plan.state?.strike ?? null,
+      expiry: order.expiry ?? plan.state?.expiry ?? null,
+      contracts,
+      limitPrice,
+      estimatedPremiumUsd,
+      positionId: `${order.optionSymbol || plan.state?.underlying || 'UNK'}:${type}:${order.strike ?? plan.state?.strike ?? 'UNK'}:${order.expiry ?? plan.state?.expiry ?? 'UNK'}`,
+      reasonTags
+    });
+  };
+  planToOrders(insurancePlan, 'INSURANCE');
+  planToOrders(growthPlan, 'GROWTH');
+  const plannedPremiumOpen = optionOrders.reduce(
+    (acc, o) => acc + (o.action === 'OPEN' ? o.estimatedPremiumUsd || 0 : 0),
+    0
+  );
+  let optionsAdjustments: Array<{
+    positionId: string;
+    beforeContracts: number | null;
+    afterContracts: number | null;
+    reason: string;
+  }> = [];
+  if (plannedPremiumOpen > reservePoolUsd && plannedPremiumOpen > 0) {
+    const scale = reservePoolUsd / plannedPremiumOpen;
+    const updated: typeof optionOrders = [];
+    for (const o of optionOrders) {
+      if (o.action !== 'OPEN') {
+        updated.push(o);
+        continue;
+      }
+      const beforeContracts = o.contracts ?? 0;
+      const beforePrem = o.estimatedPremiumUsd || 0;
+      let afterContracts = Math.floor(beforeContracts * scale);
+      let afterPrem = beforePrem * scale;
+      if (afterContracts < 1 || afterPrem <= 0) {
+        optionsAdjustments.push({
+          positionId: o.positionId,
+          beforeContracts,
+          afterContracts: 0,
+          reason: 'RESERVE_POOL_LIMIT'
+        });
+        continue; // drop the order
+      }
+      if (afterContracts !== beforeContracts) {
+        optionsAdjustments.push({
+          positionId: o.positionId,
+          beforeContracts,
+          afterContracts,
+          reason: 'RESERVE_POOL_LIMIT'
+        });
+      }
+      updated.push({ ...o, contracts: afterContracts, estimatedPremiumUsd: afterPrem });
+    }
+    optionOrders.splice(0, optionOrders.length, ...updated);
+  }
+  const clampedPremiumOpen = optionOrders.reduce(
+    (acc, o) => acc + (o.action === 'OPEN' ? o.estimatedPremiumUsd || 0 : 0),
+    0
+  );
+  const projectedSpend = existingPremium + clampedPremiumOpen;
+  const optionsPlan = {
+    asOf,
+    round: 4,
+    reservePoolUsd,
+    startingPositions,
+    orders: optionOrders,
+    summary: {
+      estimatedPremiumSpendUsd: projectedSpend,
+      reserveRemainingUsd: Math.max(0, reservePoolUsd - projectedSpend)
+    },
+    warnings: []
+  };
+  writeRunArtifact(runId, 'optionsPlan.json', optionsPlan);
+
+  // Enforce core/reserve budget: scale ETF BUY notionals to core pool only
   const sellProceeds = proposal.intent.orders
     .filter((o) => o.side === 'SELL')
     .reduce((acc, o) => acc + (o.notionalUSD || 0), 0);
-  const allowedBuyBudget = Math.max(
-    0,
-    Math.min(budgets.coreBudget, coreCashBudget + sellProceeds)
-  );
-  proposal.intent.orders = clampBuyOrdersToBudget(proposal.intent.orders, allowedBuyBudget);
+  const etfPlannedBuyUsd = proposal.intent.orders
+    .filter((o) => o.side === 'BUY')
+    .reduce((acc, o) => acc + (o.notionalUSD || 0), 0);
+  const etfPlannedSellUsd = sellProceeds;
+  const allowedBuyBudget = Math.max(0, Math.min(deployBudgetUsd, corePoolUsd, coreCashBudget + sellProceeds));
+  let etfAdjustments: Array<{
+    symbol: string;
+    beforeNotional: number;
+    afterNotional: number;
+    beforeShares: number | null;
+    afterShares: number | null;
+    reason: string;
+  }> = [];
+  if (etfPlannedBuyUsd > allowedBuyBudget && etfPlannedBuyUsd > 0) {
+    const scale = allowedBuyBudget / etfPlannedBuyUsd;
+    proposal.intent.orders = proposal.intent.orders.map((o) => {
+      if (o.side !== 'BUY') return o;
+      const beforeNotional = o.notionalUSD || 0;
+      const afterNotional = beforeNotional * scale;
+      etfAdjustments.push({
+        symbol: o.symbol,
+        beforeNotional,
+        afterNotional,
+        beforeShares: null,
+        afterShares: null,
+        reason: 'CORE_POOL_LIMIT'
+      });
+      return {
+        ...o,
+        notionalUSD: afterNotional
+      };
+    });
+  }
+  const etfClampedBuyUsd = proposal.intent.orders
+    .filter((o) => o.side === 'BUY')
+    .reduce((acc, o) => acc + (o.notionalUSD || 0), 0);
+  const budgetEnforcement = {
+    asOf,
+    round: 5,
+    corePoolUsd,
+    reservePoolUsd,
+    etf: {
+      plannedBuyUsd: etfPlannedBuyUsd,
+      clampedBuyUsd: etfClampedBuyUsd,
+      plannedSellUsd: etfPlannedSellUsd,
+      ordersAdjusted: etfAdjustments
+    },
+    options: {
+      plannedPremiumUsd: plannedPremiumOpen,
+      clampedPremiumUsd: clampedPremiumOpen,
+      ordersAdjusted: optionsAdjustments
+    },
+    remaining: {
+      coreUsd: Math.max(0, corePoolUsd - etfClampedBuyUsd),
+      reserveUsd: Math.max(0, reservePoolUsd - clampedPremiumOpen)
+    },
+    warnings: []
+  };
+  writeRunArtifact(runId, 'budgetEnforcement.json', budgetEnforcement);
 
   // Decision policy gate (exposure/confidence caps)
   let riskReport = evaluateRisk(proposal.intent, config, inputs.portfolio, { drawdown });
@@ -715,16 +935,150 @@ export const runBot = async (options: RunOptions) => {
   writeRunArtifact(runId, 'risk_report.json', riskReport);
   appendEvent(makeEvent(runId, 'RISK_EVALUATED', { approved: riskReport.approved, blocked: riskReport.blockedReasons }));
 
+  // Segregated execution artifacts
+  const etfOrdersArtifact = {
+    asOf,
+    orders: (riskReport.approvedOrders || []).map((o) => {
+      const px = quotes[o.symbol] ?? 0;
+      const shares = px > 0 ? (o.notionalUSD || 0) / px : null;
+      return {
+        symbol: o.symbol,
+        side: o.side,
+        shares: shares,
+        limitPrice: null,
+        notionalUsd: o.notionalUSD || 0,
+        fundingSource: 'CORE_POOL' as const
+      };
+    })
+  };
+  writeRunArtifact(runId, 'etfOrders.json', etfOrdersArtifact);
+
+  const optionOrdersArtifact = {
+    asOf,
+    orders: optionOrders.map((o) => ({
+      positionId: o.positionId,
+      action: o.action === 'HOLD' ? 'HOLD' : o.action,
+      underlying: o.underlying,
+      type: o.type,
+      strike: o.strike,
+      expiry: o.expiry,
+      contracts: o.contracts,
+      limitPrice: o.limitPrice ?? null,
+      estimatedPremiumUsd: o.estimatedPremiumUsd || 0,
+      fundingSource: 'RESERVE_POOL' as const
+    }))
+  };
+  writeRunArtifact(runId, 'optionOrders.json', optionOrdersArtifact);
+
+  const executionManifest = {
+    asOf,
+    etfOrdersRef: 'etfOrders.json',
+    optionOrdersRef: 'optionOrders.json',
+    totals: {
+      etfBuyUsd: etfOrdersArtifact.orders
+        .filter((o) => o.side === 'BUY')
+        .reduce((acc, o) => acc + (o.notionalUsd || 0), 0),
+      etfSellUsd: etfOrdersArtifact.orders
+        .filter((o) => o.side === 'SELL')
+        .reduce((acc, o) => acc + (o.notionalUsd || 0), 0),
+      optionPremiumUsd: optionOrdersArtifact.orders
+        .filter((o) => o.action === 'OPEN')
+        .reduce((acc, o) => acc + (o.estimatedPremiumUsd || 0), 0)
+    }
+  };
+  writeRunArtifact(runId, 'executionManifest.json', executionManifest);
+
+  const hasExecutableEtfOrders =
+    planner.status !== 'UNEXECUTABLE' && (proposal.intent.orders || []).some((o) => o.side === 'BUY' || o.side === 'SELL');
+  const hasExecutableOptionOrders = optionOrders.some(
+    (o) => (o.action === 'OPEN' || o.action === 'CLOSE') && (o.estimatedPremiumUsd || 0) <= reservePoolUsd
+  );
+  const round5Flags: any[] = [];
+  let narrativesGenerated = false;
+  let consolidatedGenerated = false;
+  const generateNarrativesOnce = () => {
+    if (narrativesGenerated) return;
+    [0, 1, 2, 3, 4, 5, 6].forEach((r) => generateRoundNarrative(runId, r as any));
+    generateRound6Metrics(runId);
+    generateRound6Retrospective(runId);
+    narrativesGenerated = true;
+  };
+  const generateConsolidatedOnce = () => {
+    if (consolidatedGenerated) return;
+    try {
+      const res = spawnSync('ts-node', ['scripts/generateConsolidatedReport.ts', runId], { stdio: 'inherit' });
+      if (res.status !== 0) {
+        console.warn(`Consolidated report generation failed for ${runId} with code ${res.status}`);
+      } else {
+        consolidatedGenerated = true;
+      }
+    } catch (err) {
+      console.warn(`Consolidated report generation error: ${(err as Error).message}`);
+    }
+  };
+
+  if (!hasExecutableEtfOrders && hasExecutableOptionOrders) {
+    (proposal as any).proposalType = 'OPTIONS_ONLY';
+    round5Flags.push({
+      code: 'ETF_PATH_UNEXECUTABLE_OPTIONS_CONTINUE',
+      severity: 'info',
+      message: 'ETF path unexecutable; continuing with options-only proposal.'
+    });
+  }
+
+  if (!hasExecutableEtfOrders && !hasExecutableOptionOrders) {
+    round5Flags.push({
+      code: 'NO_EXECUTABLE_ORDERS',
+      severity: 'warn',
+      message: 'Neither ETF nor option orders executable; exiting before Round 5.'
+    });
+    const existingRound5Flags = fs.existsSync(path.join(runDir, 'round5_flags.json'))
+      ? (JSON.parse(fs.readFileSync(path.join(runDir, 'round5_flags.json'), 'utf-8')) as any[])
+      : [];
+    writeRunArtifact(runId, 'round5_flags.json', [...existingRound5Flags, ...round5Flags]);
+    writeRunArtifact(runId, 'orders.json', []);
+    writeRunArtifact(runId, 'fills.json', [{ type: 'NO_FILL', reason: 'NO_EXECUTABLE_ORDERS' }]);
+    appendEvent(makeEvent(runId, 'RUN_FAILED', { reason: 'NO_EXECUTABLE_ORDERS' }));
+    generateNarrativesOnce();
+    generateConsolidatedOnce();
+    return;
+  }
+
+  if (round5Flags.length) {
+    const existingRound5Flags = fs.existsSync(path.join(runDir, 'round5_flags.json'))
+      ? (JSON.parse(fs.readFileSync(path.join(runDir, 'round5_flags.json'), 'utf-8')) as any[])
+      : [];
+    writeRunArtifact(runId, 'round5_flags.json', [...existingRound5Flags, ...round5Flags]);
+  }
+
   writeRunArtifact(runId, 'orders.json', riskReport.approvedOrders);
   writeRunArtifact(runId, 'fills.json', []);
+
+  const totalBaseEtfBuyNotionalUsd = (riskReport.approvedOrders || [])
+    .filter((o: any) => o.side === 'BUY')
+    .reduce((acc: number, o: any) => acc + (o.notionalUSD || 0), 0);
+  if (totalBaseEtfBuyNotionalUsd > deployBudgetUsd + 1e-6) {
+    const violation = {
+      code: 'BASE_DEPLOY_CAP_VIOLATION',
+      asOf,
+      baseAllowedInvestUsd: deployBudgetUsd,
+      totalBaseEtfBuyNotionalUsd,
+      offendingOrders: riskReport.approvedOrders
+    };
+    const existingFlags =
+      (fs.existsSync(path.join(runDir, 'round5_flags.json'))
+        ? JSON.parse(fs.readFileSync(path.join(runDir, 'round5_flags.json'), 'utf-8'))
+        : []) || [];
+    writeRunArtifact(runId, 'round5_flags.json', [...existingFlags, violation]);
+    throw new Error(`Deploy budget violated: ${totalBaseEtfBuyNotionalUsd} > ${deployBudgetUsd}`);
+  }
 
   if (!riskReport.approved) {
     appendEvent(makeEvent(runId, 'RUN_FAILED', { reason: riskReport.blockedReasons }));
     console.error('Run blocked by risk engine.');
     console.error(`Reasons: ${riskReport.blockedReasons.join('; ')}`);
-    [0, 1, 2, 3, 4, 5].forEach((r) => generateRoundNarrative(runId, r as any));
-    generateRound6Metrics(runId);
-    generateRound6Retrospective(runId);
+    generateNarrativesOnce();
+    generateConsolidatedOnce();
     return;
   }
 
@@ -745,18 +1099,16 @@ export const runBot = async (options: RunOptions) => {
         : []) || [];
     existingFlags.push({ code: 'EXECUTION_SKIPPED_PENDING_APPROVAL', severity: 'info', message: 'Awaiting approval' });
     writeRunArtifact(runId, 'round5_flags.json', existingFlags);
-    [0, 1, 2, 3, 4, 5].forEach((r) => generateRoundNarrative(runId, r as any));
-    generateRound6Metrics(runId);
-    generateRound6Retrospective(runId);
+    generateNarrativesOnce();
+    generateConsolidatedOnce();
     return;
   }
 
   if (dry) {
     appendEvent(makeEvent(runId, 'RUN_COMPLETED', { dryRun: true }));
     console.log(`Dry run completed for ${runId}.`);
-    [0, 1, 2, 3, 4, 5].forEach((r) => generateRoundNarrative(runId, r as any));
-    generateRound6Metrics(runId);
-    generateRound6Retrospective(runId);
+    generateNarrativesOnce();
+    generateConsolidatedOnce();
     return;
   }
 
@@ -767,9 +1119,8 @@ export const runBot = async (options: RunOptions) => {
   });
   appendEvent(makeEvent(runId, 'RUN_COMPLETED', { fills: execution.fills.length }));
   console.log(`Run ${runId} completed with ${execution.fills.length} fills.`);
-  [0, 1, 2, 3, 4, 5].forEach((r) => generateRoundNarrative(runId, r as any));
-  generateRound6Metrics(runId);
-  generateRound6Retrospective(runId);
+  generateNarrativesOnce();
+  generateConsolidatedOnce();
 };
 
 const run = async () => {

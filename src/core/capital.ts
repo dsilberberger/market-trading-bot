@@ -33,3 +33,19 @@ export const clampBuyOrdersToBudget = (orders: TradeOrder[], maxBuyNotional: num
     return { ...o, notionalUSD: o.notionalUSD * scale };
   });
 };
+
+export const computeCoreDeployPct = (
+  regimes: any,
+  config: BotConfig
+): { deployPct: number; confidenceScale: number } => {
+  const label = regimes?.equityRegime?.label;
+  const confidence = regimes?.equityRegime?.confidence ?? 1;
+  let basePct = 0.5;
+  if (label === 'risk_off') basePct = 0.35;
+  else if (label === 'neutral') basePct = 0.5;
+  else if (label === 'risk_on') basePct = 0.7;
+  const confThreshold = config.capital?.deployConfThreshold ?? 0.5;
+  const confidenceScale = confidence < confThreshold ? 0.8 : 1;
+  const deployPct = Math.min(1, Math.max(0, basePct * confidenceScale));
+  return { deployPct, confidenceScale };
+};

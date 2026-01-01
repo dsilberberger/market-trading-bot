@@ -587,20 +587,12 @@ export const registerRoutes = (app: express.Application, csrfToken: string) => {
       ? `Risk blocked: ${(risk as any).blockedReasons?.join('; ') || 'unknown reason'}`
       : '';
 
-    const narrativeFiles = [
-      'round0_summary.md',
-      'round1_summary.md',
-      'round2_summary.md',
-      'round3_summary.md',
-      'round4_summary.md',
-      'round5_summary.md',
-      'round6_metrics.json',
-      'round6_retrospective.md'
-    ];
-    const narrativeLinks = narrativeFiles
-      .filter((f) => fs.existsSync(path.resolve(process.cwd(), 'runs', runId, f)))
-      .map((f) => `<li><a href="/runs/${runId}/${f}">${f}</a></li>`)
-      .join('') || '<li>No narratives yet</li>';
+    const narrativeFiles = ['report.md', 'retrospective_inputs.json', 'report_narrative.json'];
+    const narrativeLinks =
+      narrativeFiles
+        .filter((f) => fs.existsSync(path.resolve(process.cwd(), 'runs', runId, f)))
+        .map((f) => `<li><a href="/runs/${runId}/${f}">${f}</a></li>`)
+        .join('') || '<li>No consolidated report yet</li>';
 
     const loadFlags = (name: string) => readRunArtifact<any[]>(runId, name) || [];
     const flagToText = (f: any) =>
@@ -659,7 +651,7 @@ export const registerRoutes = (app: express.Application, csrfToken: string) => {
         ? eligibility.eligible
           ? `<div class="card">
                <div><strong>Approval gating</strong></div>
-               <div>Rebalance day: ${config.rebalanceDay || 'TUESDAY'} | Window: ${eligibility.window.startISO} → ${eligibility.window.endISO}</div>
+              <div>Rebalance day: ${config.rebalanceDay || 'WEDNESDAY'} | Window: ${eligibility.window.startISO} → ${eligibility.window.endISO}</div>
                ${eligibilityReasons}
                <form method="POST" action="/runs/${runId}/approve">
                   <input type="hidden" name="csrfToken" value="${csrfToken}"/>
@@ -670,7 +662,7 @@ export const registerRoutes = (app: express.Application, csrfToken: string) => {
              </div>`
           : `<div class="card">
                <div><strong>Approval gating</strong></div>
-               <div>Rebalance day: ${config.rebalanceDay || 'TUESDAY'} | Window: ${eligibility.window.startISO} → ${eligibility.window.endISO}</div>
+              <div>Rebalance day: ${config.rebalanceDay || 'WEDNESDAY'} | Window: ${eligibility.window.startISO} → ${eligibility.window.endISO}</div>
                ${eligibilityReasons}
                <form method="POST" action="/runs/${runId}/approve?override=1">
                   <input type="hidden" name="csrfToken" value="${csrfToken}"/>
@@ -739,7 +731,7 @@ export const registerRoutes = (app: express.Application, csrfToken: string) => {
           .send(
             `Approval blocked: ${describeReasons(eligibility.reasons).join(
               '; '
-            )}. Rebalance day is ${config.rebalanceDay || 'TUESDAY'}. To override, resubmit with confirm=APPROVE.`
+            )}. Rebalance day is ${config.rebalanceDay || 'WEDNESDAY'}. To override, resubmit with confirm=APPROVE.`
           );
       }
       appendEvent(

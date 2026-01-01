@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ConsolidatedReportNarrative",
+  "type": "object",
+  "required": ["metadata", "overview", "rounds", "market_assessment", "capital_constraints", "etf_selection", "execution_summary", "options_summary", "risk_and_invariants", "retrospective", "glossary"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["runId", "generatedAtISO", "mode"],
+      "properties": {
+        "runId": { "type": "string" },
+        "generatedAtISO": { "type": "string" },
+        "mode": { "type": "string" }
+      }
+    },
+    "overview": { "type": "string" },
+    "rounds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["roundName", "whatHappened", "whyItMatters", "inputsUsed", "outputsProduced"],
+        "properties": {
+          "roundName": { "type": "string" },
+          "whatHappened": { "type": "string" },
+          "whyItMatters": { "type": "string" },
+          "inputsUsed": { "type": "array", "items": { "type": "string" } },
+          "outputsProduced": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "market_assessment": { "type": "string" },
+    "capital_constraints": { "type": "string" },
+    "etf_selection": { "type": "string" },
+    "execution_summary": { "type": "string" },
+    "options_summary": { "type": "string" },
+    "risk_and_invariants": { "type": "string" },
+    "retrospective": { "type": "string" },
+    "glossary": { "type": "string" }
+  }
+}
+

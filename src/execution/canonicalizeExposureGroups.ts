@@ -11,6 +11,10 @@ interface CanonicalizeInput {
   protectFromSells: boolean;
   protectedSymbols?: string[];
   equity: number;
+  corePoolUsd?: number;
+  deployBudgetUsd?: number;
+  remainingDeployBudgetUsd?: number;
+  spentByBaseRebalanceBuysUsd?: number;
 }
 
 export const planCanonicalization = ({
@@ -22,7 +26,11 @@ export const planCanonicalization = ({
   phase,
   protectFromSells,
   protectedSymbols = [],
-  equity
+  equity,
+  corePoolUsd,
+  deployBudgetUsd,
+  remainingDeployBudgetUsd,
+  spentByBaseRebalanceBuysUsd
 }: CanonicalizeInput) => {
   const flags: Array<{ code: string; severity: 'info' | 'warn'; message: string; observed?: any }> = [];
   const orders: TradeOrder[] = [];
@@ -33,9 +41,13 @@ export const planCanonicalization = ({
 
   const capNotional = (config.canonicalizeMaxNotionalPctPerRun ?? 0.1) * equity;
   let remainingCap = capNotional;
+  const budgetRail = typeof remainingDeployBudgetUsd === 'number' ? remainingDeployBudgetUsd : Infinity;
+  const poolRail = typeof corePoolUsd === 'number' ? corePoolUsd : Infinity;
+  let remainingBudget = Math.min(remainingCap, budgetRail, poolRail);
   const minDrift = config.canonicalizeMinDriftToAct ?? 0.05;
   const onlyIfAffordable = config.canonicalizeOnlyIfAffordable ?? true;
   const protectedSet = new Set(protectedSymbols);
+  let budgetUsedUsd = 0;
 
   const grouped: Record<string, { nonCanonical: Array<{ symbol: string; qty: number }>; canonicalQty: number }> = {};
   for (const h of holdings) {
@@ -56,7 +68,15 @@ export const planCanonicalization = ({
     if (canonicalWeight >= 1 - minDrift) continue;
 
     for (const n of data.nonCanonical) {
-      if (remainingCap <= 0) break;
+      if (remainingBudget <= 0) {
+        flags.push({
+          code: 'CANONICALIZATION_SKIPPED_BUDGET',
+          severity: 'info',
+          message: `Budget exhausted; skipping further canonicalization.`,
+          observed: { exposure: key, remainingBudgetUsd: remainingBudget }
+        });
+        break;
+      }
       const pxSell = prices[n.symbol] || 0;
       const pxBuy = prices[canonical] || 0;
       if (pxSell <= 0 || pxBuy <= 0) continue;
@@ -74,14 +94,31 @@ export const planCanonicalization = ({
       const qtyToSell = Math.min(sellable, maxQtyByCap);
       if (qtyToSell <= 0) continue;
       const proceeds = qtyToSell * pxSell;
-      const qtyToBuy = Math.floor(proceeds / pxBuy);
+      let qtyToBuy = Math.floor(proceeds / pxBuy);
       if (qtyToBuy <= 0) continue;
-      remainingCap -= qtyToSell * pxSell;
+      const buyNotional = qtyToBuy * pxBuy;
+      if (buyNotional > remainingBudget) {
+        qtyToBuy = Math.floor(remainingBudget / pxBuy);
+      }
+      if (qtyToBuy <= 0) {
+        flags.push({
+          code: 'CANONICALIZATION_SKIPPED_BUDGET',
+          severity: 'info',
+          message: `Budget limit reached; cannot buy canonical ${canonical}.`,
+          observed: { exposure: key, remainingBudgetUsd: remainingBudget, stage: 'CANONICALIZE' }
+        });
+        continue;
+      }
+      const adjustedBuyNotional = qtyToBuy * pxBuy;
+      const adjustedSellNotional = qtyToSell * pxSell;
+      remainingCap = Math.max(0, remainingCap - adjustedSellNotional);
+      remainingBudget = Math.max(0, remainingBudget - adjustedBuyNotional);
+      budgetUsedUsd += adjustedBuyNotional;
       orders.push({
         symbol: n.symbol,
         side: 'SELL',
         orderType: 'MARKET',
-        notionalUSD: qtyToSell * pxSell,
+        notionalUSD: adjustedSellNotional,
         thesis: 'Canonicalization sell non-canonical member.',
         invalidation: '',
         confidence: 0.8,
@@ -91,7 +128,7 @@ export const planCanonicalization = ({
         symbol: canonical,
         side: 'BUY',
         orderType: 'MARKET',
-        notionalUSD: qtyToBuy * pxBuy,
+        notionalUSD: adjustedBuyNotional,
         thesis: 'Canonicalization buy preferred member.',
         invalidation: '',
         confidence: 0.8,
@@ -101,7 +138,20 @@ export const planCanonicalization = ({
         code: 'CANONICALIZATION_PLANNED',
         severity: 'info',
         message: `Convert ${n.symbol} -> ${canonical}`,
-        observed: { exposure: key, qtySell: qtyToSell, qtyBuy: qtyToBuy }
+        observed: {
+          exposure: key,
+          qtySell: qtyToSell,
+          qtyBuy: qtyToBuy,
+          stage: 'CANONICALIZE',
+          budgetUsedUsd: budgetUsedUsd,
+          budgetRemainingUsd: remainingBudget,
+          baseAllowedInvestUsd: deployBudgetUsd ?? null,
+          spentByBaseRebalanceBuysUsd: spentByBaseRebalanceBuysUsd ?? null,
+          remainingBaseDeployBudgetUsdBefore: remainingBudget + adjustedBuyNotional,
+          remainingBaseDeployBudgetUsdAfter: remainingBudget,
+          maxSharesByDeployBudget: Math.floor((remainingBudget + adjustedBuyNotional) / pxBuy),
+          buyNotionalUsd: adjustedBuyNotional
+        }
       });
     }
   }

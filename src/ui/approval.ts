@@ -36,7 +36,7 @@ export const computeApprovalEligibility = (
   const now = opts.now ?? new Date();
   const events = opts.events ?? getEvents();
   const status = opts.runStatus ?? getRunStatus(runId);
-  const rebalanceDay = cfg.rebalanceDay || 'TUESDAY';
+  const rebalanceDay = cfg.rebalanceDay || 'WEDNESDAY';
   const window = getCurrentRebalanceWindow(now, rebalanceDay);
   const reasons: string[] = [];
 

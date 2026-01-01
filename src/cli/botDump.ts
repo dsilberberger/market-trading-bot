@@ -32,8 +32,8 @@ const run = async () => {
   const configPath = path.resolve(process.cwd(), 'src/config/default.json');
   const config = loadConfig(configPath);
   const universe = loadUniverse(path.resolve(process.cwd(), config.universeFile));
-  const marketData = getMarketDataProvider();
-  const broker = getBroker(config, marketData);
+  const marketData = getMarketDataProvider(opts.mode as any);
+  const broker = getBroker(config, marketData, opts.mode as any);
 
   const runDir = path.resolve(process.cwd(), 'runs', runId);
   if (!fs.existsSync(runDir)) ensureDir(runDir);

@@ -10,7 +10,14 @@ export const getBroker = (config: BotConfig, marketData: MarketDataProvider, mod
   const provider = (process.env.BROKER_PROVIDER || 'stub').toLowerCase();
   const consumerKey = process.env.ETRADE_CONSUMER_KEY;
   const consumerSecret = process.env.ETRADE_CONSUMER_SECRET;
-  if (provider === 'etrade' && mode === 'live') {
+  const allowLive = process.env.USE_ETRADE_ORDERS === 'true';
+  if (!allowLive) {
+    console.warn('USE_ETRADE_ORDERS not enabled; using stub broker.');
+    return new StubBroker(config, marketData);
+  }
+  const allowLiveInPaper = process.env.USE_LIVE_BROKER_IN_PAPER === 'true' || allowLive;
+  const wantsEtrade = provider === 'etrade' && (mode === 'live' || allowLiveInPaper);
+  if (wantsEtrade) {
     if (!consumerKey || !consumerSecret) {
       console.warn('BROKER_PROVIDER=etrade but E*TRADE keys missing; falling back to stub broker.');
       return new StubBroker(config, marketData);

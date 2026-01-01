@@ -316,7 +316,16 @@ export class ETradeBroker implements Broker {
       const quantityType = 'QUANTITY';
       const impliedPrice =
         preview.quantity > 0 ? preview.estimatedCost / preview.quantity : Math.max(1, order.notionalUSD || 1);
-      const qtyValue = Math.floor((order.notionalUSD ?? preview.estimatedCost) / Math.max(1e-6, impliedPrice));
+      let qtyValue = Math.floor((order.notionalUSD ?? preview.estimatedCost) / Math.max(1e-6, impliedPrice));
+      // Guard against floating-point rounding pulling qtyValue below 1 when notional ~= price
+      if (
+        qtyValue < 1 &&
+        order.notionalUSD !== undefined &&
+        impliedPrice > 0 &&
+        order.notionalUSD + 1e-6 >= impliedPrice
+      ) {
+        qtyValue = 1;
+      }
       if (qtyValue < 1) {
         throw new Error(`Notional ${order.notionalUSD} too small for whole-share order (px ~${impliedPrice})`);
       }
