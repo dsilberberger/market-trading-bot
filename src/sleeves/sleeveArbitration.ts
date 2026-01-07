@@ -18,9 +18,12 @@ export const arbitrateSleeves = (input: SleeveArbitrationInput): SleeveArbitrati
   const equity = regimes?.equityRegime;
   const vol = regimes?.volRegime;
   const severeStress = equity?.label === 'risk_off' || vol?.label === 'stressed';
+  const timeInRegimeWeeks = equity?.supports?.timeInRegimeWeeks ?? 0;
+  const confidence = equity?.confidence ?? 0;
   const robust =
     equity?.label === 'risk_on' &&
-    (equity?.confidence ?? 0) >= 0.6 &&
+    confidence >= 0.6 &&
+    timeInRegimeWeeks >= 2 &&
     vol?.label !== 'stressed';
 
   let insurance = false;
@@ -37,7 +40,11 @@ export const arbitrateSleeves = (input: SleeveArbitrationInput): SleeveArbitrati
   } else if (dislocationActive) {
     reasons.push('Growth convexity disabled: dislocation active');
   } else if (!robust) {
-    reasons.push('Growth convexity disabled: regime not robust');
+    if (equity?.label !== 'risk_on') reasons.push('Growth convexity disabled: equity regime not risk_on');
+    else if (confidence < 0.6) reasons.push('Growth convexity disabled: confidence below 0.6');
+    else if (timeInRegimeWeeks < 2) reasons.push('Growth convexity disabled: time in regime < 2 weeks');
+    else if (vol?.label === 'stressed') reasons.push('Growth convexity disabled: vol stressed');
+    else reasons.push('Growth convexity disabled: regime not robust');
   }
 
   // Mutual exclusivity with priority to insurance

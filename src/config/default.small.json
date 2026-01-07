@@ -133,8 +133,8 @@
     "minHistoryDays": 120,
     "coverageFloorConfidence": 0.55,
     "proxyMap": {
-      "VTI": "ITOT",
-      "VXUS": "IXUS",
+      "VTI": "SPY",
+      "VXUS": "EFA",
       "USMV": "SPLV"
     },
     "timeInRegimeRamp": {
@@ -144,6 +144,7 @@
       "endProgress": 1
     }
   },
+  "insuranceReserveMode": "light",
   "insurance": {
     "spendPct": 0.85,
     "minMonths": 3,

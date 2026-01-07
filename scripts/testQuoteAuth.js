@@ -14,7 +14,8 @@ const { ETradeClient } = require('../src/integrations/etradeClient');
     if (!token) {
       throw new Error('No access token found. Run auth:connect first.');
     }
-    const url = `${(process.env.ETRADE_ENV || 'sandbox').toLowerCase() === 'prod' ? 'https://api.etrade.com' : 'https://apisb.etrade.com'}/v1/market/quote/SPY.json`;
+    const sym = process.env.TEST_QUOTE_SYMBOL || 'VTI';
+    const url = `${(process.env.ETRADE_ENV || 'sandbox').toLowerCase() === 'prod' ? 'https://api.etrade.com' : 'https://apisb.etrade.com'}/v1/market/quote/${sym}.json`;
     const resp = await client.signedFetch(url, 'GET');
     const text = await resp.text();
     console.log('HTTP', resp.status);

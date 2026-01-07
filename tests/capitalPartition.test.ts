@@ -66,7 +66,10 @@ describe('sleeve arbitration', () => {
   });
 
   it('allows growth only when robust and no dislocation', () => {
-    const res = arbitrateSleeves({ dislocationActive: false, regimes: { equityRegime: { label: 'risk_on', confidence: 0.9 }, volRegime: { label: 'low' } } as any });
+    const res = arbitrateSleeves({
+      dislocationActive: false,
+      regimes: { equityRegime: { label: 'risk_on', confidence: 0.9, supports: { timeInRegimeWeeks: 2 } }, volRegime: { label: 'low' } } as any
+    });
     expect(res.allowed.growthConvexity).toBe(true);
     expect(res.allowed.insurance).toBe(false);
   });

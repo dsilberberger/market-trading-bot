@@ -3,13 +3,33 @@ import { hashString, mulberry32 } from '../core/utils';
 
 // Static price anchors for universe + proxies to make stub runs more realistic/repeatable.
 const priceOverrides: Record<string, number> = {
+  // New core universe
+  VTI: 338.81,
+  VXUS: 77.35,
+  VTV: 194.63,
+  USMV: 93.97,
+  SHY: 82.89,
+  IEF: 96.37,
+  TIP: 110.16,
+  ITOT: 150.25,
+  SCHB: 26.5,
+  IXUS: 86.78,
+  SCHV: 30.17,
+  IWD: 214.59,
+  SPLV: 71.3,
+  VGSH: 58.78,
+  SCHO: 24.38,
+  SCHR: 25.115,
+  VGIT: 60.02,
+  SCHP: 26.55,
+  VTIP: 49.5,
+  // Legacy universe (kept for tests/compat)
   SPY: 475,
   QQQ: 405,
   IWM: 195,
   EFA: 75,
   EEM: 40,
   TLT: 95,
-  SHY: 82,
   GLD: 190,
   // Proxies
   SPLG: 50,

@@ -1,0 +1,9 @@
+{
+  "VTI": ["ITOT", "SCHB"],
+  "VXUS": ["IXUS"],
+  "VTV": ["SCHV", "IWD"],
+  "USMV": ["SPLV"],
+  "SHY": ["VGSH", "SCHO", "SHV"],
+  "IEF": ["SCHR", "VGIT"],
+  "TIP": ["SCHP", "VTIP"]
+}

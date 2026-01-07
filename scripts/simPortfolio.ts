@@ -17,6 +17,12 @@ import {
   presetRebalanceChurn,
   presetStressThenRecovery,
   presetStressNormalizeRobustWithInfusion1000,
+  presetGFC2007to2010,
+  presetCovid2020to2022,
+  presetWhipsaw,
+  presetMultiShock,
+  presetSlowGrind,
+  presetSteadyBull,
   ScenarioPreset,
   ScenarioEvent
 } from './scenario';
@@ -39,17 +45,27 @@ interface SimConfig {
   scenario: ScenarioPreset;
   startingCapitalUSD?: number;
   scenarioName?: string;
+  strategy?: 'bot' | 'aggressive_robo';
 }
 
 const defaultConfig: SimConfig = {
   startDate: '2025-01-07',
   weeks: 26,
   scenario: presetDislocationRecovery,
-  scenarioName: presetDislocationRecovery.name || 'DISLOCATION_RECOVERY'
+  scenarioName: presetDislocationRecovery.name || 'DISLOCATION_RECOVERY',
+  strategy: 'bot'
 };
 
-const proxyMap: Record<string, string[]> = { SPY: ['SPYM'], QQQ: ['QQQM'], TLT: ['TLT'] };
-const symbolsOfInterest = ['SPY', 'QQQ', 'TLT', 'SPYM', 'QQQM', 'IWM', 'DIA', 'EFA', 'EEM', 'SHY', 'GLD'];
+const proxyMap: Record<string, string[]> = {
+  VTI: ['ITOT', 'SCHB'],
+  VXUS: ['IXUS'],
+  VTV: ['SCHV', 'IWD'],
+  USMV: ['SPLV'],
+  SHY: ['VGSH', 'SCHO', 'SHV'],
+  IEF: ['SCHR', 'VGIT'],
+  TIP: ['SCHP', 'VTIP']
+};
+const symbolsOfInterest = ['VTI', 'VXUS', 'VTV', 'USMV', 'SHY', 'IEF', 'TIP', 'ITOT', 'SCHB', 'IXUS', 'SCHV', 'IWD', 'SPLV', 'VGSH', 'SCHO', 'SHV', 'SCHR', 'VGIT', 'SCHP', 'VTIP'];
 const contractMultiplier = 100;
 
 const baseConfig: BotConfig = {
@@ -74,7 +90,7 @@ const baseConfig: BotConfig = {
   },
   dislocation: {
     enabled: true,
-    anchorSymbol: 'SPY',
+    anchorSymbol: 'VTI',
     barInterval: '1w',
     minActiveTier: 2,
     fastWindowWeeks: 1,
@@ -117,8 +133,8 @@ const baseConfig: BotConfig = {
   commissionPerTradeUSD: 0,
   useLLM: false,
   requireApproval: false,
-  optionsUnderlyings: ['IWM', 'DIA', 'SPY'],
-  hedgeProxyPolicy: { hedgePreferred: ['IWM', 'SPY'], growthPreferred: ['IWM', 'SPY'] },
+  optionsUnderlyings: ['VTI', 'IEF'],
+  hedgeProxyPolicy: { hedgePreferred: ['VTI', 'IEF'], growthPreferred: ['VTI', 'VTV'] },
   insurance: { spendPct: 0.85, minMonths: 3, maxMonths: 6, minMoneyness: 0.95, maxMoneyness: 1.0, limitPriceBufferPct: 0.05, closeWithinDays: 21, allowExpire: false },
   growth: { spendPct: 0.2, minMonths: 3, maxMonths: 6, minMoneyness: 1.03, maxMoneyness: 1.1, limitPriceBufferPct: 0.05, closeWithinDays: 21, allowExpire: false },
   insuranceReserveMode: 'light',
@@ -139,9 +155,10 @@ interface BaseRegimePolicy {
   policyReason: string;
 }
 const defaultUniversalTargetsForRegime = (regime: BaseRegime): Record<string, number> => {
-  if (regime === 'RISK_OFF') return { SPY: 0.25, QQQ: 0.2, TLT: 0.55 };
-  if (regime === 'RISK_ON') return { SPY: 0.4, QQQ: 0.4, IWM: 0.2 };
-  return { SPY: 0.35, QQQ: 0.35, TLT: 0.3 };
+  if (regime === 'RISK_OFF') return { SHY: 0.25, IEF: 0.4, TIP: 0.35 };
+  if (regime === 'RISK_ON') return { VTI: 0.6, VTV: 0.25, VXUS: 0.15 };
+  // Neutral: tilt slightly more to growth/core, slightly less to defensive equity
+  return { VTI: 0.45, VXUS: 0.3, USMV: 0.25 };
 };
 
 const mapExposureCap = (equityConfidence: number): number => {
@@ -204,7 +221,6 @@ const computeDynamicTargetsFromRegimes = (
   const ranking: TargetScore[] = [];
   Object.entries(historyBySymbol).forEach(([symbol, history]) => {
     // Avoid counting proxy duplicates as separate universal targets; proxies are applied later.
-    if (symbol === 'SPYM' || symbol === 'QQQM') return;
     if (!history || history.length < 2) return;
     const span = history.slice(-Math.max(2, Math.min(targetLookbackWeeks, history.length)));
     const first = span[0]?.close;
@@ -418,39 +434,6 @@ const scenarioPrices = (anchor: PricePoint, scenario: ScenarioPreset, weeks: str
       const price = +(p0 * (1 + ret)).toFixed(2);
       prices[sym] = { price, source: 'SYNTHETIC' };
     });
-    // proxies track parents with small noise
-    ['SPYM', 'QQQM'].forEach((sym) => {
-      if (!prices[sym]) {
-        const parent = sym === 'SPYM' ? prices.SPY : prices.QQQ;
-        const noise = 0.005;
-        prices[sym] = { price: +(parent.price * (1 + noise)).toFixed(2), source: 'SYNTHETIC_FALLBACK' };
-      }
-    });
-    ['IWM', 'DIA'].forEach((sym) => {
-      if (!prices[sym]) {
-        const base = prices.SPY || { price: 100 };
-        prices[sym] = { price: +(base.price * 0.9).toFixed(2), source: 'SYNTHETIC_FALLBACK' };
-      }
-    });
-    ['EFA', 'EEM'].forEach((sym) => {
-      if (!prices[sym]) {
-        const base = prices.SPY || { price: 100 };
-        const adj = sym === 'EFA' ? 0.85 : 0.8;
-        prices[sym] = { price: +(base.price * adj).toFixed(2), source: 'SYNTHETIC_FALLBACK' };
-      }
-    });
-    ['SHY'].forEach((sym) => {
-      if (!prices[sym]) {
-        const base = prices.TLT || { price: 85 };
-        prices[sym] = { price: +(base.price * 0.65).toFixed(2), source: 'SYNTHETIC_FALLBACK' };
-      }
-    });
-    ['GLD'].forEach((sym) => {
-      if (!prices[sym]) {
-        const base = prices.SPY || { price: 100 };
-        prices[sym] = { price: +(base.price * 1.8).toFixed(2), source: 'SYNTHETIC_FALLBACK' };
-      }
-    });
     out.push({ date: weeks[i], prices });
   }
   return out;
@@ -458,26 +441,31 @@ const scenarioPrices = (anchor: PricePoint, scenario: ScenarioPreset, weeks: str
 
 const week1QuoteProbe = async (asOf: string, syms: string[]) => {
   const probe: any = {};
-  const requested: string[] = [...syms, 'SPYM', 'QQQM', 'IWM', 'DIA'];
+  const seedMap: Record<string, number> = {
+    VTI: 100,
+    ITOT: 98,
+    SCHB: 97,
+    VXUS: 60,
+    IXUS: 59,
+    VTV: 80,
+    SCHV: 78,
+    IWD: 82,
+    USMV: 70,
+    SPLV: 68,
+    SHY: 50,
+    VGSH: 50,
+    SCHO: 49,
+    SHV: 49,
+    IEF: 85,
+    SCHR: 84,
+    VGIT: 83,
+    TIP: 105,
+    SCHP: 104,
+    VTIP: 102
+  };
+  const requested: string[] = [...new Set([...syms, ...Object.keys(seedMap)])];
   const fetchQuote = (sym: string) => {
-    const seed =
-      sym === 'QQQ'
-        ? 110
-        : sym === 'TLT'
-        ? 85
-        : sym === 'IWM' || sym === 'DIA'
-        ? 95
-        : sym === 'QQQM' || sym === 'SPYM'
-        ? 45
-        : sym === 'EFA'
-        ? 80
-        : sym === 'EEM'
-        ? 75
-        : sym === 'SHY'
-        ? 50
-        : sym === 'GLD'
-        ? 180
-        : 100;
+    const seed = seedMap[sym] ?? 90;
     return {
       fieldUsed: 'last',
       valueUsed: seed,
@@ -491,27 +479,11 @@ const week1QuoteProbe = async (asOf: string, syms: string[]) => {
   requested.forEach((s) => {
     probe[s] = fetchQuote(s);
   });
-  // If any are missing/errored, derive proxies only
-  ['SPYM', 'QQQM'].forEach((s) => {
-    if (!probe[s] || probe[s].status === 'NOT_FOUND') {
-      const parent = s === 'SPYM' ? probe.SPY : probe.QQQ;
-      if (parent) {
-        probe[s] = {
-          ...parent,
-          valueUsed: +(parent.valueUsed * 0.4).toFixed(2),
-          source: 'DERIVED',
-          derivedFrom: s === 'SPYM' ? 'SPY' : 'QQQ',
-          quoteQuality: 'FALLBACK',
-          reason: 'proxy quote missing'
-        };
-      }
-    }
-  });
   return { probe, requestSymbols: requested };
 };
 
 const buildWeek1Prices = async (asOf: string): Promise<PricePoint & { probe: any; priceSourceDetail: Record<string, any>; requestSymbols: string[] }> => {
-  const { probe, requestSymbols } = await week1QuoteProbe(asOf, ['SPY', 'QQQ', 'TLT', 'EFA', 'EEM', 'SHY', 'GLD']);
+  const { probe, requestSymbols } = await week1QuoteProbe(asOf, ['VTI', 'VXUS', 'VTV', 'USMV', 'SHY', 'IEF', 'TIP']);
   const prices: Record<string, { price: number; source: PriceSource }> = {};
   const priceSourceDetail: Record<string, any> = {};
   Object.entries(probe).forEach(([sym, q]: any) => {
@@ -555,7 +527,13 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
     DISLOCATION_RECOVERY: presetDislocationRecovery,
     REBALANCE_CHURN: presetRebalanceChurn,
     STRESS_THEN_RECOVERY: presetStressThenRecovery,
-    STRESS_NORMALIZE_ROBUST_WITH_INFUSION_1000: presetStressNormalizeRobustWithInfusion1000
+    STRESS_NORMALIZE_ROBUST_WITH_INFUSION_1000: presetStressNormalizeRobustWithInfusion1000,
+    GFC_2007_2010: presetGFC2007to2010,
+    COVID_2020_2022: presetCovid2020to2022,
+    WHIPSAW_SIDEWAYS: presetWhipsaw,
+    MULTI_SHOCK: presetMultiShock,
+    SLOW_GRIND_DOWN: presetSlowGrind,
+    STEADY_BULL: presetSteadyBull
   };
   const scenarioKey = cfg.scenarioName || cfg.scenario?.name || (simCfg as any)?.scenario?.name;
   let scenarioToUse: ScenarioPreset = presetDislocationRecovery;
@@ -586,13 +564,13 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
     migrationBlocked: {}
   };
 
-    const spyHistory: { date: string; close: number }[] = [];
+    const vtiHistory: { date: string; close: number }[] = [];
     const results: any[] = [];
     const historyBySymbol: Record<string, PriceBar[]> = {};
 
   for (let idx = 0; idx < synthetic.length; idx++) {
     const week = synthetic[idx];
-    const priceSource: PriceSource = idx === 0 ? 'ETRADE_REAL' : week.prices.SPY?.source || 'SYNTHETIC';
+    const priceSource: PriceSource = idx === 0 ? 'ETRADE_REAL' : week.prices.VTI?.source || 'SYNTHETIC';
     const priorCash = state.portfolio.cash;
 
     // pricesUsed map
@@ -601,7 +579,7 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
       const p = week.prices[s]?.price;
       if (Number.isFinite(p)) pricesUsed[s] = p;
     });
-    spyHistory.push({ date: week.date, close: pricesUsed.SPY });
+    if (Number.isFinite(pricesUsed.VTI)) vtiHistory.push({ date: week.date, close: pricesUsed.VTI });
     const symbolsForFeatures = Array.from(new Set([...Object.keys(pricesUsed), ...symbolsOfInterest]));
     symbolsForFeatures.forEach((sym) => {
       const close = week.prices[sym]?.price ?? pricesUsed[sym];
@@ -638,8 +616,8 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
       infusionApplied = true;
     }
 
-    // Dislocation detection (uses SPY history)
-    const history = { SPY: spyHistory.map((p) => ({ date: p.date, close: p.close })) };
+    // Dislocation detection (uses VTI history)
+    const history = { VTI: vtiHistory.map((p) => ({ date: p.date, close: p.close })) };
     const dislocation = detectDislocation(week.date, baseConfig, history as any, pricesUsed);
     // Scenario override to force tier path for growth test preset
     if (scenarioToUse.name === 'STRESS_NORMALIZE_ROBUST_WITH_INFUSION_1000') {
@@ -737,11 +715,17 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
 
     // Scenario events: cash infusions
 
-    // Universal targets from strategy signals (momentum + regime tilts)
-    const targetResult = computeDynamicTargetsFromRegimes(historyBySymbol, regimesRes.regimes, baseConfig.maxPositions);
-    let universalTargets = targetResult.universalTargets;
-    if (Object.keys(universalTargets).length === 0) {
-      universalTargets = defaultUniversalTargetsForRegime(baseRegime);
+    // Universal targets from strategy signals (momentum + regime tilts) or aggressive robo override
+    let universalTargets: Record<string, number>;
+    let targetResult: any = undefined;
+    if (cfg.strategy === 'aggressive_robo') {
+      universalTargets = { VTI: 0.6, VXUS: 0.25, USMV: 0.15 };
+    } else {
+      targetResult = computeDynamicTargetsFromRegimes(historyBySymbol, regimesRes.regimes, baseConfig.maxPositions);
+      universalTargets = targetResult.universalTargets;
+      if (Object.keys(universalTargets).length === 0) {
+        universalTargets = defaultUniversalTargetsForRegime(baseRegime);
+      }
     }
     const { executedTargets: proxyTargets, executionMapping, diagnostics: mappingDiagnostics } = mapUniversalTargets(
       universalTargets,
@@ -1097,7 +1081,7 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
       const allowedNew = Math.max(0, Math.min(plannedCumulative - dislocationMV, remainingEtfCapacityUSD));
       const overlayBudgetUSD = allowedNew;
       if (overlayBudgetUSD > 0) {
-        const overlayUniversalTargets: Record<string, number> = { SPY: 0.7, QQQ: 0.3 };
+        const overlayUniversalTargets: Record<string, number> = { VTI: 0.7, VTV: 0.3 };
         const overlayMappingRes = mapUniversalTargets(overlayUniversalTargets, pricesUsed, overlayBudgetUSD, proxyMap);
         const overlayExecEntries = Object.entries(overlayMappingRes.executedTargets || {});
         const overlayPlan =
@@ -1258,7 +1242,7 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
       const markRes = closeOption('insurance', 'insurance_close');
       insuranceRes = { action: 'CLOSE', spend: -markRes.mark, mark: 0, markPerShare: markRes.markPerShare, position: null, weeksToExpiry: markRes.weeksToExpiry };
     } else if (insuranceOpenWindow) {
-      const underlying = baseConfig.optionsUnderlyings?.[0] || 'IWM';
+      const underlying = baseConfig.optionsUnderlyings?.[0] || 'VTI';
       const uPrice = pricesUsed[underlying] || 0;
       const premiumPerShare = uPrice * 0.005 * volProxy;
       const costPerContract = premiumPerShare * contractMultiplier;
@@ -1337,7 +1321,7 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
       const markRes = closeOption('growth', 'growth_close');
       growthRes = { action: 'CLOSE', spend: -markRes.mark, mark: 0, markPerShare: markRes.markPerShare, position: null, weeksToExpiry: markRes.weeksToExpiry };
     } else if (growthOpenWindow) {
-      const underlying = baseConfig.hedgeProxyPolicy?.growthPreferred?.[0] || baseConfig.optionsUnderlyings?.[0] || 'IWM';
+      const underlying = baseConfig.hedgeProxyPolicy?.growthPreferred?.[0] || baseConfig.optionsUnderlyings?.[0] || 'VTI';
       const uPrice = pricesUsed[underlying] || 0;
       const premiumPerShare = uPrice * 0.02 * volProxy;
       const costPerContract = premiumPerShare * contractMultiplier;
@@ -1563,7 +1547,7 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}) => {
         baseExposureCapPct: baseRegimePolicy.baseExposureCapPct
       },
       universalTargets,
-      targetRanking: targetResult.ranking,
+      targetRanking: (typeof targetResult !== 'undefined' && targetResult?.ranking) || {},
       proxyTargets,
       executionMapping,
       currentProxyWeights,

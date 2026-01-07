@@ -470,8 +470,8 @@ export const runSimulation = async (simCfg: Partial<SimConfig> = {}): Promise<We
         tierEngaged: dislocation.tierEngaged,
         tier: dislocation.tier,
         peak: dislocation.metrics.peakDrawdownPct,
-        fast: dislocation.metrics.spyDrawdownFastPct,
-        slow: dislocation.metrics.spyDrawdownSlowPct
+        fast: dislocation.metrics.anchorDrawdownFastPct,
+        slow: dislocation.metrics.anchorDrawdownSlowPct
       });
       console.log(
         'Controls:',

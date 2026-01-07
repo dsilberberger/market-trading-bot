@@ -198,7 +198,7 @@ describe('simPortfolio harness invariants', () => {
     expect(riskOnWeek?.proxyTargets && Object.keys(riskOnWeek.proxyTargets).length).toBeGreaterThan(0);
 
     const regimeSwapScenario = {
-      baseReturns: { SPY: 0.015, QQQ: 0.018, TLT: 0, SPYM: 0.015, QQQM: 0.018, IWM: 0.02 },
+      baseReturns: { VTI: 0.015, VXUS: 0.018, VTV: 0, USMV: 0.012, SHY: 0, IEF: 0, TIP: 0 },
       events: [
         { weekIndex: 0 },
         { weekIndex: 8, cashInfusionUSD: 500 }
@@ -207,9 +207,14 @@ describe('simPortfolio harness invariants', () => {
     };
     const res = await runSimulation({ scenario: regimeSwapScenario as any, scenarioName: regimeSwapScenario.name, weeks: 16 });
     const riskOn = res.find((w) => w.baseRegime === 'RISK_ON');
-    expect(riskOn?.proxyTargets?.IWM).toBeGreaterThan(0);
-    const buys = riskOn?.orders.filter((o: any) => o.side === 'BUY' && o.sleeve === 'base') || [];
-    expect(buys.some((o: any) => o.symbol === 'IWM') || (riskOn?.proxyTargets?.IWM ?? 0) > 0).toBe(true);
+    const targetSym = riskOn ? Object.keys(riskOn.proxyTargets || {})[0] : undefined;
+    expect(targetSym).toBeDefined();
+    if (riskOn && targetSym) {
+      const weight = (riskOn.proxyTargets as any)[targetSym];
+      expect(weight).toBeGreaterThan(0);
+      const buys = riskOn.orders.filter((o: any) => o.side === 'BUY' && o.sleeve === 'base') || [];
+      expect(buys.some((o: any) => o.symbol === targetSym) || weight > 0).toBe(true);
+    }
   });
 
   it('keeps options spend contained to reserve and updates reserveUsed on open/close', () => {
@@ -346,7 +351,7 @@ describe('simPortfolio harness invariants', () => {
         w.dislocation.phase === 'ADD' &&
         (w.overlayOrders || []).some((o: any) => o.side === 'BUY')
     );
-    const allowedOverlaySymbols = new Set(['SPYM', 'QQQM', 'SPY', 'QQQ']);
+    const allowedOverlaySymbols = new Set(['VTI', 'VTV', 'USMV', 'ITOT', 'SCHB', 'SCHV', 'IWD', 'SPLV']);
     addWeeks.forEach((w) => {
       expect(w.dislocationAllocationDiagnostics).toBeDefined();
       const diag = w.dislocationAllocationDiagnostics || {};
@@ -376,7 +381,7 @@ describe('simPortfolio harness invariants', () => {
 
   it('falls back to proxies when universals are unaffordable and marks unmapped when neither is affordable', async () => {
     const skewedScenario = {
-      baseReturns: { SPY: 0.2, SPYM: 0.2, QQQ: -0.2, QQQM: -0.2, TLT: -0.15, IWM: -0.15, EFA: -0.15, EEM: -0.15, SHY: -0.05, GLD: -0.05 },
+      baseReturns: { VTI: 0.2, VXUS: -0.2, VTV: -0.15, USMV: -0.15, SHY: -0.05, IEF: -0.05, TIP: -0.05 },
       events: [{ weekIndex: 0 }],
       name: 'MOMENTUM_SPY_ONLY'
     };
@@ -386,9 +391,7 @@ describe('simPortfolio harness invariants', () => {
       weeks: 6,
       startingCapitalUSD: 300
     });
-    const proxyWeek = proxyRun.find((w: any) =>
-      (w.executionMapping || []).some((m: any) => m.universalSymbol === 'SPY' && m.reason === 'proxy' && m.executedSymbol === 'SPYM')
-    );
+    const proxyWeek = proxyRun.find((w: any) => (w.executionMapping || []).some((m: any) => m.reason === 'proxy'));
     expect(proxyWeek).toBeDefined();
     if (proxyWeek) {
       expect(proxyWeek.mappingDiagnostics.executedSumNormalized).toBeCloseTo(1, 4);
@@ -400,12 +403,10 @@ describe('simPortfolio harness invariants', () => {
       weeks: 6,
       startingCapitalUSD: 40
     });
-    const unmappedWeek = unmappedRun.find((w: any) =>
-      (w.executionMapping || []).some((m: any) => m.universalSymbol === 'SPY' && m.reason === 'too_expensive')
-    );
+    const unmappedWeek = unmappedRun.find((w: any) => (w.executionMapping || []).some((m: any) => m.reason === 'too_expensive'));
     expect(unmappedWeek).toBeDefined();
     if (unmappedWeek) {
-      expect(unmappedWeek.mappingDiagnostics.unmappedUniversals).toContain('SPY');
+      expect((unmappedWeek.mappingDiagnostics.unmappedUniversals || []).length).toBeGreaterThan(0);
       expect(unmappedWeek.proxyTargets && sumWeights(unmappedWeek.proxyTargets)).toBe(0);
     }
   });
@@ -442,14 +443,8 @@ describe('simPortfolio harness invariants', () => {
 
   it('does not accumulate both universal and proxy holdings for the same exposure', async () => {
     const week1 = defaultRun[0];
-    expect(week1.executionMapping).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ universalSymbol: 'SPY', executedSymbol: 'SPY', reason: 'direct' })
-      ])
-    );
-    const week1Orders = (week1.orders || []).filter((o: any) => o.side === 'BUY' && o.sleeve === 'base');
-    expect(week1Orders.some((o: any) => o.symbol === 'SPY')).toBe(true);
-    expect(week1Orders.some((o: any) => o.symbol === 'SPYM')).toBe(false);
+    expect(week1.executionMapping.length).toBeGreaterThan(0);
+    expect(week1.executionMapping.every((m: any) => m.reason === 'direct' && m.universalSymbol === m.executedSymbol)).toBe(true);
     // ensure no churn (BUY+SELL same symbol/sleeve in same week)
     defaultRun.forEach((w) => {
       const byKey: Record<string, { buy: number; sell: number }> = {};

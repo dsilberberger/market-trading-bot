@@ -10,7 +10,7 @@ const { ETradeClient } = require('../src/integrations/etradeClient');
       callbackUrl: process.env.ETRADE_CALLBACK_URL,
       tokenStorePath: process.env.ETRADE_TOKEN_STORE || process.env.TOKEN_STORE_PATH
     });
-    const q = await c.getQuote('SPY');
+    const q = await c.getQuote(process.env.TEST_QUOTE_SYMBOL || 'VTI');
     console.log('quote OK', q);
   } catch (err) {
     console.error('quote failed', (err && err.message) || err);

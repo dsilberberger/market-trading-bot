@@ -2,6 +2,7 @@
 import { performance } from 'perf_hooks';
 import { getMarketDataProvider, StubMarketDataProvider } from '../src/data/marketData';
 import { Mode } from '../src/core/types';
+import { loadConfig, loadUniverse } from '../src/core/utils';
 
 type QuoteResult = {
   ok: boolean;
@@ -30,7 +31,22 @@ type HealthcheckMode = Mode | 'harness';
 const fetchQuotesStub = async (symbols: string[]) => {
   const out: Record<string, { status: 'FOUND' | 'NOT_FOUND'; last?: number }> = {};
   symbols.forEach((s) => {
-    const seed = s === 'QQQ' ? 110 : s === 'TLT' ? 85 : s === 'IWM' || s === 'DIA' ? 95 : s === 'QQQM' || s === 'SPYM' ? 45 : 100;
+    const seed =
+      s === 'VTI'
+        ? 338
+        : s === 'VXUS'
+        ? 77
+        : s === 'VTV'
+        ? 195
+        : s === 'USMV'
+        ? 94
+        : s === 'SHY'
+        ? 83
+        : s === 'IEF'
+        ? 96
+        : s === 'TIP'
+        ? 110
+        : 100;
     out[s] = { status: 'FOUND', last: seed };
   });
   return out;
@@ -62,14 +78,18 @@ export const marketDataHealthcheck = async (
       usedStub = true;
       ok = Object.values(perSymbol).some((v) => v.status === 'FOUND');
     } else {
-      const provider = getMarketDataProvider(mode === 'live' ? 'live' : 'paper');
+      // Honor explicit provider selection; default to real provider in paper/live.
+      const providerOverride = (process.env.MARKET_DATA_PROVIDER || '').toLowerCase();
+      const providerMode = mode === 'live' ? 'live' : 'paper';
+      const provider =
+        providerOverride === 'etrade'
+          ? getMarketDataProvider(providerMode as any)
+          : getMarketDataProvider(providerMode as any);
       const isStubProvider = provider instanceof StubMarketDataProvider;
       providerName = isStubProvider ? 'STUB' : 'ETRADE_QUOTE_API';
       usedStub = isStubProvider;
       if (isStubProvider) {
         errors.push('market data provider is stubbed in live/paper; refusing to pass healthcheck');
-      }
-      if (isStubProvider) {
         symbols.forEach((sym) => {
           perSymbol[sym] = {
             status: 'NOT_FOUND',
@@ -106,6 +126,20 @@ export const marketDataHealthcheck = async (
 };
 
 if (require.main === module) {
-  const symbols = ['SPY', 'QQQ', 'TLT', 'SPYM', 'QQQM', 'IWM', 'DIA'];
-  marketDataHealthcheck(symbols).then((res) => console.log(JSON.stringify(res, null, 2)));
+  // Load universe from config if available; fallback to legacy list.
+  let symbols: string[] = [];
+  let mode = (process.env.MODE || 'paper') as HealthcheckMode;
+  try {
+    const cfgPath = process.env.BOT_CONFIG_PATH || 'src/config/default.json';
+    const cfg = loadConfig(cfgPath);
+    const uniPath = cfg.universeFile || 'src/config/universe.json';
+    symbols = loadUniverse(uniPath);
+    // If explicit provider is set to etrade, force mode paper to use it.
+    if ((process.env.MARKET_DATA_PROVIDER || '').toLowerCase() === 'etrade') {
+      mode = 'paper';
+    }
+  } catch {
+    symbols = ['SPY', 'QQQ', 'TLT', 'SPYM', 'QQQM', 'IWM', 'DIA'];
+  }
+  marketDataHealthcheck(symbols, mode).then((res) => console.log(JSON.stringify(res, null, 2)));
 }

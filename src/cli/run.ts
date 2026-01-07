@@ -111,7 +111,9 @@ export const runBot = async (options: RunOptions) => {
     return;
   }
 
-  const configPath = path.resolve(process.cwd(), 'src/config/default.json');
+  const configPath = process.env.BOT_CONFIG_PATH
+    ? path.resolve(process.cwd(), process.env.BOT_CONFIG_PATH)
+    : path.resolve(process.cwd(), 'src/config/default.json');
   const config: BotConfig = loadConfig(configPath);
   const rebalanceDay = config.rebalanceDay?.toUpperCase?.() ?? 'WEDNESDAY';
   if (config.cadence === 'weekly' && !forceRun) {
@@ -177,6 +179,12 @@ export const runBot = async (options: RunOptions) => {
   const optionPositionsArtifact = readArtifact<{ positions?: any[] }>('optionPositions.json', { positions: [] });
   const optionMarksArtifact = readArtifact<{ marks?: any[] }>('optionMarks.json', { marks: [] });
   const regimesArtifact = readArtifact<any>('regimes.json', {});
+  const dataAdequacy = readArtifact<{ adequate?: boolean; observed?: any }>('dataAdequacy.json', { adequate: true });
+  if (!dataAdequacy.adequate) {
+    console.error('RUN_ABORTED: insufficient market history (data adequacy failed).');
+    appendEvent(makeEvent(runId, 'RUN_FAILED', { reason: 'INSUFFICIENT_HISTORY', observed: dataAdequacy.observed }));
+    return;
+  }
   const { deployPct: coreDeployPct, confidenceScale } = computeCoreDeployPct(regimesArtifact, config);
   const deployBudgetUsd = corePoolUsd * coreDeployPct;
   writeRunArtifact(runId, 'capital_budgets.json', {
@@ -375,6 +383,9 @@ export const runBot = async (options: RunOptions) => {
     });
   });
 
+  const eqRegime = (llmContext as any)?.regimes?.equityRegime;
+  const timeInRegimeWeeks = eqRegime?.supports?.timeInRegimeWeeks ?? 0;
+  const allowRemainder = eqRegime?.label === 'risk_on' && timeInRegimeWeeks >= 1;
   const planner = planWholeShareExecution({
     targets: proposal.intent.orders.map((o) => ({ symbol: o.symbol, notionalUSD: o.notionalUSD, priority: o.confidence })),
     prices: quotes,
@@ -386,7 +397,8 @@ export const runBot = async (options: RunOptions) => {
     proxyMap: proxiesMap,
     allowProxies: config.allowExecutionProxies,
     maxProxyTrackingErrorAbs: config.maxProxyTrackingErrorAbs,
-    exposureGroups
+    exposureGroups,
+    allowRemainder
   });
   writeRunArtifact(runId, 'execution_plan.json', planner);
   writeRunArtifact(runId, 'execution_substitutions.json', planner.substitutions || []);
@@ -677,6 +689,31 @@ export const runBot = async (options: RunOptions) => {
 
   // Combine rebalance orders with dislocation incremental buys
   proposal.intent.orders = [...rebalanceOrdersEnriched, ...dislocationExtraOrders];
+
+  // Enforce maxTradesPerRun deterministically by trimming lowest-notional orders if needed.
+  if (config.maxTradesPerRun && proposal.intent.orders.length > config.maxTradesPerRun) {
+    const sorted = [...proposal.intent.orders].sort((a, b) => {
+      const aNotional = Math.abs(a.notionalUSD || 0);
+      const bNotional = Math.abs(b.notionalUSD || 0);
+      if (bNotional !== aNotional) return bNotional - aNotional;
+      if (a.side !== b.side) return a.side === 'BUY' ? -1 : 1;
+      return String(a.symbol || '').localeCompare(String(b.symbol || ''));
+    });
+    const kept = sorted.slice(0, config.maxTradesPerRun);
+    const dropped = sorted.slice(config.maxTradesPerRun);
+    proposal.intent.orders = kept;
+    const existingFlags =
+      (fs.existsSync(path.join(runDir, 'round5_flags.json'))
+        ? JSON.parse(fs.readFileSync(path.join(runDir, 'round5_flags.json'), 'utf-8'))
+        : []) || [];
+    existingFlags.push({
+      code: 'TRADES_TRUNCATED_MAX',
+      severity: 'warn',
+      message: `Trimmed orders to maxTradesPerRun=${config.maxTradesPerRun}; dropped ${dropped.length} lower-notional orders`,
+      observed: { maxTradesPerRun: config.maxTradesPerRun, droppedSymbols: dropped.map((d) => d.symbol) }
+    });
+    writeRunArtifact(runId, 'round5_flags.json', existingFlags);
+  }
 
   // Sleeve arbitration (for future options sleeves)
   const sleeves = arbitrateSleeves({

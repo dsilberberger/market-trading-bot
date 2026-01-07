@@ -4,7 +4,7 @@ Production-minded ETF allocator with append-only ledger, deterministic stubs, an
 
 ## Key constraints
 - Time-based runs (pass `--asof YYYY-MM-DD` for EOD or `YYYY-MM-DDTHH:mm` for intra-day; default cadence weekly)
-- ETFs only (default universe: SPY, QQQ, IWM, EFA, EEM, TLT, SHY, GLD)
+- ETFs only (default universe: VTI, VXUS, VTV, USMV, SHY, IEF, TIP)
 - Max 4 positions (configurable to 3 or 4), long-only, no margin/options
 - Starting capital: $250
 - Orders capped by max position %, max trades/run, min cash buffer, and weekly drawdown gate

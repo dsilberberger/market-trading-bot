@@ -64,6 +64,8 @@ const main = () => {
   const ranking = execPlan?.targetWeights || regimes?.targetRanking;
   const dataSources = get('data_sources.json');
   const exposureGroups = loadExposureGroups();
+  const confidenceDiagnostics = get('confidence_diagnostics.json');
+  const dataAdequacy = get('dataAdequacy.json');
 
   const plannedOrders = execPlan?.orders || [];
   const plannedNotional = sumNotional(plannedOrders);
@@ -98,6 +100,7 @@ const main = () => {
       achievedNotionalUSD: executedNotional,
       leftoverCashUSD: execPlan?.leftoverCashUSD ?? budgetEnforcement?.etf?.coreRemainingUsd ?? null,
       substitutions: execSubs?.substitutions || execPlan?.substitutions || [],
+      targetWeights: execPlan?.targetWeights || null,
       budgetEnforcement,
       executionFlags: executionFlags || []
     },
@@ -112,6 +115,8 @@ const main = () => {
       memo: marketMemo || null,
       news: news || null
     },
+    confidenceDiagnostics: confidenceDiagnostics || null,
+    dataAdequacy: dataAdequacy || null,
     ranking: ranking || [],
     exposures: exposureGroups || null,
     notes: []

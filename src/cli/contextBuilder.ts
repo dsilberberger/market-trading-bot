@@ -22,6 +22,7 @@ import { computeNav } from '../core/capital';
 import { writeRunArtifact } from '../ledger/storage';
 import { getFredClient } from '../macro';
 import { getFinnhubClient } from '../data/finnhubClient';
+import { calibrateEquityConfidence } from '../strategy/confidenceCalibrator';
 
 const safeLoadJson = <T>(filePath: string | undefined, fallback: T): T => {
   if (!filePath) return fallback;
@@ -124,6 +125,27 @@ const bucketize = (pct?: number): 'low' | 'mid' | 'high' | 'unknown' => {
   if (pct === undefined || pct === null || Number.isNaN(pct)) return 'unknown';
   if (pct < 0.33) return 'low';
   if (pct > 0.66) return 'high';
+  return 'mid';
+};
+
+const bucketizeWithHysteresis = (
+  pct: number | undefined | null,
+  previous?: 'low' | 'mid' | 'high' | 'unknown'
+): 'low' | 'mid' | 'high' | 'unknown' => {
+  if (pct === undefined || pct === null || Number.isNaN(pct)) return 'unknown';
+  // Two-threshold hysteresis for high: enter >0.7, exit only when <0.6
+  if (previous === 'high') {
+    if (pct < 0.6) return pct < 0.33 ? 'low' : 'mid';
+    return 'high';
+  }
+  if (previous === 'low') {
+    if (pct > 0.4 && pct < 0.66) return 'mid';
+    if (pct > 0.66) return 'high';
+    return 'low';
+  }
+  // Neutral/mid/unknown previous
+  if (pct > 0.7) return 'high';
+  if (pct < 0.33) return 'low';
   return 'mid';
 };
 
@@ -284,6 +306,20 @@ const evaluateRound0 = (
   return { flags, diagnostics, summary: { symbols: diagnostics, macroLatest: macroLagResult.macroLatest, macroLagDays: macroLagResult.macroLagDays } };
 };
 
+const rollingMetricSeries = (
+  bars: PriceBar[],
+  window: number,
+  fn: (series: PriceBar[], window: number) => number | undefined
+): number[] => {
+  const out: number[] = [];
+  for (let i = window; i <= bars.length; i++) {
+    const slice = bars.slice(0, i);
+    const v = fn(slice, window);
+    if (v !== undefined && !Number.isNaN(v)) out.push(v);
+  }
+  return out;
+};
+
 export const buildFeatures = (
   universe: string[],
   quotes: Record<string, number>,
@@ -291,8 +327,6 @@ export const buildFeatures = (
   flags: DataQualityFlag[]
 ): SymbolFeature[] => {
   const features: SymbolFeature[] = [];
-  const volSet: number[] = [];
-  const ret60Set: number[] = [];
   const firstWithHistory = universe.find((s) => (history[s] || []).length > 1);
   const medianGap = firstWithHistory ? medianGapDays(history[firstWithHistory]) : undefined;
   const isWeekly = medianGap !== undefined && medianGap >= 5;
@@ -308,7 +342,7 @@ export const buildFeatures = (
   const win5 = isWeekly ? 1 : 5; // 1 bar ~ 1w
   const win20 = isWeekly ? 4 : 20; // ~1 month
   const win60 = isWeekly ? 12 : 60; // ~3 months
-  const volWindow = isWeekly ? 8 : 20; // ~8w vs 20d
+  const volWindow = isWeekly ? 26 : 20; // smoother weekly vol (~6 months) vs 20d daily
   const ma50Bars = isWeekly ? 10 : 50;
   const ma200Bars = isWeekly ? 40 : 200;
   const featureWarn = isWeekly ? 24 : 120;
@@ -327,6 +361,8 @@ export const buildFeatures = (
     const ma50 = movingAverage(bars, ma50Bars);
     const ma200 = movingAverage(bars, ma200Bars);
     const price = quotes[symbol] ?? 0;
+    const ret60Series = rollingMetricSeries(bars, win60, computeReturn);
+    const volSeries = rollingMetricSeries(bars, volWindow, computeVol);
     const feature: SymbolFeature = {
       symbol,
       price,
@@ -346,8 +382,6 @@ export const buildFeatures = (
       historyUniqueCloses: uniqueCloses
     };
     features.push(feature);
-    if (vol20 !== undefined) volSet.push(vol20);
-    if (ret60 !== undefined) ret60Set.push(ret60);
     if (samples < featureBlock) {
       flags.push({
         code: 'INSUFFICIENT_HISTORY_FOR_FEATURES',
@@ -379,10 +413,16 @@ export const buildFeatures = (
     }
   }
   for (const f of features) {
-    f.return60dPctile = ret60Set.length >= 2 ? percentile(f.return60d, ret60Set) : null as any;
-    f.vol20dPctile = volSet.length >= 2 ? percentile(f.realizedVol20d, volSet) : null as any;
+    const bars = history[f.symbol] || [];
+    const isWeekly = f.barInterval === '1w';
+    const win60 = isWeekly ? 12 : 60;
+    const volWindow = isWeekly ? 8 : 20;
+    const retSeries = rollingMetricSeries(bars, win60, computeReturn);
+    const volSeries = rollingMetricSeries(bars, volWindow, computeVol);
+    f.return60dPctile = retSeries.length >= 1 ? percentile(f.return60d, retSeries) : (null as any);
+    f.vol20dPctile = volSeries.length >= 1 ? percentile(f.realizedVol20d, volSeries) : (null as any);
     f.return60dPctileBucket = bucketize(f.return60dPctile ?? undefined);
-    f.vol20dPctileBucket = bucketize(f.vol20dPctile ?? undefined);
+    f.vol20dPctileBucket = bucketizeWithHysteresis(f.vol20dPctile ?? undefined, f.vol20dPctileBucket);
     if (f.return60dPctileBucket === 'unknown' || f.vol20dPctileBucket === 'unknown') {
       flags.push({
         code: 'PERCENTILE_UNRELIABLE',
@@ -446,12 +486,13 @@ export const buildRegimes = (
   cfg: BotConfig
 ): { regimes: RegimeContext; flags: DataQualityFlag[] } => {
   const flags: DataQualityFlag[] = [];
-  const spy = features.find((f) => f.symbol === 'SPY');
-  const volBucket = spy?.vol20dPctileBucket ?? 'unknown';
-  const volPct = spy?.vol20dPctile ?? 0.5;
-  const ret60 = spy?.return60d ?? 0;
-  const retBucket = spy?.return60dPctileBucket ?? 'unknown';
-  const above200 = spy?.above200dma ?? false;
+  const anchorSymbol = cfg.confidenceCalibration?.anchorSymbol || features[0]?.symbol || 'SPY';
+  const anchor = features.find((f) => f.symbol === anchorSymbol) || features[0];
+  const volBucket = anchor?.vol20dPctileBucket ?? 'unknown';
+  const volPct = anchor?.vol20dPctile ?? 0.5;
+  const ret60 = anchor?.return60d ?? 0;
+  const retBucket = anchor?.return60dPctileBucket ?? 'unknown';
+  const above200 = anchor?.above200dma ?? false;
   const bucketToScore = (b: string | undefined) => (b === 'high' ? 0.8 : b === 'mid' ? 0.5 : b === 'low' ? 0.2 : 0.4);
   const volScore = bucketToScore(volBucket);
   const retScore = bucketToScore(retBucket);
@@ -514,14 +555,15 @@ export const buildRegimes = (
       confidence: equityConf,
       transitionRisk: equityTransition,
       supports: {
-        spyRet60d: ret60,
-        spyRet60dPctile: spy?.return60dPctile ?? null,
-        spyRet60dBucket: retBucket,
-        spyVolPctile: spy?.vol20dPctile ?? null,
-        spyVolPctileBucket: volBucket,
-        spyTrend: spy?.trend,
-        historySamples: spy?.historySamples,
-        historyUniqueCloses: spy?.historyUniqueCloses
+        anchorSymbol,
+        anchorRet60d: ret60,
+        anchorRet60dPctile: anchor?.return60dPctile ?? null,
+        anchorRet60dBucket: retBucket,
+        anchorVolPctile: anchor?.vol20dPctile ?? null,
+        anchorVolPctileBucket: volBucket,
+        anchorTrend: anchor?.trend,
+        historySamples: anchor?.historySamples,
+        historyUniqueCloses: anchor?.historyUniqueCloses
       }
     },
     volRegime: { label: volLabel, confidence: volConf },
@@ -529,6 +571,53 @@ export const buildRegimes = (
     breadth: breadthLabel
   };
   return { regimes, flags };
+};
+
+export const evaluateDataAdequacy = (
+  features: SymbolFeature[],
+  proxiesMap: Record<string, string[]>,
+  cfg: BotConfig
+): {
+  adequate: boolean;
+  anchorSymbol: string;
+  proxySymbol?: string | null;
+  minHistorySamples: number;
+  minUniqueCloses: number;
+  observed: {
+    canonical?: { symbol: string; historySamples?: number; historyUniqueCloses?: number };
+    proxy?: { symbol: string; historySamples?: number; historyUniqueCloses?: number } | null;
+  };
+} => {
+  const anchorSymbol = cfg.confidenceCalibration?.anchorSymbol || 'SPY';
+  const minHistorySamples = cfg.dataAdequacy?.minHistorySamples ?? 0;
+  const minUniqueCloses = cfg.dataAdequacy?.minUniqueCloses ?? 0;
+  const canonical = features.find((f) => f.symbol === anchorSymbol);
+  const proxyCandidate = proxiesMap[anchorSymbol]?.[0];
+  const proxyFeature = proxyCandidate ? features.find((f) => f.symbol === proxyCandidate) : undefined;
+  const canonicalOk = Boolean(
+    canonical && (canonical.historySamples ?? 0) >= minHistorySamples && (canonical.historyUniqueCloses ?? 0) >= minUniqueCloses
+  );
+  const proxyOk = Boolean(
+    proxyFeature &&
+      (proxyFeature.historySamples ?? 0) >= minHistorySamples &&
+      (proxyFeature.historyUniqueCloses ?? 0) >= minUniqueCloses
+  );
+  const adequate = canonicalOk || proxyOk;
+  return {
+    adequate,
+    anchorSymbol,
+    proxySymbol: proxyCandidate || null,
+    minHistorySamples,
+    minUniqueCloses,
+    observed: {
+      canonical: canonical
+        ? { symbol: canonical.symbol, historySamples: canonical.historySamples, historyUniqueCloses: canonical.historyUniqueCloses }
+        : undefined,
+      proxy: proxyCandidate
+        ? { symbol: proxyCandidate, historySamples: proxyFeature?.historySamples, historyUniqueCloses: proxyFeature?.historyUniqueCloses }
+        : null
+    }
+  };
 };
 
 const buildEligibility = (
@@ -851,6 +940,17 @@ export const generateBaseArtifacts = async (
     ? safeLoadJson<Record<string, string[]>>(path.resolve(process.cwd(), config.proxiesFile || ''), {})
     : {};
 
+  const dataAdequacy = evaluateDataAdequacy(features, proxiesMap, config);
+  if (!dataAdequacy.adequate) {
+    round1Flags.push({
+      code: 'INSUFFICIENT_HISTORY',
+      severity: config.dataAdequacy?.action === 'block' ? 'error' : 'warn',
+      message: 'Insufficient market history for canonical and proxy symbols',
+      observed: dataAdequacy.observed,
+      action: config.dataAdequacy?.action === 'block' ? 'block' : 'warn'
+    });
+  }
+
   // Capital pools artifact (round 0)
   const nav = computeNav(portfolio.holdings || [], portfolio.cash || 0, quotes || {}).nav;
   const corePoolUsd = Math.round(nav * poolPolicy.corePct * 100) / 100;
@@ -983,13 +1083,31 @@ export const generateBaseArtifacts = async (
   writeRunArtifact(runId, 'optionMarks.json', optionMarksArtifact);
 
   const round2 = buildRegimes(asOf, features, fredSeriesTrimmed, config);
+  const calibration = calibrateEquityConfidence({
+    asOf,
+    runId,
+    regimes: round2.regimes,
+    features,
+    config,
+    proxiesMap
+  });
+  if (round2.regimes?.equityRegime) {
+    round2.regimes.equityRegime.confidence = calibration.confidence;
+    (round2.regimes.equityRegime as any).timeInRegimeWeeks = calibration.timeInRegimeWeeks;
+    round2.regimes.equityRegime.supports = {
+      ...(round2.regimes.equityRegime.supports || {}),
+      confidenceCalibrated: calibration.confidence,
+      timeInRegimeWeeks: calibration.timeInRegimeWeeks,
+      confidenceQuality: calibration.diagnostics?.confidence?.quality ?? undefined
+    };
+  }
   const { eligibility, flags: eligFlags, executionCapabilities } = buildEligibility(
     features,
     portfolio.equity,
     config,
     proxiesMap
   );
-  const round2Flags = [...round2.flags, ...eligFlags];
+  const round2Flags = [...round2.flags, ...eligFlags, ...calibration.flags];
 
   const round3Flags: DataQualityFlag[] = [];
   const macroPolicy = buildMacroPolicy(fredSeriesTrimmed, round3Flags);
@@ -1088,6 +1206,8 @@ export const generateBaseArtifacts = async (
   writeJSONFile(path.join(runDir, 'round0_flags.json'), round0Flags);
   writeJSONFile(path.join(runDir, 'features.json'), features);
   writeJSONFile(path.join(runDir, 'round1_flags.json'), round1Flags);
+  writeJSONFile(path.join(runDir, 'dataAdequacy.json'), dataAdequacy);
+  writeJSONFile(path.join(runDir, 'confidence_diagnostics.json'), calibration.diagnostics);
   writeJSONFile(path.join(runDir, 'regimes.json'), round2.regimes);
   writeJSONFile(path.join(runDir, 'eligibility.json'), eligibility);
   writeJSONFile(path.join(runDir, 'round2_flags.json'), round2Flags);
@@ -1144,14 +1264,44 @@ export const buildRound2FromFeatures = async (runId: string) => {
           {}
         )
       : {};
+  const calibration = calibrateEquityConfidence({
+    asOf: inputs.asOf,
+    runId,
+    regimes: round2.regimes,
+    features,
+    config: inputs.config as BotConfig,
+    proxiesMap
+  });
+  if (round2.regimes?.equityRegime) {
+    round2.regimes.equityRegime.confidence = calibration.confidence;
+    (round2.regimes.equityRegime as any).timeInRegimeWeeks = calibration.timeInRegimeWeeks;
+    round2.regimes.equityRegime.supports = {
+      ...(round2.regimes.equityRegime.supports || {}),
+      confidenceCalibrated: calibration.confidence,
+      timeInRegimeWeeks: calibration.timeInRegimeWeeks,
+      confidenceQuality: calibration.diagnostics?.confidence?.quality ?? undefined
+    };
+  }
   const { eligibility, flags: eligFlags, executionCapabilities } = buildEligibility(
     features,
     inputs.portfolio.equity,
     inputs.config,
     proxiesMap
   );
-  const round2Flags = [...round2.flags, ...eligFlags, ...round1Flags.filter((f) => f.action === 'block')];
+  const dataAdequacy = evaluateDataAdequacy(features, proxiesMap, inputs.config as BotConfig);
+  if (!dataAdequacy.adequate) {
+    round1Flags.push({
+      code: 'INSUFFICIENT_HISTORY',
+      severity: (inputs.config as BotConfig).dataAdequacy?.action === 'block' ? 'error' : 'warn',
+      message: 'Insufficient market history for canonical and proxy symbols',
+      observed: dataAdequacy.observed,
+      action: (inputs.config as BotConfig).dataAdequacy?.action === 'block' ? 'block' : 'warn'
+    });
+  }
+  const round2Flags = [...round2.flags, ...eligFlags, ...calibration.flags, ...round1Flags.filter((f) => f.action === 'block')];
   writeJSONFile(path.join(runDir, 'regimes.json'), round2.regimes);
+  writeJSONFile(path.join(runDir, 'dataAdequacy.json'), dataAdequacy);
+  writeJSONFile(path.join(runDir, 'confidence_diagnostics.json'), calibration.diagnostics);
   writeJSONFile(path.join(runDir, 'eligibility.json'), { eligibility, executionCapabilities });
   writeJSONFile(path.join(runDir, 'round2_flags.json'), round2Flags);
 };

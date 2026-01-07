@@ -13,8 +13,8 @@ export interface DislocationResult {
   triggeredThisRun: boolean;
   reason: string[];
   metrics: {
-    spyDrawdownFastPct: number;
-    spyDrawdownSlowPct: number;
+    anchorDrawdownFastPct: number;
+    anchorDrawdownSlowPct: number;
     peakDrawdownPct?: number;
     breadthConfirm?: { symbolsChecked: string[]; downCount: number };
     troughDate?: string;
@@ -98,7 +98,7 @@ export const detectDislocation = (
       active: false,
       triggeredThisRun: false,
       reason: ['disabled'],
-      metrics: { spyDrawdownFastPct: 0, spyDrawdownSlowPct: 0 },
+      metrics: { anchorDrawdownFastPct: 0, anchorDrawdownSlowPct: 0 },
       window: { startISO: nowISO, expiresISO: nowISO, remainingWeeks: 0 },
       flags
     };
@@ -196,8 +196,8 @@ export const detectDislocation = (
     triggeredThisRun,
     reason,
     metrics: {
-      spyDrawdownFastPct: fast,
-      spyDrawdownSlowPct: slow,
+      anchorDrawdownFastPct: fast,
+      anchorDrawdownSlowPct: slow,
       peakDrawdownPct: peak,
       breadthConfirm: cfg.confirmBreadth ? { symbolsChecked: breadthSyms, downCount: breadthDown } : undefined,
       troughDate,

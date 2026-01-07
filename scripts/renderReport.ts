@@ -41,7 +41,26 @@ const main = () => {
   const leftover = deployBudget !== null ? Math.max(0, deployBudget - plannedNotional) : null;
   const modeHint = dataSources?.providers?.brokerProvider === 'etrade' ? 'Live/Paper (E*TRADE)' : 'Harness / Simulation';
   const volLabel = regimes?.volRegime?.label || 'unknown';
-  const confidence = regimes?.equityRegime?.confidence ?? cap.basis?.equityRegimeConfidence ?? null;
+  const confidenceDiagnostics = facts.confidenceDiagnostics || {};
+  const dataAdequacy = facts.dataAdequacy || {};
+  const confidence =
+    confidenceDiagnostics?.confidence?.base ??
+    regimes?.equityRegime?.confidence ??
+    cap.basis?.equityRegimeConfidence ??
+    null;
+  const calibratedConfidence = confidenceDiagnostics?.confidence?.calibrated ?? confidence;
+  const coverageSufficient = dataAdequacy?.adequate ?? confidenceDiagnostics?.coverage?.sufficient ?? null;
+  const proxyUsed =
+    confidenceDiagnostics?.proxy?.confidence !== null &&
+    confidenceDiagnostics?.proxy?.confidence !== undefined &&
+    confidenceDiagnostics?.proxy?.symbol;
+  const anchorSymbol =
+    dataAdequacy?.anchorSymbol || confidenceDiagnostics?.anchorSymbol || regimes?.equityRegime?.supports?.anchor || 'n/a';
+  const timeInRegime =
+    regimes?.equityRegime?.timeInRegimeWeeks ??
+    confidenceDiagnostics?.timeInRegimeWeeks ??
+    regimes?.equityRegime?.supports?.timeInRegimeWeeks ??
+    null;
   const plannedOrders = facts.execution?.plannedOrders || [];
   const substitutions = facts.execution?.substitutions || [];
   const optionOrders = facts.orders?.optionOrders || [];
@@ -54,6 +73,7 @@ const main = () => {
   const sortedRanking = ranking.sort((a, b) => (b.score || 0) - (a.score || 0));
   const selectedSymbols = plannedOrders.map((o: any) => o.symbol);
   const nonSelected = sortedRanking.filter((r) => !selectedSymbols.includes(r.symbol)).slice(0, 5);
+  const features: any[] = Array.isArray(facts.features) ? facts.features : [];
   const exposures = facts.exposures || {};
   const describeSymbol = (sym: string) => {
     if (!exposures) return undefined;
@@ -103,6 +123,88 @@ const main = () => {
   lines.push(`- Deploy budget: ${fmtCurrency(deployBudget)}`);
   lines.push(`- Planned ETF buys (whole-share): ${fmtCurrency(plannedNotional)}; leftover: ${fmtCurrency(leftover)}`);
   lines.push('\n---\n');
+
+  lines.push('## Regime & Confidence Rationale');
+  lines.push('### Regime rationale');
+  lines.push(
+    `- Equity regime: ${regimeLabel || 'unknown'}; Vol regime: ${volLabel}; Time in regime: ${
+      timeInRegime ?? 'n/a'
+    } week(s); Anchor: ${anchorSymbol}`
+  );
+  const supports = regimes?.equityRegime?.supports || {};
+  const anchorSym = supports.anchorSymbol || anchorSymbol;
+  const signalBullets: string[] = [];
+  const retBucket = supports.anchorRet60dBucket;
+  const retPct = supports.anchorRet60dPctile;
+  const volBucketSup = supports.anchorVolPctileBucket;
+  const volPctSup = supports.anchorVolPctile;
+  if (retBucket) signalBullets.push(`return bucket: ${retBucket}`);
+  if (retPct !== undefined && retPct !== null) signalBullets.push(`return pctile: ${retPct}`);
+  if (volBucketSup) signalBullets.push(`vol bucket: ${volBucketSup}`);
+  if (volPctSup !== undefined && volPctSup !== null) signalBullets.push(`vol pctile: ${volPctSup}`);
+  if (signalBullets.length) {
+    lines.push(`- Regime drivers: ${signalBullets.join('; ')}`);
+  } else {
+    lines.push('- Regime drivers: not available in artifacts.');
+  }
+  lines.push('- Why: regime labels are derived from the above buckets/percentiles and the current matrix state (no extra heuristics).');
+  lines.push('');
+  lines.push('### Confidence rationale');
+  lines.push(
+    `- Raw confidence: ${confidence ?? 'n/a'}; Calibrated confidence: ${calibratedConfidence ?? 'n/a'}; confidenceScale: ${
+      confidenceScale ?? 'n/a'
+    }; deployPct: ${fmtPct(deployPct)}`
+  );
+  const confQuality = confidenceDiagnostics?.confidence?.quality || regimes?.equityRegime?.supports?.confidenceQuality;
+  lines.push(`- Confidence quality: ${confQuality || 'not available'} (full = strong signal; degraded = limited data or proxy; blocked = insufficient data)`);
+  lines.push(
+    `- Proxy calibration ${
+      proxyUsed ? `used (${confidenceDiagnostics?.proxy?.symbol || 'proxy'})` : 'not used'
+    }; data adequacy ${coverageSufficient === null ? 'not available' : coverageSufficient ? 'passed' : 'failed'}.`
+  );
+  if (confidenceDiagnostics?.thresholds?.coverageFloorConfidence) {
+    lines.push(
+      `- Coverage floor (if triggered) would clamp confidence to ${confidenceDiagnostics.thresholds.coverageFloorConfidence}; observed calibrated=${calibratedConfidence ?? 'n/a'}.`
+    );
+  }
+  if (confidenceScale !== null && confidenceScale !== undefined && confidenceScale !== 1) {
+    lines.push(
+      `- confidenceScale < 1.0 indicates reduced deployment due to confidence below full threshold; applied scale=${confidenceScale}.`
+    );
+  }
+  lines.push(
+    `- Time-in-regime ramp: ${timeInRegime ?? 'n/a'} week(s) vs ramp window ${
+      confidenceDiagnostics?.ramp
+        ? `${confidenceDiagnostics.ramp.minWeeks}-${confidenceDiagnostics.ramp.maxWeeks}`
+        : 'not available'
+    }.`
+  );
+  lines.push('');
+  lines.push('### Lookback / data coverage');
+  const historySamples =
+    dataAdequacy?.observed?.canonical?.historySamples ?? confidenceDiagnostics?.base?.historySamples ?? null;
+  const historyUnique =
+    dataAdequacy?.observed?.canonical?.historyUniqueCloses ?? confidenceDiagnostics?.base?.historyUniqueCloses ?? null;
+  const minSamples = dataAdequacy?.minHistorySamples ?? null;
+  const minUnique = dataAdequacy?.minUniqueCloses ?? null;
+  const minDays = confidenceDiagnostics?.thresholds?.minHistoryDays ?? null;
+  lines.push(
+    `- Coverage: samples=${historySamples ?? 'n/a'}, uniqueCloses=${historyUnique ?? 'n/a'}, minSamples=${minSamples ?? 'n/a'}, minUnique=${minUnique ?? 'n/a'}, minDays=${minDays ?? 'n/a'}.`
+  );
+  lines.push(
+    `- Coverage assessment: ${
+      coverageSufficient === null ? 'not available' : coverageSufficient ? 'sufficient; proxy not needed' : 'insufficient; proxy/guard would apply'
+    }.`
+  );
+  if (dataAdequacy?.adequate === false) {
+    lines.push(
+      `- Data adequacy failed: anchor ${dataAdequacy.anchorSymbol || 'n/a'} observed ${JSON.stringify(
+        dataAdequacy.observed || {}
+      )} vs required samples ${minSamples ?? 'n/a'}.`
+    );
+  }
+  lines.push('');
+  lines.push('---\n');
 
   lines.push('## 2) Round-by-round walkthrough (transparent pipeline)');
   lines.push('Each round has a single purpose and hands its results to the next round.');
@@ -189,7 +291,16 @@ const main = () => {
       `- ${o.symbol}: planned ${fmtCurrency(o.estNotionalUSD ?? o.notionalUSD ?? 0)}${desc ? ` — ${desc}` : ''} (proxy/rounding may apply)`
     );
   });
-  if (sortedRanking.length) {
+  lines.push(
+    'Selection is role-based: the regime activates portfolio roles (e.g., US core, international diversifier, defensive equity) with target weights. One ETF is chosen per role; the system does not rank all ETFs to find “winners.”'
+  );
+  if (Object.keys(facts.execution?.targetWeights || {}).length) {
+    lines.push('Target weights (these are allocations, not momentum scores):');
+    Object.entries(facts.execution.targetWeights || {}).forEach(([sym, w]: any) => {
+      lines.push(`- ${sym}: weight ${fmtPct(Number(w) || 0)}${describeSymbol(sym) ? ` — ${describeSymbol(sym)}` : ''}`);
+    });
+    lines.push('Note: No ranking artifact was provided; weights come from the execution plan.');
+  } else if (sortedRanking.length) {
     lines.push('Top-ranked (not necessarily all selected):');
     sortedRanking
       .slice(0, 5)
@@ -206,6 +317,27 @@ const main = () => {
     lines.push('Note: Scores come from artifacts; detailed per-symbol drivers are not logged. Scoring typically reflects momentum/trend and regime tilts.');
   } else {
     lines.push('- Ranking details not available in artifacts.');
+  }
+  lines.push('');
+
+  lines.push('## 4a) ETF signal drivers (from features)');
+  if (features.length) {
+    const sortedFeatures = [...features].sort((a, b) => (a.symbol || '').localeCompare(b.symbol || ''));
+    sortedFeatures.forEach((f) => {
+      lines.push(
+        `- ${f.symbol}: return bucket ${f.return60dPctileBucket ?? 'n/a'} (pctile ${f.return60dPctile ?? 'n/a'}); vol bucket ${
+          f.vol20dPctileBucket ?? 'n/a'
+        } (pctile ${f.vol20dPctile ?? 'n/a'}); trend: ${f.trend ?? 'n/a'}, above50=${f.above50dma ?? 'n/a'}, above200=${
+          f.above200dma ?? 'n/a'
+        }`
+      );
+    });
+    lines.push('Regime tilt multipliers not present in artifacts; not displayed.');
+    lines.push(
+      'Note: These feature signals inform regime and diagnostics. They do not override role-based target weights; strong standalone signals on non-required roles will not force selection.'
+    );
+  } else {
+    lines.push('- Feature signals not available in artifacts.');
   }
   lines.push('');
 

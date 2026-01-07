@@ -36,6 +36,8 @@ describe('consolidated report pipeline', () => {
     expect(md).toMatch(/confidence scaling/i);
     expect(md).toMatch(/whole-share rounding/i);
     expect(md).toMatch(/regime/i);
+    expect(md).toMatch(/Regime & Confidence Rationale/);
+    expect(md).toMatch(/confidenceScale/i);
+    expect(md).toMatch(/coverage assessment/i);
   });
 });
-

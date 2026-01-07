@@ -131,7 +131,14 @@ export interface BotConfig {
   capital?: {
     corePct?: number;
     reservePct?: number;
+    baseDeployPct?: {
+      risk_off?: number;
+      neutral?: number;
+      risk_on?: number;
+      fallback?: number;
+    };
     deployConfThreshold?: number;
+    deployConfScaleLow?: number;
   };
   proxiesFile?: string;
   proxySelectionMode?: 'first_executable';
@@ -143,6 +150,11 @@ export interface BotConfig {
   canonicalizeMaxNotionalPctPerRun?: number;
   canonicalizeMinDriftToAct?: number;
   canonicalizeOnlyIfAffordable?: boolean;
+  dataAdequacy?: {
+    minHistorySamples?: number;
+    minUniqueCloses?: number;
+    action?: 'warn' | 'block';
+  };
   universeFile: string;
   baselinesEnabled: boolean;
   slippageBps: number;
@@ -153,6 +165,18 @@ export interface BotConfig {
   hedgeProxyPolicy?: {
     hedgePreferred?: string[];
     growthPreferred?: string[];
+  };
+  confidenceCalibration?: {
+    anchorSymbol?: string;
+    minHistoryDays?: number;
+    coverageFloorConfidence?: number;
+    proxyMap?: Record<string, string>;
+    timeInRegimeRamp?: {
+      minWeeks?: number;
+      maxWeeks?: number;
+      startProgress?: number;
+      endProgress?: number;
+    };
   };
   insuranceReserveMode?: 'light' | 'full';
   insurance?: {
@@ -223,14 +247,18 @@ export interface RegimeContext {
     confidence: number;
     transitionRisk?: 'low' | 'elevated' | 'high';
     supports?: {
-      spyRet60d?: number;
-      spyRet60dPctile?: number | null;
-      spyRet60dBucket?: 'low' | 'mid' | 'high' | 'unknown';
-      spyVolPctile?: number | null;
-      spyVolPctileBucket?: 'low' | 'mid' | 'high' | 'unknown';
-      spyTrend?: 'up' | 'down' | 'flat';
+      anchorSymbol?: string;
+      anchorRet60d?: number;
+      anchorRet60dPctile?: number | null;
+      anchorRet60dBucket?: 'low' | 'mid' | 'high' | 'unknown';
+      anchorVolPctile?: number | null;
+      anchorVolPctileBucket?: 'low' | 'mid' | 'high' | 'unknown';
+      anchorTrend?: 'up' | 'down' | 'flat';
       historySamples?: number;
       historyUniqueCloses?: number;
+      confidenceCalibrated?: number;
+      timeInRegimeWeeks?: number;
+      confidenceQuality?: 'full' | 'degraded' | 'blocked';
     };
   };
   volRegime?: { label: 'low' | 'rising' | 'stressed'; confidence?: number };

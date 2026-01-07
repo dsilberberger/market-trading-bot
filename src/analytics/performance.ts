@@ -36,6 +36,7 @@ export const buildEquityCurve = async (
   config: BotConfig,
   marketData: MarketDataProvider
 ): Promise<EquityPoint[]> => {
+  const benchmarkSymbol = config.confidenceCalibration?.anchorSymbol || 'SPY';
   const events = readLedgerEvents();
   const runs = Array.from(new Set(events.map((e) => e.runId)));
   runs.sort((a, b) => {
@@ -62,13 +63,13 @@ export const buildEquityCurve = async (
     const { equity, exposure } = await markToMarket(asOfForRun, marketData, state);
     peak = Math.max(peak, equity);
     const drawdown = peak > 0 ? (peak - equity) / peak : 0;
-    const spyQuote = await marketData.getQuote('SPY', asOfForRun);
+    const benchmarkQuote = await marketData.getQuote(benchmarkSymbol || 'SPY', asOfForRun);
     points.push({
       date: asOfForRun,
       equity,
       exposure,
       drawdown,
-      benchmarkSPY: spyQuote.price,
+      benchmarkSPY: benchmarkQuote.price,
       deterministicEquity: equity,
       randomEquity: equity
     });

@@ -70,7 +70,10 @@ describe('growth sleeve activation', () => {
 
   it('opens when allowed and budget sufficient', async () => {
     resetState('test-growth', 'case2');
-    const sleeves = arbitrateSleeves({ dislocationActive: false, regimes: { equityRegime: { label: 'risk_on', confidence: 0.9 }, volRegime: { label: 'low' } } as any });
+    const sleeves = arbitrateSleeves({
+      dislocationActive: false,
+      regimes: { equityRegime: { label: 'risk_on', confidence: 0.9, supports: { timeInRegimeWeeks: 3 } }, volRegime: { label: 'low' } } as any
+    });
     const res = await planGrowthSleeve({
       runId: 'g2',
       asOf: '2025-01-02',

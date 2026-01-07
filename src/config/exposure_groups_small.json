@@ -1,0 +1,37 @@
+{
+  "US_TOTAL_EQUITY": {
+    "members": ["VTI", "ITOT", "SCHB"],
+    "canonicalPreference": ["VTI", "ITOT", "SCHB"],
+    "description": "US total market equity"
+  },
+  "INTL_TOTAL_EQUITY": {
+    "members": ["VXUS", "IXUS"],
+    "canonicalPreference": ["VXUS", "IXUS"],
+    "description": "International ex-US total equity"
+  },
+  "US_VALUE_EQUITY": {
+    "members": ["VTV", "SCHV", "IWD"],
+    "canonicalPreference": ["VTV", "SCHV", "IWD"],
+    "description": "US value tilt equity"
+  },
+  "US_MIN_VOL_EQUITY": {
+    "members": ["USMV", "SPLV"],
+    "canonicalPreference": ["USMV", "SPLV"],
+    "description": "US minimum volatility equity"
+  },
+  "FI_SHORT_TREASURY": {
+    "members": ["SHY", "VGSH", "SCHO", "SHV"],
+    "canonicalPreference": ["SHY", "VGSH", "SCHO", "SHV"],
+    "description": "Short-term US Treasuries"
+  },
+  "FI_INTERMEDIATE_TREASURY": {
+    "members": ["IEF", "SCHR", "VGIT"],
+    "canonicalPreference": ["IEF", "SCHR", "VGIT"],
+    "description": "Intermediate-term US Treasuries"
+  },
+  "FI_INFLATION_TIPS": {
+    "members": ["TIP", "SCHP", "VTIP"],
+    "canonicalPreference": ["TIP", "SCHP", "VTIP"],
+    "description": "Inflation-linked Treasuries (TIPS)"
+  }
+}

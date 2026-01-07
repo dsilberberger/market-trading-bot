@@ -67,6 +67,7 @@ interface PlannerParams {
   maxProxyTrackingErrorAbs?: number;
   proxyCascade?: boolean;
   exposureGroups?: ExposureGroups;
+  allowRemainder?: boolean; // optional gate for largest-remainder pass
 }
 
 const normalizeWeights = (targets: TargetInput[]) => {
@@ -97,7 +98,8 @@ export const planWholeShareExecution = ({
   allowProxies,
   maxProxyTrackingErrorAbs,
   proxyCascade,
-  exposureGroups
+  exposureGroups,
+  allowRemainder
 }: PlannerParams): ExecutionPlan => {
   const flags: ExecutionPlan['flags'] = [];
   const skipped: ExecutionPlan['skipped'] = [];
@@ -307,44 +309,94 @@ export const planWholeShareExecution = ({
   const weightSum = candidates.reduce((acc, t) => acc + (t.targetWeight || 0), 0);
   candidates = candidates.map((c) => ({ ...c, weight: weightSum ? (c.targetWeight || 0) / weightSum : 0 }));
 
-  // initial shares
-  let shares = candidates.map((c) => Math.floor(((c.weight || 0) * budget) / c.price));
-  // ensure at least 1 share each
-  shares = shares.map((s) => (s < 1 ? 1 : s));
+  const calcCost = (list: Candidate[], shareArr: number[]) =>
+    shareArr.reduce((acc, s, i) => acc + s * (list[i]?.price || 0), 0);
 
-  const cost = () => shares.reduce((acc, s, i) => acc + s * (candidates[i].price || 0), 0);
-  if (cost() > budget) {
-    // drop lowest weight until feasible
-    const sorted = candidates
+  // Initial allocation: floor target USD per symbol, do not force a share that blows past target.
+  let shares = candidates.map((c) => {
+    const targetUSD = (c.weight || 0) * budget;
+    return Math.max(0, Math.floor(targetUSD / c.price));
+  });
+
+  // If we cannot meet minimum viable positions, bump cheapest symbols up to 1 share while budget allows.
+  const ensureMinPositions = () => {
+    let active = shares.filter((s) => s > 0).length;
+    if (active >= minViablePositions) return;
+    const sortedByPrice = candidates
       .map((c, i) => ({ ...c, idx: i }))
-      .sort((a, b) => (a.weight || 0) - (b.weight || 0));
-    let kept = [...candidates];
-    for (const drop of sorted) {
-      kept = kept.filter((_, i) => i !== drop.idx);
-      shares = kept.map((c) => Math.max(1, Math.floor(((c.weight || 0) / kept.reduce((acc, t) => acc + (t.weight || 0), 0)) * budget / c.price)));
-      if (cost() <= budget && kept.length >= minViablePositions) {
-        candidates = kept;
-        break;
+      .sort((a, b) => (a.price || 0) - (b.price || 0));
+    for (const c of sortedByPrice) {
+      if (active >= minViablePositions) break;
+      if (shares[c.idx] > 0) continue;
+      const newCost = calcCost(candidates, shares.map((s, i) => (i === c.idx ? 1 : s)));
+      if (newCost <= budget) {
+        shares[c.idx] = 1;
+        active += 1;
+      }
+    }
+  };
+  ensureMinPositions();
+
+  let currentCost = calcCost(candidates, shares);
+  if (currentCost > budget) {
+    // First, reduce excess shares (while keeping at least 1 of each) before dropping symbols.
+    while (currentCost > budget) {
+      const reducible = shares
+        .map((s, i) => ({
+          idx: i,
+          shares: s,
+          price: candidates[i]?.price || 0,
+          overTarget: s * (candidates[i]?.price || 0) - (candidates[i]?.weight || 0) * budget
+        }))
+        .filter((x) => x.shares > 1)
+        .sort((a, b) => (b.overTarget || 0) - (a.overTarget || 0))[0];
+      if (!reducible) break;
+      shares[reducible.idx] -= 1;
+      currentCost = calcCost(candidates, shares);
+    }
+    // If still above budget, fall back to dropping lowest-weight symbols.
+    if (currentCost > budget) {
+      const sorted = candidates
+        .map((c, i) => ({ ...c, idx: i }))
+        .sort((a, b) => (a.weight || 0) - (b.weight || 0));
+      let kept = [...candidates];
+      for (const drop of sorted) {
+        kept = kept.filter((_, i) => i !== drop.idx);
+        const weightTotal = kept.reduce((acc, t) => acc + (t.weight || 0), 0);
+        shares = kept.map((c) => Math.max(1, Math.floor(((c.weight || 0) / weightTotal) * budget / c.price)));
+        currentCost = calcCost(kept, shares);
+        if (currentCost <= budget && kept.length >= minViablePositions) {
+          candidates = kept;
+          break;
+        }
       }
     }
   }
 
-  // largest remainder allocation
-  let spent = cost();
+  // largest remainder allocation (optional)
+  let spent = calcCost(candidates, shares);
   let leftover = budget - spent;
-  let remainders = candidates.map((c, i) => (c.weight || 0) * budget - shares[i] * c.price);
-  while (true) {
-    const idx = remainders
-      .map((r, i) => ({ r, i }))
-      .filter((x) => x.r > 0 && (candidates[x.i].price || 0) <= leftover)
-      .sort((a, b) => b.r - a.r)[0]?.i;
-    if (idx === undefined) break;
-    const px = candidates[idx].price || 0;
-    if (px > leftover) break;
-    shares[idx] += 1;
-    spent += px;
-    leftover -= px;
-    remainders[idx] = (candidates[idx].weight || 0) * budget - shares[idx] * px;
+  if (allowRemainder !== false) {
+    const remainderFor = (i: number, shareArr: number[]) =>
+      (candidates[i].weight || 0) * budget - shareArr[i] * (candidates[i].price || 0);
+    const minAffordablePrice = () =>
+      Math.min(
+        ...candidates
+          .map((c) => c.price || Infinity)
+          .filter((p) => Number.isFinite(p) && p > 0)
+      );
+
+    while (leftover >= minAffordablePrice() - 1e-9) {
+      const ranked = candidates
+        .map((c, i) => ({ idx: i, remainderUSD: remainderFor(i, shares), price: c.price || 0, symbol: c.symbol }))
+        .filter((x) => x.price > 0 && x.remainderUSD > 0 && x.price <= leftover + 1e-9)
+        .sort((a, b) => (b.remainderUSD === a.remainderUSD ? a.symbol.localeCompare(b.symbol) : b.remainderUSD - a.remainderUSD));
+      if (!ranked.length) break;
+      const pick = ranked[0];
+      shares[pick.idx] += 1;
+      spent += pick.price;
+      leftover = budget - spent;
+    }
   }
 
   const orders: ExecutionPlanOrder[] = candidates.map((c, i) => ({

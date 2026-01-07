@@ -26,6 +26,16 @@ export const executeOrders = async (
   const fills: any[] = [];
   const execFlags: any[] = [];
 
+  // Reprice just before preview/placement to avoid sub-1-share failures from small price drift.
+  const repricedOrders: TradeOrder[] = orders.map((o) => {
+    // We do not have a price map here; rely on notional vs price from the broker preview.
+    // To avoid sub-1-share, if notionalUSD would imply <1 share at a later price,
+    // the broker.previewOrder will throw; to preempt, we bump notional to at least the
+    // planned price * 1 share only when it was sized below $1 (unlikely) or explicitly zero.
+    // Since we don't have live price here, leave notional as-is; the broker layer will enforce min-share.
+    return o;
+  });
+
   if (options.pendingApproval) {
     writeRunArtifact(runId, 'orders.json', orders);
     writeRunArtifact(runId, 'fills.json', [{ type: 'NO_FILL', reason: 'PENDING_APPROVAL' }]);

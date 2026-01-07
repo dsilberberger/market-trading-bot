@@ -40,12 +40,15 @@ export const computeCoreDeployPct = (
 ): { deployPct: number; confidenceScale: number } => {
   const label = regimes?.equityRegime?.label;
   const confidence = regimes?.equityRegime?.confidence ?? 1;
-  let basePct = 0.5;
-  if (label === 'risk_off') basePct = 0.35;
-  else if (label === 'neutral') basePct = 0.5;
-  else if (label === 'risk_on') basePct = 0.7;
+  const baseDeployMap =
+    config.capital?.baseDeployPct || { risk_off: 0.35, neutral: 0.6, risk_on: 0.8, fallback: 0.5 };
+  let basePct = baseDeployMap.fallback ?? 0.5;
+  if (label === 'risk_off') basePct = baseDeployMap.risk_off ?? basePct;
+  else if (label === 'neutral') basePct = baseDeployMap.neutral ?? basePct;
+  else if (label === 'risk_on') basePct = baseDeployMap.risk_on ?? basePct;
   const confThreshold = config.capital?.deployConfThreshold ?? 0.5;
-  const confidenceScale = confidence < confThreshold ? 0.8 : 1;
+  const scaleLow = config.capital?.deployConfScaleLow ?? 0.9;
+  const confidenceScale = confidence < confThreshold ? scaleLow : 1;
   const deployPct = Math.min(1, Math.max(0, basePct * confidenceScale));
   return { deployPct, confidenceScale };
 };

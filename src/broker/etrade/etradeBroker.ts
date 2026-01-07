@@ -136,16 +136,56 @@ export class ETradeBroker implements Broker {
     } catch (err) {
       throw new Error(`balance parse error: ${text.slice(0, 200)}`);
     }
-    const cash =
-      Number(json?.BalanceResponse?.Computed?.cashBalance) ||
-      Number(json?.BalanceResponse?.Computed?.cashAvailableForInvestment) ||
-      0;
-    const buyingPower =
-      Number(json?.BalanceResponse?.Computed?.cashBuyingPower) ||
-      Number(json?.BalanceResponse?.Computed?.purchasingPower) ||
-      Number(json?.BalanceResponse?.Computed?.marginBuyingPower) ||
-      0;
-    return cash > 0 ? cash : buyingPower;
+    const computed = json?.BalanceResponse?.Computed || {};
+    const cashBalance = Number(computed.cashBalance) || 0;
+    const cashAvail = Number(computed.cashAvailableForInvestment) || 0;
+    const cashBP = Number(computed.cashBuyingPower) || 0;
+    const marginBP = Number(computed.marginBuyingPower) || 0;
+    const purchasingPower = Number(computed.purchasingPower) || 0;
+
+    // Prefer buying power if available; fall back to cash/cash available.
+    const bp = Math.max(cashBP, marginBP, purchasingPower);
+    if (bp > 0) return bp;
+    if (cashAvail > 0) return cashAvail;
+    return cashBalance;
+  }
+
+  // List brokerage accounts with basic cash balances
+  async listAccounts(): Promise<
+    Array<{ accountIdKey: string; accountDesc?: string; accountStatus?: string; cash?: number }>
+  > {
+    const url = `${baseApi(this.env)}/v1/accounts/list.json`;
+    const resp = await this.client.signedFetch(url, 'GET');
+    const text = await resp.text();
+    if (!resp.ok) throw new Error(`accounts/list ${resp.status}: ${text.slice(0, 200)}`);
+    let json: any;
+    try {
+      json = text ? JSON.parse(text) : {};
+    } catch (err) {
+      throw new Error(`accounts list parse error: ${text.slice(0, 200)}`);
+    }
+    const accounts: any[] = json?.AccountListResponse?.Accounts?.Account || [];
+    const brokerage = accounts.filter(
+      (a) => a?.accountStatus === 'ACTIVE' && String(a?.institutionType || '').toUpperCase().includes('BROKERAGE')
+    );
+    const results: Array<{ accountIdKey: string; accountDesc?: string; accountStatus?: string; cash?: number }> = [];
+    for (const a of brokerage) {
+      const accountIdKey = a?.accountIdKey;
+      if (!accountIdKey) continue;
+      let cash: number | undefined;
+      try {
+        cash = await this.getBalanceCash(accountIdKey);
+      } catch {
+        cash = undefined;
+      }
+      results.push({
+        accountIdKey,
+        accountDesc: a?.accountDesc,
+        accountStatus: a?.accountStatus,
+        cash
+      });
+    }
+    return results;
   }
 
   async getPortfolioState(asOf: string): Promise<PortfolioState> {
@@ -192,8 +232,8 @@ export class ETradeBroker implements Broker {
         });
         equity += qty * mark;
       }
-      const balance = json?.PortfolioResponse?.AccountPortfolio?.[0]?.AccountBalance;
-      const cash = Number(balance?.cashBalance ?? balance?.cashAvailableForWithdrawal ?? 0);
+      // Always fetch cash via balance endpoint to avoid missing fields in portfolio response
+      const cash = await this.getBalanceCash(accountKey);
       equity += cash;
       return { cash, holdings, equity };
     } catch (err) {
@@ -211,10 +251,7 @@ export class ETradeBroker implements Broker {
     const quote = await this.marketData.getQuote(order.symbol, asOf);
 
     const attemptPreview = async (): Promise<{ previewId?: string | number; quantity: number }> => {
-      const qtyNumber = Math.floor((order.notionalUSD ?? 0) / Math.max(1e-6, quote.price || 1));
-      if (qtyNumber < 1) {
-        throw new Error(`Notional ${order.notionalUSD} too small for whole-share order at price ${quote.price}`);
-      }
+      const qtyNumber = Math.max(1, Math.floor((order.notionalUSD ?? 0) / Math.max(1e-6, quote.price || 1)));
       const qtyString = String(qtyNumber);
 
       // Match official E*TRADE sample structure: Order[], Instrument[] with capitalized keys and strings.
