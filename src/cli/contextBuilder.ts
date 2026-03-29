@@ -22,7 +22,7 @@ import { computeNav } from '../core/capital';
 import { writeRunArtifact } from '../ledger/storage';
 import { getFredClient } from '../macro';
 import { getFinnhubClient } from '../data/finnhubClient';
-import { calibrateEquityConfidence } from '../strategy/confidenceCalibrator';
+import { calibrateEquityConfidence, computeBaseEquityConfidence } from '../strategy/confidenceCalibrator';
 
 const safeLoadJson = <T>(filePath: string | undefined, fallback: T): T => {
   if (!filePath) return fallback;
@@ -111,6 +111,35 @@ const maxDrawdown = (bars: PriceBar[]): number | undefined => {
     if (dd < mdd) mdd = dd;
   }
   return Math.abs(mdd);
+};
+
+const sign = (v?: number): -1 | 0 | 1 => {
+  if (v === undefined || v === null) return 0;
+  if (v > 0) return 1;
+  if (v < 0) return -1;
+  return 0;
+};
+
+const deriveAgreementScore = (returns: Array<number | undefined>): number => {
+  const directionalSigns = returns.map(sign).filter((s) => s !== 0);
+  if (!directionalSigns.length) return 0;
+  const counts = directionalSigns.reduce<Record<string, number>>((acc, s) => {
+    acc[String(s)] = (acc[String(s)] || 0) + 1;
+    return acc;
+  }, {});
+  return Math.max(...Object.values(counts), 0) / 3;
+};
+
+const computeSteppedReturns = (bars: PriceBar[], stepBars: number, count: number): number[] => {
+  if (stepBars <= 0 || count <= 0) return [];
+  const sorted = sortedBars(bars);
+  const values: number[] = [];
+  let endIdx = sorted.length - 1;
+  while (endIdx - stepBars >= 0 && values.length < count) {
+    values.push(pctChange(sorted[endIdx - stepBars].close, sorted[endIdx].close));
+    endIdx -= stepBars;
+  }
+  return values;
 };
 
 const percentile = (val: number | undefined, values: number[]): number | undefined => {
@@ -342,7 +371,9 @@ export const buildFeatures = (
   const win5 = isWeekly ? 1 : 5; // 1 bar ~ 1w
   const win20 = isWeekly ? 4 : 20; // ~1 month
   const win60 = isWeekly ? 12 : 60; // ~3 months
+  const win120 = isWeekly ? 24 : 120; // ~6 months
   const volWindow = isWeekly ? 26 : 20; // smoother weekly vol (~6 months) vs 20d daily
+  const weekStep = isWeekly ? 1 : 5;
   const ma50Bars = isWeekly ? 10 : 50;
   const ma200Bars = isWeekly ? 40 : 200;
   const featureWarn = isWeekly ? 24 : 120;
@@ -356,11 +387,21 @@ export const buildFeatures = (
     const ret5 = computeReturn(bars, win5);
     const ret20 = computeReturn(bars, win20);
     const ret60 = computeReturn(bars, win60);
+    const ret4w = computeReturn(bars, win20);
+    const ret12w = computeReturn(bars, win60);
+    const ret24w = computeReturn(bars, win120);
     const vol20 = computeVol(bars, volWindow);
     const mdd60 = maxDrawdown(bars);
     const ma50 = movingAverage(bars, ma50Bars);
     const ma200 = movingAverage(bars, ma200Bars);
     const price = quotes[symbol] ?? 0;
+    const agreementScore = deriveAgreementScore([ret4w, ret12w, ret24w]);
+    const weeklyReturns = computeSteppedReturns(bars, weekStep, 12);
+    const refSign = sign(ret12w);
+    const stabilityScore =
+      refSign === 0 || weeklyReturns.length === 0
+        ? 0
+        : weeklyReturns.filter((r) => sign(r) === refSign).length / weeklyReturns.length;
     const ret60Series = rollingMetricSeries(bars, win60, computeReturn);
     const volSeries = rollingMetricSeries(bars, volWindow, computeVol);
     const feature: SymbolFeature = {
@@ -369,8 +410,13 @@ export const buildFeatures = (
       barInterval,
       return5d: ret5,
       return20d: ret20,
+      return4w: ret4w,
+      return12w: ret12w,
+      return24w: ret24w,
       return60d: ret60,
       realizedVol20d: vol20,
+      agreementScore,
+      stabilityScore,
       maxDrawdown60d: mdd60,
       trend: price && ma50 ? (price > ma50 ? 'up' : 'down') : undefined,
       above50dma: ma50 ? price > ma50 : undefined,
@@ -491,18 +537,23 @@ export const buildRegimes = (
   const volBucket = anchor?.vol20dPctileBucket ?? 'unknown';
   const volPct = anchor?.vol20dPctile ?? 0.5;
   const ret60 = anchor?.return60d ?? 0;
+  const ret12w = anchor?.return12w ?? ret60;
+  const ret24w = anchor?.return24w ?? ret12w;
   const retBucket = anchor?.return60dPctileBucket ?? 'unknown';
-  const above200 = anchor?.above200dma ?? false;
   const bucketToScore = (b: string | undefined) => (b === 'high' ? 0.8 : b === 'mid' ? 0.5 : b === 'low' ? 0.2 : 0.4);
   const volScore = bucketToScore(volBucket);
-  const retScore = bucketToScore(retBucket);
-  let equityConf = Math.min(1, Math.max(0.2, Math.abs(ret60) * 5 + (above200 ? 0.2 : 0)));
+  let equityConf = computeBaseEquityConfidence(anchor) ?? 0.2;
   if (retBucket === 'unknown' || volBucket === 'unknown') {
     equityConf = Math.min(equityConf, 0.4);
   }
+  const agreementScore = anchor?.agreementScore ?? 0;
+  const stabilityScore = anchor?.stabilityScore ?? 0;
   let equityLabel: 'risk_on' | 'risk_off' | 'neutral' = 'neutral';
-  if (ret60 > 0.03 && above200) equityLabel = 'risk_on';
-  else if (ret60 < -0.02 || volScore > 0.7) equityLabel = 'risk_off';
+  if (volScore > 0.7) equityLabel = 'risk_off';
+  else if (agreementScore >= 2 / 3 && stabilityScore >= 0.58) {
+    if (ret12w > 0.005 && ret24w > 0) equityLabel = 'risk_on';
+    else if (ret12w < -0.005 && ret24w <= 0) equityLabel = 'risk_off';
+  }
   const equityTransition = volBucket === 'unknown' || volScore > 0.7 ? 'elevated' : 'low';
 
   const volLabel: 'low' | 'rising' | 'stressed' = volScore > 0.8 ? 'stressed' : volScore > 0.6 ? 'rising' : 'low';

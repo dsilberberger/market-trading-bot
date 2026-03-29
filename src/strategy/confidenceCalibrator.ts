@@ -30,17 +30,49 @@ const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(ma
 
 const bucketToScore = (b: string | undefined) => (b === 'high' ? 0.8 : b === 'mid' ? 0.5 : b === 'low' ? 0.2 : 0.4);
 
-const computeConfidenceFromFeature = (f?: SymbolFeature | null): number | null => {
+const sign = (v?: number): -1 | 0 | 1 => {
+  if (v === undefined || v === null) return 0;
+  if (v > 0) return 1;
+  if (v < 0) return -1;
+  return 0;
+};
+
+const deriveAgreementScore = (returns: Array<number | undefined>): number => {
+  const signs = returns.map(sign);
+  const directionalSigns = signs.filter((s) => s !== 0);
+  if (!directionalSigns.length) return 0;
+  const counts = directionalSigns.reduce<Record<string, number>>((acc, s) => {
+    acc[String(s)] = (acc[String(s)] || 0) + 1;
+    return acc;
+  }, {});
+  return Math.max(...Object.values(counts), 0) / 3;
+};
+
+export const computeBaseEquityConfidence = (f?: SymbolFeature | null): number | null => {
   if (!f) return null;
   const volBucket = f.vol20dPctileBucket ?? 'unknown';
   const retBucket = f.return60dPctileBucket ?? 'unknown';
   const ret60 = f.return60d ?? 0;
   const above200 = f.above200dma ?? false;
-  let equityConf = Math.min(1, Math.max(0.2, Math.abs(ret60) * 5 + (above200 ? 0.2 : 0)));
+  const baseSignal = Math.max(0.2, Math.abs(ret60) * 5 + (above200 ? 0.2 : 0));
+  const agreementScore = f.agreementScore ?? deriveAgreementScore([f.return4w, f.return12w, f.return24w]);
+  const stability = f.stabilityScore ?? 0;
+  const agreementBoost = 0.15 * agreementScore;
+  const stabilityBoost = 0.15 * stability;
+  let equityConf = clamp(baseSignal + agreementBoost + stabilityBoost, 0, 1);
   if (retBucket === 'unknown' || volBucket === 'unknown') {
     equityConf = Math.min(equityConf, 0.4);
   }
+  return equityConf;
+};
+
+const computeConfidenceFromFeature = (f?: SymbolFeature | null): number | null => {
+  const equityConfBase = computeBaseEquityConfidence(f);
+  if (equityConfBase === null || !f) return null;
   // Mild adjustment toward bucket quality
+  let equityConf = equityConfBase;
+  const volBucket = f.vol20dPctileBucket ?? 'unknown';
+  const retBucket = f.return60dPctileBucket ?? 'unknown';
   const volScore = bucketToScore(volBucket);
   const retScore = bucketToScore(retBucket);
   equityConf = Math.max(equityConf, Math.min(1, (volScore + retScore) / 2));

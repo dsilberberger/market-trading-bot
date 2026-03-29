@@ -70,6 +70,11 @@ interface PlannerParams {
   allowRemainder?: boolean; // optional gate for largest-remainder pass
 }
 
+interface BaseEtfPlannerParams extends PlannerParams {
+  regimeLabel?: string;
+  timeInRegimeWeeks?: number;
+}
+
 const normalizeWeights = (targets: TargetInput[]) => {
   let weights: Record<string, number> = {};
   let total = 0;
@@ -440,4 +445,26 @@ export const planWholeShareExecution = ({
     flags,
     substitutions
   };
+};
+
+export const planBaseEtfExecution = ({
+  regimeLabel,
+  timeInRegimeWeeks = 0,
+  ...plannerParams
+}: BaseEtfPlannerParams): ExecutionPlan => {
+  if (regimeLabel === 'neutral') {
+    const floorPlan = planWholeShareExecution({ ...plannerParams, allowRemainder: false });
+    const candidatePlan = planWholeShareExecution({ ...plannerParams, allowRemainder: true });
+    const maxAbsErrorDelta = candidatePlan.error.maxAbsError - floorPlan.error.maxAbsError;
+    const l1ErrorDelta = candidatePlan.error.l1Error - floorPlan.error.l1Error;
+    const candidateAccepted =
+      candidatePlan.status === 'OK' &&
+      candidatePlan.error.maxAbsError <= 0.05 &&
+      maxAbsErrorDelta <= 0.01 &&
+      l1ErrorDelta <= 0.02;
+    return candidateAccepted ? candidatePlan : floorPlan;
+  }
+
+  const allowRemainder = regimeLabel === 'risk_on' && timeInRegimeWeeks >= 1;
+  return planWholeShareExecution({ ...plannerParams, allowRemainder });
 };

@@ -20,7 +20,7 @@ import { anchorInvalidations } from '../risk/invalidationAnchor';
 import { applyDecisionPolicyGate } from '../risk/decisionPolicyGate';
 import { assertRound5Input } from '../risk/round5Guards';
 import { preflightAuth } from '../broker/etrade/authService';
-import { planWholeShareExecution } from '../execution/wholeSharePlanner';
+import { planBaseEtfExecution, planWholeShareExecution } from '../execution/wholeSharePlanner';
 import { rebalancePortfolio } from '../execution/rebalanceEngine';
 import { detectDislocation } from '../dislocation/dislocationDetector';
 import { buildDislocationBuys } from '../execution/dislocationPlanner';
@@ -28,7 +28,9 @@ import { runSleeveLifecycle } from '../dislocation/sleeveLifecycle';
 import { generateRoundNarrative } from '../narratives/roundNarrative';
 import { generateRound6Metrics } from '../retrospective/metrics';
 import { generateRound6Retrospective } from '../retrospective/retrospective';
+import { derivePolicyExposureCap } from '../risk/policyExposureCap';
 import { computeOverlayBudget } from '../dislocation/overlayBudget';
+import { computePostRiskOffReentryBudget } from '../dislocation/postRiskOffReentry';
 import { loadExposureGroups, symbolToExposureKey, canonicalSymbolForExposure } from '../core/exposureGroups';
 import { planCanonicalization } from '../execution/canonicalizeExposureGroups';
 import {
@@ -286,17 +288,18 @@ export const runBot = async (options: RunOptions) => {
   const hasCoarsePercentiles = dataQualityRound1.some(
     (f) => f.code === 'COARSE_PERCENTILES' || f.code === 'PERCENTILE_UNRELIABLE'
   );
+  const equityLabel = (llmContext as any)?.regimes?.equityRegime?.label;
+  const volLabel = (llmContext as any)?.regimes?.volRegime?.label;
   const equityConf = (llmContext as any)?.regimes?.equityRegime?.confidence ?? 0.5;
   const transitionRisk = (llmContext as any)?.regimes?.equityRegime?.transitionRisk ?? 'low';
-  let exposureCap = 1.0;
-  const netExposureTarget = proposal.intent.orders[0]?.portfolioLevel?.netExposureTarget;
-  if (netExposureTarget !== undefined) exposureCap = Math.min(exposureCap, netExposureTarget);
-  if (equityConf < 0.35) exposureCap = Math.min(exposureCap, 0.35);
-  else if (equityConf < 0.6) exposureCap = Math.min(exposureCap, 0.6);
-  if (hasMacroLag) exposureCap = Math.min(exposureCap, 0.7);
-  if (hasCoarsePercentiles) exposureCap = Math.min(exposureCap, 0.7);
-  if (transitionRisk === 'high') exposureCap = Math.min(exposureCap, 0.35);
-  else if (transitionRisk === 'elevated') exposureCap = Math.min(exposureCap, 0.6);
+  const exposureCap = derivePolicyExposureCap({
+    equityConfidence: equityConf,
+    regimeLabel: equityLabel,
+    volLabel,
+    hasMacroLag,
+    hasCoarsePercentiles,
+    transitionRisk
+  });
   const baseExposureCap = exposureCap;
   const capBudget = Math.min(deployBudgetUsd, (inputs?.portfolio?.equity ?? rawBudget) * exposureCap);
   const buyBudgetUSD = Math.max(0, Math.min(deployBudgetUsd, rawBudget - minCashUSD, capBudget));
@@ -385,8 +388,7 @@ export const runBot = async (options: RunOptions) => {
 
   const eqRegime = (llmContext as any)?.regimes?.equityRegime;
   const timeInRegimeWeeks = eqRegime?.supports?.timeInRegimeWeeks ?? 0;
-  const allowRemainder = eqRegime?.label === 'risk_on' && timeInRegimeWeeks >= 1;
-  const planner = planWholeShareExecution({
+  const planner = planBaseEtfExecution({
     targets: proposal.intent.orders.map((o) => ({ symbol: o.symbol, notionalUSD: o.notionalUSD, priority: o.confidence })),
     prices: quotes,
     buyBudgetUSD,
@@ -398,7 +400,8 @@ export const runBot = async (options: RunOptions) => {
     allowProxies: config.allowExecutionProxies,
     maxProxyTrackingErrorAbs: config.maxProxyTrackingErrorAbs,
     exposureGroups,
-    allowRemainder
+    regimeLabel: eqRegime?.label,
+    timeInRegimeWeeks
   });
   writeRunArtifact(runId, 'execution_plan.json', planner);
   writeRunArtifact(runId, 'execution_substitutions.json', planner.substitutions || []);
@@ -471,6 +474,7 @@ export const runBot = async (options: RunOptions) => {
     config,
     dislocationActive: dislocation.tierEngaged ?? false,
     anchorPrice: quotes[config.dislocation?.anchorSymbol || 'SPY'],
+    anchorHistory: (inputs.history as any)?.[config.dislocation?.anchorSymbol || 'SPY'] || [],
     regimes: llmContext?.regimes,
     tier: dislocation.tier
   });
@@ -541,7 +545,8 @@ export const runBot = async (options: RunOptions) => {
   if (sleeveLifecycle.allowAdd && config.dislocation?.enabled) {
     const extra = config.dislocation.overlayExtraExposurePct ?? config.dislocation.opportunisticExtraExposurePct ?? 0;
     const maxTotal = config.dislocation.maxTotalExposureCapPct ?? 1.0;
-    if (extra > 0) {
+    const isPostRiskOffReentry = sleeveLifecycle.state.triggerReason === 'post_risk_off_reentry';
+    if (extra > 0 || isPostRiskOffReentry) {
       let basePlannedBuysUSD = 0;
       let basePlannedSellsUSD = 0;
       for (const o of rebalance.combinedOrders || []) {
@@ -567,23 +572,41 @@ export const runBot = async (options: RunOptions) => {
     .map((t) => priceMap[t.symbol])
     .filter((p) => typeof p === 'number' && p > 0)
     .sort((a, b) => a - b)[0];
-      const overlayBudget = computeOverlayBudget({
-        equityUSD: inputs.portfolio.equity ?? rawBudget,
-        cashUSD: inputs.portfolio.cash ?? 0,
-        minCashUSD,
-        overlayExtraExposurePct: extra,
-        maxTotalExposureCapPct: maxTotal,
-        currentInvestedUSD,
-        cheapestOverlayPrice,
-        overlayMinBudgetUSD: config.dislocation.overlayMinBudgetUSD
-      });
+      const reserveOnlyCash = Math.max(0, (inputs.portfolio.cash || 0) - corePoolUsd);
+      const overlayBudget = isPostRiskOffReentry
+        ? (() => {
+            const budget = computePostRiskOffReentryBudget({
+              corePoolUsd,
+              reservePoolUsd,
+              reserveOnlyCashUsd: reserveOnlyCash,
+              config
+            });
+            return {
+              overlayBudgetUSD: budget.budgetUSD,
+              availableCashUSD: reserveOnlyCash,
+              remainingInvestCapacityUSD: budget.budgetUSD,
+              requestedBudgetUSD: budget.requestedBudgetUSD,
+              source: 'post_risk_off_reentry',
+              flags: budget.flags
+            };
+          })()
+        : computeOverlayBudget({
+            equityUSD: inputs.portfolio.equity ?? rawBudget,
+            cashUSD: inputs.portfolio.cash ?? 0,
+            minCashUSD,
+            overlayExtraExposurePct: extra,
+            maxTotalExposureCapPct: maxTotal,
+            currentInvestedUSD,
+            cheapestOverlayPrice,
+            overlayMinBudgetUSD: config.dislocation.overlayMinBudgetUSD
+          });
       const maxSpendOverride = overlayBudget.overlayBudgetUSD;
       if (maxSpendOverride > 0 && overlayTargetsEffective.length) {
         const overlayPlan = planWholeShareExecution({
           targets: overlayTargetsEffective.map((t) => ({ symbol: t.symbol, notionalUSD: maxSpendOverride * (t.weight || 0), priority: 1 })),
           prices: priceMap,
           buyBudgetUSD: maxSpendOverride,
-          minCashUSD,
+          minCashUSD: isPostRiskOffReentry ? 0 : minCashUSD,
           allowPartial: true,
           minViablePositions: 1,
           maxAbsWeightError: 0.5,
@@ -610,10 +633,17 @@ export const runBot = async (options: RunOptions) => {
               ? JSON.parse(fs.readFileSync(path.join(runDir, 'round5_flags.json'), 'utf-8'))
               : []) || [];
           existingFlags.push({
-            code: 'DISLOCATION_ACTIVE',
+            code: isPostRiskOffReentry ? 'POST_RISK_OFF_REENTRY_ACTIVE' : 'DISLOCATION_ACTIVE',
             severity: 'info',
-            message: 'Opportunistic dislocation buys added',
-            observed: { extraPct: extra, dislocationCap: maxTotal, baseExposureCap, overlayBudgetUSD: maxSpendOverride }
+            message: isPostRiskOffReentry
+              ? 'Post-risk-off dislocation sleeve buys added'
+              : 'Opportunistic dislocation buys added',
+            observed: isPostRiskOffReentry
+              ? {
+                  reserveDeployPctOfCore: config.dislocation?.earlyReentry?.reserveDeployPctOfCore ?? 0.15,
+                  overlayBudgetUSD: maxSpendOverride
+                }
+              : { extraPct: extra, dislocationCap: maxTotal, baseExposureCap, overlayBudgetUSD: maxSpendOverride }
           });
           writeRunArtifact(runId, 'round5_flags.json', existingFlags);
         }
@@ -1075,7 +1105,7 @@ export const runBot = async (options: RunOptions) => {
     writeRunArtifact(runId, 'round5_flags.json', [...existingRound5Flags, ...round5Flags]);
     writeRunArtifact(runId, 'orders.json', []);
     writeRunArtifact(runId, 'fills.json', [{ type: 'NO_FILL', reason: 'NO_EXECUTABLE_ORDERS' }]);
-    appendEvent(makeEvent(runId, 'RUN_FAILED', { reason: 'NO_EXECUTABLE_ORDERS' }));
+    appendEvent(makeEvent(runId, 'RUN_SKIPPED', { reason: 'NO_EXECUTABLE_ORDERS' }));
     generateNarrativesOnce();
     generateConsolidatedOnce();
     return;

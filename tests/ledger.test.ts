@@ -27,4 +27,13 @@ describe('Ledger and approval transitions', () => {
     appendEvent(makeEvent(runId, 'RUN_COMPLETED'));
     expect(getRunStatus(runId)).toBe('COMPLETED');
   });
+
+  it('treats no-executable orders as skipped', () => {
+    const { appendEvent, makeEvent, getRunStatus } = loadLedger();
+    const runId = '2025-12-21';
+    appendEvent(makeEvent(runId, 'RUN_FAILED', { reason: 'NO_EXECUTABLE_ORDERS' }));
+    expect(getRunStatus(runId)).toBe('SKIPPED');
+    appendEvent(makeEvent(runId, 'RUN_SKIPPED', { reason: 'NO_EXECUTABLE_ORDERS' }));
+    expect(getRunStatus(runId)).toBe('SKIPPED');
+  });
 });

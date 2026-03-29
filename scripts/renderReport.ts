@@ -14,6 +14,12 @@ const readJson = (p: string) => {
 
 const fmtCurrency = (n?: number | null) => (n === undefined || n === null ? 'n/a' : `$${n.toFixed(2)}`);
 const fmtPct = (n?: number | null) => (n === undefined || n === null ? 'n/a' : `${(n * 100).toFixed(2)}%`);
+const orderNotional = (o: any) => {
+  const raw = o?.notionalUSD ?? o?.notionalUsd ?? o?.estNotionalUSD ?? o?.estNotionalUsd ?? null;
+  const value = typeof raw === 'number' ? raw : Number(raw);
+  return Number.isFinite(value) ? value : 0;
+};
+const sumNotional = (orders: any[] | undefined) => (orders || []).reduce((acc, o) => acc + orderNotional(o), 0);
 
 const main = () => {
   const args = process.argv.slice(2);
@@ -64,6 +70,16 @@ const main = () => {
   const plannedOrders = facts.execution?.plannedOrders || [];
   const substitutions = facts.execution?.substitutions || [];
   const optionOrders = facts.orders?.optionOrders || [];
+  const netOrders = facts.orders?.etfOrders || [];
+  const netBuyOrders = netOrders.filter((o: any) => String(o.side || '').toUpperCase() === 'BUY');
+  const netSellOrders = netOrders.filter((o: any) => String(o.side || '').toUpperCase() === 'SELL');
+  const netBuyNotional = sumNotional(netBuyOrders);
+  const netSellNotional = sumNotional(netSellOrders);
+  const netNotional = sumNotional(netOrders);
+  const rebalance = facts.rebalance || null;
+  const rebalanceOrders = Array.isArray(rebalance?.combinedOrders)
+    ? rebalance?.combinedOrders
+    : [...(rebalance?.sellOrders || []), ...(rebalance?.buyOrders || [])];
   const fills = facts.orders?.fills || [];
   const execFails = (facts.execution?.executionFlags || []).filter((f: any) => f.code === 'EXECUTION_FAILED');
   const rankingRaw = facts.ranking || [];
@@ -121,7 +137,14 @@ const main = () => {
     }, deploy % (after scaling) = ${fmtPct(deployPct)}`
   );
   lines.push(`- Deploy budget: ${fmtCurrency(deployBudget)}`);
-  lines.push(`- Planned ETF buys (whole-share): ${fmtCurrency(plannedNotional)}; leftover: ${fmtCurrency(leftover)}`);
+  lines.push(`- Planned ETF buys (target portfolio, whole-share): ${fmtCurrency(plannedNotional)}; leftover: ${fmtCurrency(leftover)}`);
+  lines.push(
+    `- Net ETF orders (rebalance vs current holdings): ${
+      netOrders.length
+        ? `buys ${netBuyOrders.length}, sells ${netSellOrders.length}; notional buys ${fmtCurrency(netBuyNotional)}, sells ${fmtCurrency(netSellNotional)}`
+        : 'none'
+    }.`
+  );
   lines.push('\n---\n');
 
   lines.push('## Regime & Confidence Rationale');
@@ -254,10 +277,16 @@ const main = () => {
   lines.push('');
   lines.push('### Round 5 — Order Construction (Whole-share reality)');
   lines.push(
-    `Planned ETF orders: ${plannedOrders
-      .map((o: any) => `${o.symbol} ${fmtCurrency(o.estNotionalUSD ?? o.notionalUSD ?? 0)}`)
+    `Target ETF orders (pre-rebalance): ${plannedOrders
+      .map((o: any) => `${o.symbol} ${fmtCurrency(orderNotional(o))}`)
       .join(', ') || 'none'}`
   );
+  lines.push(
+    `Net ETF orders (rebalance vs current holdings): ${
+      netOrders.length ? netOrders.map((o: any) => `${o.symbol} ${o.side} ${fmtCurrency(orderNotional(o))}`).join(', ') : 'none'
+    }`
+  );
+  lines.push('Why net orders can differ from target: current holdings are netted against target weights.');
   lines.push(`Total spend ${fmtCurrency(plannedNotional)} vs budget ${fmtCurrency(deployBudget)}; leftover ${fmtCurrency(leftover)} (rounding).`);
   lines.push('Why spend < budget: whole-share constraint; leftover cash is intentional.');
   lines.push('');
@@ -288,7 +317,7 @@ const main = () => {
   plannedOrders.forEach((o: any) => {
     const desc = describeSymbol(o.symbol);
     lines.push(
-      `- ${o.symbol}: planned ${fmtCurrency(o.estNotionalUSD ?? o.notionalUSD ?? 0)}${desc ? ` — ${desc}` : ''} (proxy/rounding may apply)`
+      `- ${o.symbol}: planned ${fmtCurrency(orderNotional(o))}${desc ? ` — ${desc}` : ''} (proxy/rounding may apply)`
     );
   });
   lines.push(
@@ -349,10 +378,38 @@ const main = () => {
 
   lines.push('## 6) Execution summary');
   lines.push(
-    `Planned ETF orders total ${fmtCurrency(plannedNotional)}; substitutions: ${
+    `Target ETF orders total ${fmtCurrency(plannedNotional)}; substitutions: ${
       substitutions.length ? 'applied' : 'none'
     }.`
   );
+  lines.push(
+    `Net ETF orders (rebalance vs current holdings): ${
+      netOrders.length
+        ? `${netOrders.length} order(s); buys ${fmtCurrency(netBuyNotional)}, sells ${fmtCurrency(
+            netSellNotional
+          )}; gross notional ${fmtCurrency(netNotional)}`
+        : 'none'
+    }.`
+  );
+  lines.push('Orders (summary)');
+  if (netOrders.length) {
+    netOrders.forEach((o: any) => {
+      const orderType = o.orderType || 'MARKET';
+      const thesis = o.thesis ? ` — ${o.thesis}` : '';
+      lines.push(`- ${o.symbol} ${o.side} ${orderType} ${fmtCurrency(orderNotional(o))}${thesis}`);
+    });
+  } else {
+    lines.push('- none');
+  }
+  if (rebalanceOrders.length) {
+    lines.push('Rebalance');
+    rebalanceOrders.forEach((o: any) => {
+      const reason = o.reason || o.thesis || '';
+      lines.push(`- ${o.symbol} ${o.side} ${fmtCurrency(orderNotional(o))}${reason ? ` — ${reason}` : ''}`);
+    });
+  } else if (rebalance) {
+    lines.push('Rebalance: none');
+  }
   if (fills.length) {
     lines.push('- Fills:');
     fills.forEach((f: any) => {

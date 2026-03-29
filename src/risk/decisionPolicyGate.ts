@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { BotConfig, LLMContextPacket, PortfolioState, TradeIntent, TradeOrder } from '../core/types';
+import { derivePolicyExposureCap } from './policyExposureCap';
 
 export interface PolicyGateResult {
   orders: TradeOrder[];
@@ -40,19 +41,20 @@ export const applyDecisionPolicyGate = (
   const hasCoarsePercentiles =
     llmContext.dataQuality?.round1?.some((f) => f.code === 'COARSE_PERCENTILES' || f.code === 'PERCENTILE_UNRELIABLE') ??
     false;
+  const equityLabel = llmContext.regimes?.equityRegime?.label;
+  const volLabel = llmContext.regimes?.volRegime?.label;
   const equityConf = llmContext.regimes?.equityRegime?.confidence ?? 0.5;
   const transitionRisk = llmContext.regimes?.equityRegime?.transitionRisk ?? 'low';
 
   // Exposure cap
-  let exposureCap = 1.0;
-  const netExposureTarget = intent.orders[0]?.portfolioLevel?.netExposureTarget;
-  if (netExposureTarget !== undefined) exposureCap = Math.min(exposureCap, netExposureTarget);
-  if (equityConf < 0.35) exposureCap = Math.min(exposureCap, 0.35);
-  else if (equityConf < 0.6) exposureCap = Math.min(exposureCap, 0.6);
-  if (hasMacroLag) exposureCap = Math.min(exposureCap, 0.7);
-  if (hasCoarsePercentiles) exposureCap = Math.min(exposureCap, 0.7);
-  if (transitionRisk === 'high') exposureCap = Math.min(exposureCap, 0.35);
-  else if (transitionRisk === 'elevated') exposureCap = Math.min(exposureCap, 0.6);
+  let exposureCap = derivePolicyExposureCap({
+    equityConfidence: equityConf,
+    regimeLabel: equityLabel,
+    volLabel,
+    hasMacroLag,
+    hasCoarsePercentiles,
+    transitionRisk
+  });
 
   const baseExposureCap = exposureCap;
   if (dislocation?.active && config.dislocation?.enabled) {
@@ -144,7 +146,8 @@ export const applyDecisionPolicyGate = (
     hasCoarsePercentiles,
     transitionRisk,
     equityConf,
-    baseExposureCap
+    baseExposureCap,
+    requestedNetExposureTarget: intent.orders[0]?.portfolioLevel?.netExposureTarget
   };
 
   return { orders, flags, policyApplied, blockedReasons };

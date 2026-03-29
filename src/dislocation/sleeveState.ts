@@ -6,6 +6,7 @@ export type SleevePhase = 'INACTIVE' | 'ADD' | 'HOLD' | 'REINTEGRATE' | 'EXITED'
 export interface DislocationSleeveState {
   active: boolean;
   phase: SleevePhase;
+  triggerReason?: 'dislocation' | 'post_risk_off_reentry';
   triggeredAtISO?: string;
   addUntilISO?: string;
   holdUntilISO?: string;
@@ -20,6 +21,9 @@ export interface DislocationSleeveState {
   currentTier?: number;
   lastTierChangeISO?: string;
   lastTier?: number;
+  postRiskOffEpisodeStartISO?: string;
+  postRiskOffTriggeredAtISO?: string;
+  postRiskOffTriggerCount?: number;
 }
 
 const statePath = path.resolve(process.cwd(), 'data_cache', 'dislocation_sleeve_state.json');

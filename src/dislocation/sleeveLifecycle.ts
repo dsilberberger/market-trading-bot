@@ -1,5 +1,6 @@
-import { BotConfig } from '../core/types';
+import { BotConfig, PriceBar } from '../core/types';
 import { DislocationSleeveState, SleevePhase, loadSleeveState, saveSleeveState } from './sleeveState';
+import { evaluatePostRiskOffStabilization } from './postRiskOffReentry';
 
 const addWeeks = (iso: string, weeks: number): string => {
   const d = new Date(iso);
@@ -15,6 +16,7 @@ export interface SleeveLifecycleInput {
   config: BotConfig;
   dislocationActive: boolean;
   anchorPrice?: number;
+  anchorHistory?: PriceBar[];
   regimes?: any;
   tier?: number;
 }
@@ -46,6 +48,7 @@ export const runSleeveLifecycle = ({
   config,
   dislocationActive,
   anchorPrice,
+  anchorHistory = [],
   regimes,
   tier = 0
 }: SleeveLifecycleInput): SleeveLifecycleResult => {
@@ -61,9 +64,11 @@ export const runSleeveLifecycle = ({
 
   // Early exit: risk_off with high confidence
   const riskOff = regimes?.equityRegime?.label === 'risk_off';
+  const riskOn = regimes?.equityRegime?.label === 'risk_on';
   const riskConf = regimes?.equityRegime?.confidence ?? 0;
   const earlyExitEnabled = cfg.earlyExit?.enabled !== false;
   const riskOffThreshold = cfg.earlyExit?.riskOffConfidenceThreshold ?? 0.7;
+  const earlyReentryEnabled = cfg.earlyReentry?.enabled !== false;
 
   // Deep drawdown failsafe
   const deepFailsafePct = cfg.earlyExit?.deepDrawdownFailsafePct ?? 0.3;
@@ -80,6 +85,17 @@ export const runSleeveLifecycle = ({
     if (!state.addUntilISO) state.addUntilISO = addWeeks(state.triggeredAtISO, addWeeksCfg);
     if (!state.holdUntilISO) state.holdUntilISO = addWeeks(state.triggeredAtISO, addWeeksCfg + holdWeeksCfg);
     if (!state.reintegrateAfterISO) state.reintegrateAfterISO = state.holdUntilISO;
+  }
+
+  if (earlyReentryEnabled && riskOff && !state.postRiskOffEpisodeStartISO) {
+    state.postRiskOffEpisodeStartISO = now;
+    state.postRiskOffTriggeredAtISO = undefined;
+    state.postRiskOffTriggerCount = 0;
+  }
+  if (earlyReentryEnabled && riskOn && state.phase === 'INACTIVE') {
+    state.postRiskOffEpisodeStartISO = undefined;
+    state.postRiskOffTriggeredAtISO = undefined;
+    state.postRiskOffTriggerCount = 0;
   }
   // Recompute phase from dates if state exists
   if (state.triggeredAtISO && state.addUntilISO && state.holdUntilISO) {
@@ -110,9 +126,17 @@ export const runSleeveLifecycle = ({
   state.currentTier = currentTier;
 
   const engaged = isDislocationActive(currentTier, minActiveTier);
+  const postRiskOffReentry =
+    earlyReentryEnabled && state.postRiskOffEpisodeStartISO && !state.postRiskOffTriggeredAtISO
+      ? evaluatePostRiskOffStabilization({
+          bars: anchorHistory || [],
+          episodeStartISO: state.postRiskOffEpisodeStartISO,
+          config
+        })
+      : null;
 
   // New trigger only allowed from INACTIVE
-  if ((!state.phase || state.phase === 'INACTIVE') && engaged) {
+  if ((!state.phase || state.phase === 'INACTIVE') && (engaged || postRiskOffReentry?.eligible)) {
     const addWeeksCfg = cfg.durationWeeksAdd ?? 3;
     const holdWeeksCfg = cfg.durationWeeksHold ?? 10;
     if (!state.triggeredAtISO) state.triggeredAtISO = now;
@@ -120,13 +144,25 @@ export const runSleeveLifecycle = ({
     if (!state.holdUntilISO) state.holdUntilISO = addWeeks(state.triggeredAtISO, addWeeksCfg + holdWeeksCfg);
     if (!state.reintegrateAfterISO) state.reintegrateAfterISO = state.holdUntilISO;
     state.phase = 'ADD';
+    state.triggerReason = postRiskOffReentry?.eligible ? 'post_risk_off_reentry' : 'dislocation';
     state.entryAnchorPrice = state.entryAnchorPrice ?? anchorPrice;
     if (!state.troughAnchorPrice || (anchorPrice && anchorPrice < state.troughAnchorPrice)) {
       state.troughAnchorPrice = anchorPrice;
       state.troughDateISO = now;
     }
     state.active = true;
-    flags.push({ code: 'DISLOCATION_SLEEVE_TRIGGERED', severity: 'info', message: 'Dislocation sleeve triggered' });
+    if (postRiskOffReentry?.eligible) {
+      state.postRiskOffTriggeredAtISO = now;
+      state.postRiskOffTriggerCount = (state.postRiskOffTriggerCount ?? 0) + 1;
+      flags.push({
+        code: 'POST_RISK_OFF_REENTRY_TRIGGERED',
+        severity: 'info',
+        message: 'Post-risk-off dislocation sleeve trigger fired',
+        observed: postRiskOffReentry.diagnostics
+      });
+    } else {
+      flags.push({ code: 'DISLOCATION_SLEEVE_TRIGGERED', severity: 'info', message: 'Dislocation sleeve triggered' });
+    }
   }
 
   // Phase transitions
@@ -146,8 +182,17 @@ export const runSleeveLifecycle = ({
       observed: { tier: currentTier }
     });
   }
+  if (postRiskOffReentry?.eligible && state.phase === 'REINTEGRATE') {
+    flags.push({
+      code: 'POST_RISK_OFF_REENTRY_IGNORED_DURING_REINTEGRATE',
+      severity: 'info',
+      message: 'Post-risk-off re-entry ignored during reintegrate phase',
+      observed: postRiskOffReentry.diagnostics
+    });
+  }
 
-  if (earlyExitEnabled && (deepFailsafe || (riskOff && riskConf >= riskOffThreshold))) {
+  const sleeveActiveForExit = state.phase === 'ADD' || state.phase === 'HOLD';
+  if (earlyExitEnabled && sleeveActiveForExit && (deepFailsafe || (riskOff && riskConf >= riskOffThreshold))) {
     state.phase = 'REINTEGRATE';
     state.cooldownUntilISO = addWeeks(now, cfg.cooldownWeeks ?? 0);
     flags.push({
@@ -159,10 +204,13 @@ export const runSleeveLifecycle = ({
   }
 
   // Derive active/controls from phase
-  const derived = deriveLifecycleBooleans(state.phase, engaged && state.phase === 'ADD');
+  const addEngaged =
+    (engaged && state.phase === 'ADD') ||
+    (state.phase === 'ADD' && state.triggerReason === 'post_risk_off_reentry');
+  const derived = deriveLifecycleBooleans(state.phase, addEngaged);
   state.active = derived.active;
   const { allowAdd, protectFromSells, allowReintegration } = derived;
-  if (currentTier === 0 && allowAdd) {
+  if (currentTier === 0 && allowAdd && state.triggerReason !== 'post_risk_off_reentry') {
     flags.push({
       code: 'DISLOCATION_IGNORED_TIER0_ADD_ATTEMPT',
       severity: 'error',

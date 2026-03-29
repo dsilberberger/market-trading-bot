@@ -31,6 +31,7 @@ import { accountApiHealthcheck } from './accountHealthcheck';
 import { detectDislocation } from '../src/dislocation/dislocationDetector';
 import { buildFeatures, buildRegimes } from '../src/cli/contextBuilder';
 import { regimeTiltForSymbol } from '../src/strategy/regimeTilts';
+import { mapPolicyExposureCap } from '../src/risk/policyExposureCap';
 
 type PriceSource = 'ETRADE_REAL' | 'SYNTHETIC' | 'SYNTHETIC_FALLBACK';
 
@@ -161,14 +162,8 @@ const defaultUniversalTargetsForRegime = (regime: BaseRegime): Record<string, nu
   return { VTI: 0.45, VXUS: 0.3, USMV: 0.25 };
 };
 
-const mapExposureCap = (equityConfidence: number): number => {
-  if (equityConfidence < 0.35) return 0.35;
-  if (equityConfidence < 0.6) return 0.6;
-  return 1;
-};
-
 const getBaseRegimePolicy = (snap: BaseRegimeSnapshot): BaseRegimePolicy => {
-  let cap = mapExposureCap(snap.equityConfidence);
+  let cap = mapPolicyExposureCap(snap.equityConfidence, snap.baseRegime, snap.volLabel);
   if (snap.volLabel === 'stressed') cap = Math.min(cap, 0.35);
   return {
     baseExposureCapPct: cap,

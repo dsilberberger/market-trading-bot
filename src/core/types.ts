@@ -113,6 +113,16 @@ export interface BotConfig {
     sleeveTag?: string;
     reintegrationMode?: 'passive';
     freezeBaseRebalanceDuringAddHold?: boolean;
+    earlyReentry?: {
+      enabled?: boolean;
+      reserveDeployPctOfCore?: number;
+      minRet3?: number;
+      minRet5?: number;
+      minNonNegativeShare5?: number;
+      offBottomPct?: number;
+      minDaysSinceLow?: number;
+      volCoolingPctOfPeak?: number;
+    };
     earlyExit?: {
       enabled?: boolean;
       riskOffConfidenceThreshold?: number;
@@ -209,12 +219,17 @@ export interface SymbolFeature {
   barInterval?: '1d' | '1w';
   return5d?: number;
   return20d?: number;
+  return4w?: number;
+  return12w?: number;
+  return24w?: number;
   return60d?: number;
   return60dPctile?: number;
   return60dPctileBucket?: 'low' | 'mid' | 'high' | 'unknown';
   realizedVol20d?: number;
   vol20dPctile?: number;
   vol20dPctileBucket?: 'low' | 'mid' | 'high' | 'unknown';
+  agreementScore?: number;
+  stabilityScore?: number;
   maxDrawdown60d?: number;
   trend?: 'up' | 'down' | 'flat';
   above50dma?: boolean;
@@ -314,6 +329,7 @@ export type LedgerEventType =
   | 'FILL_RECORDED'
   | 'RUN_COMPLETED'
   | 'RUN_FAILED'
+  | 'RUN_SKIPPED'
   | 'EXECUTION_SENT_TO_BROKER';
 
 export interface LedgerEvent {

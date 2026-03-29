@@ -75,6 +75,16 @@
     "sleeveTag": "dislocation",
     "reintegrationMode": "passive",
     "freezeBaseRebalanceDuringAddHold": true,
+    "earlyReentry": {
+      "enabled": true,
+      "reserveDeployPctOfCore": 0.15,
+      "minRet3": 0.006,
+      "minRet5": 0.010,
+      "minNonNegativeShare5": 0.80,
+      "offBottomPct": 0.012,
+      "minDaysSinceLow": 3,
+      "volCoolingPctOfPeak": 0.75
+    },
     "earlyExit": {
       "enabled": true,
       "riskOffConfidenceThreshold": 0.70,

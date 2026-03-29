@@ -61,6 +61,7 @@ const main = () => {
   const marketMemo = get('market_memo.json');
   const news = get('news_headlines.json');
   const sleeveSnap = get('sleeve_positions_snapshot.json');
+  const rebalance = get('rebalance.json');
   const ranking = execPlan?.targetWeights || regimes?.targetRanking;
   const dataSources = get('data_sources.json');
   const exposureGroups = loadExposureGroups();
@@ -109,6 +110,7 @@ const main = () => {
       optionOrders: optionOrders?.orders || optionOrders || [],
       fills: fills || []
     },
+    rebalance: rebalance || null,
     sleeves: sleeveSnap || null,
     risk: riskReport || null,
     marketContext: {

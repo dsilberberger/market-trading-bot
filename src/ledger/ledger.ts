@@ -21,7 +21,15 @@ export const appendEvent = (event: LedgerEvent) => {
   appendLedgerEvent(event);
 };
 
-export type RunStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'COMPLETED' | 'FAILED' | 'IN_PROGRESS' | 'UNKNOWN';
+export type RunStatus =
+  | 'PENDING_APPROVAL'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'SKIPPED'
+  | 'IN_PROGRESS'
+  | 'UNKNOWN';
 
 export const getRunStatus = (runId: string): RunStatus => {
   const events = readEventsForRun(runId);
@@ -36,8 +44,14 @@ export const getRunStatus = (runId: string): RunStatus => {
       return 'COMPLETED';
     case 'RUN_REJECTED':
       return 'REJECTED';
-    case 'RUN_FAILED':
+    case 'RUN_SKIPPED':
+      return 'SKIPPED';
+    case 'RUN_FAILED': {
+      const reason = last.details?.reason;
+      const reasons = Array.isArray(reason) ? reason : reason !== undefined && reason !== null ? [String(reason)] : [];
+      if (reasons.includes('NO_EXECUTABLE_ORDERS')) return 'SKIPPED';
       return 'FAILED';
+    }
     case 'RUN_APPROVED':
       return 'APPROVED';
     case 'RUN_PENDING_APPROVAL':
