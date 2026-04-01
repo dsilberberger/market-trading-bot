@@ -1,0 +1,139 @@
+{
+  "date": "2022-03-08",
+  "asOf": "2022-03-08T16:00",
+  "runId": "growth-scout-2020-2022-G0-2022-03-08",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.35151116951379774,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 87598.14244999998,
+  "targetAllocations": {
+    "IEF": 0.32759894923739624,
+    "TIP": 0.32759894923739624,
+    "SHY": 0.32759894923739624,
+    "VXUS": 0.0019995977956723627,
+    "VTI": 0.00769581126888538,
+    "USMV": 0.007507743223253572
+  },
+  "achievedAllocations": {
+    "IEF": 0.32841553444872845,
+    "TIP": 0.32729866638672467,
+    "SHY": 0.3283825641738354,
+    "VXUS": 0.0016769048147019035,
+    "VTI": 0.006915171718464534,
+    "USMV": 0.0073111584575452195
+  },
+  "orders": [
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52887.51624187908,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 1928.923439836657,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (119.00) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 1832.4275429394718,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.55) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 321573.1748252148,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 8.986021435814873,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 4.992012712589901,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 7.988517197701075,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 376359.6356607534,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 263451.74496252736,
+    "coreCashUsd": 208665.28412698873,
+    "coreHeadroomUsd": 208665.28412698873,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 112907.89069822602,
+    "optionsReserveCashUsd": 112907.89069822602,
+    "optionsReserveHeadroomUsd": 112907.89069822602
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0,
+    "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-scout-2020-2022-G0-2022-03-08"
+}

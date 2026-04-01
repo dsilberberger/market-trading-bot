@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { LedgerEvent, LedgerEventType } from '../core/types';
+import { runtimeNowISO } from '../core/time';
 import { appendLedgerEvent, readEventsForRun, readLedgerEvents } from './storage';
 
 const safeUuid = () => {
@@ -12,7 +13,7 @@ const safeUuid = () => {
 export const makeEvent = (runId: string, type: LedgerEventType, details?: Record<string, unknown>): LedgerEvent => ({
   id: safeUuid(),
   runId,
-  timestamp: new Date().toISOString(),
+  timestamp: runtimeNowISO(),
   type,
   details
 });

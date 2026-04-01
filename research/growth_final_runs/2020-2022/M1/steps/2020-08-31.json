@@ -1,0 +1,85 @@
+{
+  "date": "2020-08-31",
+  "asOf": "2020-08-31T16:00",
+  "runId": "growth-final-2020-2022-M1-2020-08-31",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.8739329085006613,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 87487.9145,
+  "targetAllocations": {},
+  "achievedAllocations": {},
+  "orders": [],
+  "holdingsAfterExecution": {
+    "cash": 178501.5,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 863.568215892054,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 504.7476261869066,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 701.6491754122939,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 357093.523988006,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 249965.46679160418,
+    "coreCashUsd": 71373.44280359818,
+    "coreHeadroomUsd": 71373.44280359818,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 107128.0571964018,
+    "optionsReserveCashUsd": 107128.0571964018,
+    "optionsReserveHeadroomUsd": 107128.0571964018
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffEpisodeStartISO": "2020-08-04T06:00:00.000Z",
+    "postRiskOffTriggerCount": 0
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-final-2020-2022-M1-2020-08-31"
+}

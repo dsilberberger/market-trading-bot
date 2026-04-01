@@ -1,0 +1,152 @@
+{
+  "date": "2022-02-15",
+  "asOf": "2022-02-15T16:00",
+  "runId": "growth-scout-2020-2022-G8-2022-02-15",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.35186029168047744,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 95904.34157499998,
+  "targetAllocations": {
+    "IEF": 0.22264079244694382,
+    "TIP": 0.22264079244694382,
+    "SHY": 0.22264079244694382,
+    "VXUS": 0.11638593106439492,
+    "VTI": 0.11226482175176791,
+    "USMV": 0.10342686984300552
+  },
+  "achievedAllocations": {
+    "IEF": 0.2228070311165401,
+    "TIP": 0.22316510227034886,
+    "SHY": 0.22287874989362413,
+    "VXUS": 0.11604798592555592,
+    "VTI": 0.11140424738252602,
+    "USMV": 0.10369688341140505
+  },
+  "orders": [
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52498.490754622704,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 51551.72406296852,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (71.73) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 49777.463283358324,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (118.26) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 45757.112068965514,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.23) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 327875.36233812245,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 152.64453816113462,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 88.79202219800561,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 124.71153117788276,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 411975.1431530677,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 288382.60020714736,
+    "coreCashUsd": 204282.81939220213,
+    "coreHeadroomUsd": 204282.81939220213,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 123592.5429459203,
+    "optionsReserveCashUsd": 123592.5429459203,
+    "optionsReserveHeadroomUsd": 123592.5429459203
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0,
+    "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-scout-2020-2022-G8-2022-02-15"
+}

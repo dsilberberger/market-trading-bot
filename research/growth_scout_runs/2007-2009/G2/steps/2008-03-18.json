@@ -1,0 +1,223 @@
+{
+  "date": "2008-03-18",
+  "asOf": "2008-03-18T16:00",
+  "runId": "growth-scout-2007-2009-G2-2008-03-18",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 1,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 78200.5875,
+  "targetAllocations": {
+    "USMV": 0.48377097179509027,
+    "VXUS": 0.20399814689615967,
+    "VTI": 0.31223088130875015
+  },
+  "achievedAllocations": {
+    "USMV": 0.4839847177570136,
+    "VXUS": 0.20402326634057796,
+    "VTI": 0.3119920159024085
+  },
+  "orders": [
+    {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 42485.30059770115,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 41111.24625687158,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 36872.93101349325,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 23576.228050974518,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 60.00067225290213,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (91.93) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 47.33150712792862,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (66.24) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 90869.07882917587,
+    "holdings": [
+      {
+        "symbol": "IEF",
+        "quantity": 244.87756121939034,
+        "avgPrice": 87.54357491249999,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 797.9995004995016,
+        "avgPrice": 63.60932346554088,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 432.78360819590205,
+        "avgPrice": 83.3462595391836,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "VXUS",
+        "quantity": 483.7586201905292,
+        "avgPrice": 50.32311348346574,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "TIP",
+        "quantity": 367.81609195402297,
+        "avgPrice": 110.5658362905,
+        "holdSince": "2008-01-23T08:00:00.000Z"
+      },
+      {
+        "symbol": "SHY",
+        "quantity": 789.6051974012995,
+        "avgPrice": 51.49651538999999,
+        "holdSince": "2008-01-23T08:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 405.9995002497507,
+        "avgPrice": 71.80878228528,
+        "holdSince": "2008-02-06T08:00:00.000Z"
+      }
+    ],
+    "equity": 319238.4943884834,
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:PUT:59.8809:2008-05-14",
+        "type": "PUT",
+        "strike": 59.8808655,
+        "expiry": "2008-05-14",
+        "contracts": 33,
+        "multiplier": 100,
+        "avgOpenPrice": 3.657543169736843,
+        "openDate": "2008-02-19T16:00",
+        "costBasisUsd": 12069.892460131581,
+        "marketPrice": 1.860855296883657,
+        "marketValueUsd": 6140.822479716067,
+        "unrealizedPnlUsd": -5929.069980415514
+      }
+    ],
+    "optionsMarketValueUsd": 6140.822479716067
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 223466.94607193838,
+    "coreCashUsd": 1238.3529923468886,
+    "coreHeadroomUsd": 1238.3529923468886,
+    "executedDislocationCoreUsageUsd": 39116.75034114196,
+    "optionsReserveCapitalUsd": 95771.54831654501,
+    "optionsReserveCashUsd": 83701.65585641343,
+    "optionsReserveHeadroomUsd": 83701.65585641343
+  },
+  "executedOptionReserveUsageUsd": 12069.892460131581,
+  "executedReserveUsageUsd": 12069.892460131581,
+  "reserveUsageUsd": 12069.892460131581,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_ACTIVE",
+      "message": "Market dislocation active",
+      "observed": {
+        "expiresISO": "2008-02-27T08:00:00.000Z",
+        "remainingWeeks": 0
+      }
+    },
+    {
+      "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+      "message": "Dislocation sleeve early exit",
+      "observed": {
+        "riskOff": true,
+        "riskConf": 1,
+        "anchorPrice": 60.060688,
+        "entryAnchorPrice": 76.126195
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "REINTEGRATE",
+    "postRiskOffEpisodeStartISO": "2007-07-25T06:00:00.000Z",
+    "postRiskOffTriggerCount": 0,
+    "currentTier": 3,
+    "lastTier": 2,
+    "lastTierChangeISO": "2008-02-13T08:00:00.000Z",
+    "triggeredAtISO": "2008-02-06T08:00:00.000Z",
+    "addUntilISO": "2008-02-27T08:00:00.000Z",
+    "holdUntilISO": "2008-05-07T07:00:00.000Z",
+    "reintegrateAfterISO": "2008-05-07T07:00:00.000Z",
+    "triggerReason": "dislocation",
+    "entryAnchorPrice": 76.126195,
+    "troughAnchorPrice": 76.126195,
+    "troughDateISO": "2008-02-06T08:00:00.000Z",
+    "cooldownUntilISO": "2008-04-02T06:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-scout-2007-2009-G2-2008-03-18"
+}

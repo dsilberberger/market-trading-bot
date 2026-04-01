@@ -1,0 +1,10 @@
+{
+  "status": "DEPLOYED",
+  "openedRunId": "growth-scout-2007-2009-G0-2009-12-29",
+  "openedAsOf": "2009-12-01T16:00",
+  "underlying": "VTI",
+  "expiry": "2010-02-24",
+  "strike": 81.19661289000001,
+  "contracts": 30,
+  "premiumUSD": 8056.733914010252
+}

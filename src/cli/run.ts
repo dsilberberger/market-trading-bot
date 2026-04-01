@@ -6,6 +6,7 @@ import { parseAsOfDateTime } from '../core/time';
 import { loadConfig, loadUniverse, ensureDir, readJSONFile } from '../core/utils';
 import { getMarketDataProvider } from '../data/marketData';
 import { getBroker, ETradeBroker, StubBroker } from '../broker/broker';
+import { Broker } from '../broker/broker.types';
 import { generateLLMProposal } from '../strategy/llmProposer';
 import { runDeterministicBaseline } from '../strategy/deterministicBaseline';
 import { runRandomBaseline } from '../strategy/randomBaseline';
@@ -15,7 +16,7 @@ import { evaluateRisk } from '../risk/riskEngine';
 import { currentDrawdown } from '../analytics/performance';
 import { executeOrders } from '../execution/executionEngine';
 import { BotConfig, ProposalResult, TradeOrder } from '../core/types';
-import { generateBaseArtifacts } from './contextBuilder';
+import { ContextOptions, generateBaseArtifacts } from './contextBuilder';
 import { anchorInvalidations } from '../risk/invalidationAnchor';
 import { applyDecisionPolicyGate } from '../risk/decisionPolicyGate';
 import { assertRound5Input } from '../risk/round5Guards';
@@ -34,12 +35,20 @@ import { computePostRiskOffReentryBudget } from '../dislocation/postRiskOffReent
 import { loadExposureGroups, symbolToExposureKey, canonicalSymbolForExposure } from '../core/exposureGroups';
 import { planCanonicalization } from '../execution/canonicalizeExposureGroups';
 import {
+  applyFilledSleeveOrders,
   loadSleevePositions,
   reconcileSleevePositions,
   saveSleevePositions,
   snapshotSleevePositions
 } from '../dislocation/sleevePositions';
-import { computeBudgets, computeNav, clampBuyOrdersToBudget, computeCoreDeployPct } from '../core/capital';
+import {
+  computeBudgets,
+  computeCapitalLanes,
+  computeCoreDeployPct,
+  computeNav,
+  computeOptionReserveUsageUsd,
+  clampBuyOrdersToBudget
+} from '../core/capital';
 import { spawnSync } from 'child_process';
 import { arbitrateSleeves } from '../sleeves/sleeveArbitration';
 import { selectOptionsUnderlying } from '../sleeves/optionsUnderlying';
@@ -47,6 +56,7 @@ import { planInsuranceSleeve, saveInsuranceState } from '../sleeves/insuranceSle
 import { planGrowthSleeve } from '../sleeves/growthSleeve';
 import { ETradeMarketDataProvider } from '../data/marketData.etrade';
 import { StubMarketDataProvider } from '../data/marketData.stub';
+import { MarketDataProvider } from '../data/marketData.types';
 
 const program = new Command();
 
@@ -66,6 +76,14 @@ export interface RunOptions {
   force?: boolean;
   autoExec?: boolean;
   runId?: string;
+  configOverride?: BotConfig;
+  universeOverride?: string[];
+  marketDataOverride?: MarketDataProvider;
+  brokerOverride?: Broker;
+  priorRegimes?: any;
+  priorRegimeState?: { label?: string; timeInRegimeWeeks?: number };
+  contextOptions?: Partial<ContextOptions>;
+  skipReports?: boolean;
 }
 
 const loadPreviousRegimes = (currentRunId: string): any | undefined => {
@@ -116,7 +134,7 @@ export const runBot = async (options: RunOptions) => {
   const configPath = process.env.BOT_CONFIG_PATH
     ? path.resolve(process.cwd(), process.env.BOT_CONFIG_PATH)
     : path.resolve(process.cwd(), 'src/config/default.json');
-  const config: BotConfig = loadConfig(configPath);
+  const config: BotConfig = options.configOverride ?? loadConfig(configPath);
   const rebalanceDay = config.rebalanceDay?.toUpperCase?.() ?? 'WEDNESDAY';
   if (config.cadence === 'weekly' && !forceRun) {
     const day = new Date(asOf).getUTCDay(); // 0 Sunday ... 6 Saturday
@@ -129,9 +147,9 @@ export const runBot = async (options: RunOptions) => {
     }
   }
 
-  const universe = loadUniverse(path.resolve(process.cwd(), config.universeFile));
-  const marketData = getMarketDataProvider(runMode as any);
-  const broker = getBroker(config, marketData, runMode as any);
+  const universe = options.universeOverride ?? loadUniverse(path.resolve(process.cwd(), config.universeFile));
+  const marketData = options.marketDataOverride ?? getMarketDataProvider(runMode as any);
+  const broker = options.brokerOverride ?? getBroker(config, marketData, runMode as any);
   const brokerProvider = (process.env.BROKER_PROVIDER || 'stub').toLowerCase();
   const resolvedProviders = {
     marketData: marketData instanceof ETradeMarketDataProvider ? 'etrade' : marketData instanceof StubMarketDataProvider ? 'stub' : 'unknown',
@@ -162,14 +180,34 @@ export const runBot = async (options: RunOptions) => {
     }
   };
 
-  const { inputs } = await generateBaseArtifacts(asOf, runId, config, universe, marketData, { mode: runMode }, broker);
+  const { inputs } = await generateBaseArtifacts(
+    asOf,
+    runId,
+    config,
+    universe,
+    marketData,
+    {
+      ...(options.contextOptions || {}),
+      mode: runMode,
+      priorRegimeState: options.priorRegimeState
+    },
+    broker
+  );
 
   appendEvent(makeEvent(runId, 'RUN_STARTED', { mode: runMode, dryRun: dry, asOf }));
   writeRunArtifact(runId, 'inputs.json', inputs);
   appendEvent(makeEvent(runId, 'INPUTS_WRITTEN', { symbols: universe.length }));
 
   // Capital partition (core/reserve)
-  const navResult = computeNav(inputs.portfolio.holdings || [], inputs.portfolio.cash || 0, inputs.quotes || {});
+  const navResult = computeNav(
+    inputs.portfolio.holdings || [],
+    inputs.portfolio.cash || 0,
+    inputs.quotes || {},
+    inputs.portfolio.optionsMarketValueUsd || 0
+  );
+  const optionPositionsArtifact = readArtifact<{ positions?: any[] }>('optionPositions.json', { positions: [] });
+  const optionMarksArtifact = readArtifact<{ marks?: any[] }>('optionMarks.json', { marks: [] });
+  const executedOptionReserveUsageUsd = computeOptionReserveUsageUsd(optionPositionsArtifact.positions || []);
   const budgets = computeBudgets(navResult.nav, config);
   const capitalPools = readArtifact<{ reservePoolUsd?: number; corePoolUsd?: number }>('capitalPools.json', {
     reservePoolUsd: budgets.reserveBudget,
@@ -177,9 +215,15 @@ export const runBot = async (options: RunOptions) => {
   });
   const reservePoolUsd = capitalPools?.reservePoolUsd ?? budgets.reserveBudget;
   const corePoolUsd = capitalPools?.corePoolUsd ?? budgets.coreBudget;
-  const coreCashBudget = Math.max(0, (inputs.portfolio.cash || 0) - reservePoolUsd);
-  const optionPositionsArtifact = readArtifact<{ positions?: any[] }>('optionPositions.json', { positions: [] });
-  const optionMarksArtifact = readArtifact<{ marks?: any[] }>('optionMarks.json', { marks: [] });
+  const capitalLanes = computeCapitalLanes({
+    navUsd: navResult.nav,
+    etfInvestedUsd: navResult.invested,
+    cashUsd: navResult.cash,
+    executedOptionReserveUsageUsd,
+    config
+  });
+  const coreCashBudget = capitalLanes.coreCashUsd;
+  const optionsReserveCashBudget = capitalLanes.optionsReserveCashUsd;
   const regimesArtifact = readArtifact<any>('regimes.json', {});
   const dataAdequacy = readArtifact<{ adequate?: boolean; observed?: any }>('dataAdequacy.json', { adequate: true });
   if (!dataAdequacy.adequate) {
@@ -195,12 +239,25 @@ export const runBot = async (options: RunOptions) => {
     cash: navResult.cash,
     coreBudget: corePoolUsd,
     reserveBudget: reservePoolUsd,
-    coreCashBudget
+    coreCashBudget,
+    optionsReserveCashBudget,
+    capitalLanes: {
+      coreCapitalUsd: capitalLanes.coreCapitalUsd,
+      coreCashUsd: capitalLanes.coreCashUsd,
+      coreHeadroomUsd: capitalLanes.coreHeadroomUsd,
+      optionsReserveCapitalUsd: capitalLanes.optionsReserveCapitalUsd,
+      optionsReserveCashUsd: capitalLanes.optionsReserveCashUsd,
+      optionsReserveHeadroomUsd: capitalLanes.optionsReserveHeadroomUsd,
+      executedOptionReserveUsageUsd: capitalLanes.executedOptionReserveUsageUsd,
+      unassignedCashUsd: capitalLanes.unassignedCashUsd
+    }
   });
   writeRunArtifact(runId, 'capital_deployment.json', {
     asOf,
     corePoolUsd,
     reservePoolUsd,
+    coreCashUsd: capitalLanes.coreCashUsd,
+    optionsReserveCashUsd: capitalLanes.optionsReserveCashUsd,
     coreDeployPct,
     deployBudgetUsd,
     basis: {
@@ -215,13 +272,13 @@ export const runBot = async (options: RunOptions) => {
   const sleeveEnv = process.env.ETRADE_ENV || 'default';
   const sleeveAccountKey = process.env.ETRADE_ACCOUNT_ID_KEY || undefined;
   const existingSleeve = loadSleevePositions(sleeveEnv, sleeveAccountKey);
-  const reconciledSleeve = reconcileSleevePositions(inputs.portfolio.holdings || [], existingSleeve);
+  const reconciledSleeve = reconcileSleevePositions(inputs.portfolio.holdings || [], existingSleeve, asOf);
   const sleevePositions = reconciledSleeve.positions;
   if (reconciledSleeve.flags.length) {
     writeRunArtifact(runId, 'round5_flags.json', reconciledSleeve.flags);
   }
   saveSleevePositions(sleevePositions, sleeveEnv, sleeveAccountKey);
-  writeRunArtifact(runId, 'sleeve_positions_snapshot.json', snapshotSleevePositions(sleevePositions));
+  writeRunArtifact(runId, 'sleeve_positions_snapshot.json', snapshotSleevePositions(sleevePositions, asOf));
 
   let proposal: ProposalResult | null = null;
   const chosenStrategy: string = strategyOpt || (config.useLLM ? 'llm' : 'deterministic');
@@ -273,8 +330,8 @@ export const runBot = async (options: RunOptions) => {
   const rawBudget =
     typeof deployBudgetUsd === 'number'
       ? deployBudgetUsd
-      : typeof inputs?.portfolio?.cash === 'number' && inputs.portfolio.cash > 0
-      ? inputs.portfolio.cash
+      : capitalLanes.coreCashUsd > 0
+      ? capitalLanes.coreCashUsd
       : inputs?.portfolio?.equity ?? 0;
   const minCashUSD = Math.max(0, config.minCashPct * (inputs?.portfolio?.equity ?? rawBudget));
   const round0SummaryPath = path.join(runDir, 'round0_summary.json');
@@ -301,8 +358,33 @@ export const runBot = async (options: RunOptions) => {
     transitionRisk
   });
   const baseExposureCap = exposureCap;
+  const proposalEstimatedSellProceedsUsd = (proposal?.intent?.orders || [])
+    .filter((order) => order.side === 'SELL')
+    .reduce((sum, order) => sum + Math.abs(order.notionalUSD || 0), 0);
+  const coreBuyCapacityUsd = Math.max(
+    0,
+    Math.min(capitalLanes.coreCashUsd + proposalEstimatedSellProceedsUsd, capitalLanes.coreHeadroomUsd + proposalEstimatedSellProceedsUsd)
+  );
   const capBudget = Math.min(deployBudgetUsd, (inputs?.portfolio?.equity ?? rawBudget) * exposureCap);
-  const buyBudgetUSD = Math.max(0, Math.min(deployBudgetUsd, rawBudget - minCashUSD, capBudget));
+  const buyBudgetUSD = Math.max(0, Math.min(deployBudgetUsd, coreBuyCapacityUsd, capBudget));
+  writeRunArtifact(runId, 'capital_deployment.json', {
+    asOf,
+    corePoolUsd,
+    reservePoolUsd,
+    coreCashUsd: capitalLanes.coreCashUsd,
+    optionsReserveCashUsd: capitalLanes.optionsReserveCashUsd,
+    coreDeployPct,
+    deployBudgetUsd,
+    exposureCap,
+    capBudgetUsd: capBudget,
+    buyBudgetUSD,
+    basis: {
+      equityRegimeLabel: regimesArtifact?.equityRegime?.label ?? null,
+      equityRegimeConfidence: regimesArtifact?.equityRegime?.confidence ?? null,
+      confidenceScale
+    },
+    warnings: []
+  });
   const proxiesMap: Record<string, string[]> =
     config.allowExecutionProxies && config.proxiesFile
       ? readJSONFile<Record<string, string[]>>(path.resolve(process.cwd(), config.proxiesFile))
@@ -507,7 +589,7 @@ export const runBot = async (options: RunOptions) => {
       }
     }
   }
-  const priorRegimes = loadPreviousRegimes(runId);
+  const priorRegimes = options.priorRegimes ?? loadPreviousRegimes(runId);
   const freezeBase = (config.dislocation?.freezeBaseRebalanceDuringAddHold ?? true) &&
     (sleeveLifecycle.state.phase === 'ADD' || sleeveLifecycle.state.phase === 'HOLD');
   const riskOffExit =
@@ -542,11 +624,26 @@ export const runBot = async (options: RunOptions) => {
 
   // Opportunistic dislocation buys (incremental)
   let dislocationExtraOrders: TradeOrder[] = [];
-  if (sleeveLifecycle.allowAdd && config.dislocation?.enabled) {
-    const extra = config.dislocation.overlayExtraExposurePct ?? config.dislocation.opportunisticExtraExposurePct ?? 0;
+  const handoffState = sleeveLifecycle.state as typeof sleeveLifecycle.state & {
+    handoffStartedAtISO?: string;
+    handoffEndsAtISO?: string;
+    handoffBaseExtraExposurePct?: number;
+  };
+  const handoffActive =
+    llmContext?.regimes?.equityRegime?.label !== 'risk_off' &&
+    !!handoffState.handoffStartedAtISO &&
+    !!handoffState.handoffEndsAtISO &&
+    (handoffState.handoffBaseExtraExposurePct ?? 0) > 0 &&
+    new Date(asOf).getTime() < new Date(handoffState.handoffEndsAtISO).getTime();
+  if ((sleeveLifecycle.allowAdd || handoffActive) && config.dislocation?.enabled) {
+    const extra =
+      dislocation.overlayExtraExposurePct ??
+      config.dislocation.overlayExtraExposurePct ??
+      config.dislocation.opportunisticExtraExposurePct ??
+      0;
     const maxTotal = config.dislocation.maxTotalExposureCapPct ?? 1.0;
     const isPostRiskOffReentry = sleeveLifecycle.state.triggerReason === 'post_risk_off_reentry';
-    if (extra > 0 || isPostRiskOffReentry) {
+    if (extra > 0 || isPostRiskOffReentry || handoffActive) {
       let basePlannedBuysUSD = 0;
       let basePlannedSellsUSD = 0;
       for (const o of rebalance.combinedOrders || []) {
@@ -572,18 +669,16 @@ export const runBot = async (options: RunOptions) => {
     .map((t) => priceMap[t.symbol])
     .filter((p) => typeof p === 'number' && p > 0)
     .sort((a, b) => a - b)[0];
-      const reserveOnlyCash = Math.max(0, (inputs.portfolio.cash || 0) - corePoolUsd);
       const overlayBudget = isPostRiskOffReentry
         ? (() => {
             const budget = computePostRiskOffReentryBudget({
               corePoolUsd,
-              reservePoolUsd,
-              reserveOnlyCashUsd: reserveOnlyCash,
+              coreCashUsd: coreCashBudget,
               config
             });
             return {
               overlayBudgetUSD: budget.budgetUSD,
-              availableCashUSD: reserveOnlyCash,
+              availableCashUSD: coreCashBudget,
               remainingInvestCapacityUSD: budget.budgetUSD,
               requestedBudgetUSD: budget.requestedBudgetUSD,
               source: 'post_risk_off_reentry',
@@ -591,14 +686,27 @@ export const runBot = async (options: RunOptions) => {
             };
           })()
         : computeOverlayBudget({
+            asOf,
             equityUSD: inputs.portfolio.equity ?? rawBudget,
-            cashUSD: inputs.portfolio.cash ?? 0,
-            minCashUSD,
+            cashUSD: coreCashBudget,
+            minCashUSD: 0,
             overlayExtraExposurePct: extra,
             maxTotalExposureCapPct: maxTotal,
             currentInvestedUSD,
             cheapestOverlayPrice,
-            overlayMinBudgetUSD: config.dislocation.overlayMinBudgetUSD
+            overlayMinBudgetUSD: config.dislocation.overlayMinBudgetUSD,
+            overlayMinBudgetPolicy: config.dislocation.overlayMinBudgetPolicy,
+            phase: sleeveLifecycle.state.phase,
+            baseExposureCapPct: baseExposureCap,
+            allowAdd: sleeveLifecycle.allowAdd,
+            dislocationActive: dislocation.tierEngaged,
+            handoffStartedAtISO: handoffActive ? handoffState.handoffStartedAtISO : undefined,
+            handoffEndsAtISO: handoffActive ? handoffState.handoffEndsAtISO : undefined,
+            handoffBaseExtraExposurePct: handoffActive ? handoffState.handoffBaseExtraExposurePct : undefined,
+            pacingDeployPct:
+              dislocation.tier !== undefined
+                ? config.dislocation?.pacing?.tierMaxDeployPctOfOverlayPerWeek?.[String(dislocation.tier)] ?? 1
+                : 1
           });
       const maxSpendOverride = overlayBudget.overlayBudgetUSD;
       if (maxSpendOverride > 0 && overlayTargetsEffective.length) {
@@ -633,17 +741,29 @@ export const runBot = async (options: RunOptions) => {
               ? JSON.parse(fs.readFileSync(path.join(runDir, 'round5_flags.json'), 'utf-8'))
               : []) || [];
           existingFlags.push({
-            code: isPostRiskOffReentry ? 'POST_RISK_OFF_REENTRY_ACTIVE' : 'DISLOCATION_ACTIVE',
+            code: isPostRiskOffReentry
+              ? 'POST_RISK_OFF_REENTRY_ACTIVE'
+              : overlayBudget.source === 'handoff_decay'
+                ? 'DISLOCATION_HANDOFF_ACTIVE'
+                : 'DISLOCATION_ACTIVE',
             severity: 'info',
             message: isPostRiskOffReentry
               ? 'Post-risk-off dislocation sleeve buys added'
-              : 'Opportunistic dislocation buys added',
+              : overlayBudget.source === 'handoff_decay'
+                ? 'Dislocation handoff buys added'
+                : 'Opportunistic dislocation buys added',
             observed: isPostRiskOffReentry
               ? {
                   reserveDeployPctOfCore: config.dislocation?.earlyReentry?.reserveDeployPctOfCore ?? 0.15,
                   overlayBudgetUSD: maxSpendOverride
                 }
-              : { extraPct: extra, dislocationCap: maxTotal, baseExposureCap, overlayBudgetUSD: maxSpendOverride }
+              : {
+                  extraPct: extra,
+                  dislocationCap: maxTotal,
+                  baseExposureCap,
+                  overlayBudgetUSD: maxSpendOverride,
+                  source: overlayBudget.source
+                }
           });
           writeRunArtifact(runId, 'round5_flags.json', existingFlags);
         }
@@ -748,7 +868,8 @@ export const runBot = async (options: RunOptions) => {
   // Sleeve arbitration (for future options sleeves)
   const sleeves = arbitrateSleeves({
     regimes: llmContext?.regimes,
-    dislocationActive: sleeveLifecycle.allowAdd || sleeveLifecycle.protectFromSells
+    dislocationActive: sleeveLifecycle.allowAdd || sleeveLifecycle.protectFromSells,
+    config
   });
   const hedgeUnderlying = selectOptionsUnderlying('HEDGE', config);
   const growthUnderlying = selectOptionsUnderlying('GROWTH', config);
@@ -765,7 +886,6 @@ export const runBot = async (options: RunOptions) => {
   });
 
   // Insurance sleeve planning (reserve budget only)
-  const reserveOnlyCash = Math.max(0, (inputs.portfolio.cash || 0) - corePoolUsd);
   const insurancePlan = await planInsuranceSleeve({
     runId,
     asOf,
@@ -773,10 +893,18 @@ export const runBot = async (options: RunOptions) => {
     arbitratorAllowed: sleeves.allowed.insurance,
     reserveBudget: reservePoolUsd,
     reservePoolUsd: reservePoolUsd,
-    cashAvailable: reserveOnlyCash,
+    cashAvailable: optionsReserveCashBudget,
     quotes,
     optionPositions: optionPositionsArtifact.positions || [],
     optionMarks: optionMarksArtifact.marks || [],
+    regimes: llmContext?.regimes,
+    dislocationState: {
+      active: Boolean(dislocation?.tierEngaged),
+      phase: sleeveLifecycle.state.phase,
+      currentTier: sleeveLifecycle.state.currentTier ?? dislocation?.tier ?? 0,
+      triggeredAtISO: sleeveLifecycle.state.triggeredAtISO,
+      postRiskOffEpisodeStartISO: sleeveLifecycle.state.postRiskOffEpisodeStartISO
+    },
     env: process.env.ETRADE_ENV,
     accountKey: process.env.ETRADE_ACCOUNT_ID_KEY
   });
@@ -788,7 +916,7 @@ export const runBot = async (options: RunOptions) => {
     arbitratorAllowed: sleeves.allowed.growthConvexity,
     reserveBudget: reservePoolUsd,
     reservePoolUsd: reservePoolUsd,
-    cashAvailable: reserveOnlyCash,
+    cashAvailable: optionsReserveCashBudget,
     quotes,
     optionPositions: optionPositionsArtifact.positions || [],
     optionMarks: optionMarksArtifact.marks || [],
@@ -823,6 +951,13 @@ export const runBot = async (options: RunOptions) => {
     if (!plan) return;
     const action = plan.plannedAction;
     if (!action || action === 'NONE') return;
+    if (action === 'ROLL') {
+      const closePlan = { ...plan, plannedAction: 'CLOSE', order: plan.order };
+      const openPlan = { ...plan, plannedAction: 'OPEN', order: plan.rollOrder || plan.order };
+      planToOrders(closePlan, sleeve);
+      planToOrders(openPlan, sleeve);
+      return;
+    }
     const order = plan.order || {};
     const type = sleeve === 'INSURANCE' ? 'PUT' : 'CALL';
     const reasonTags: string[] = [];
@@ -860,8 +995,8 @@ export const runBot = async (options: RunOptions) => {
     afterContracts: number | null;
     reason: string;
   }> = [];
-  if (plannedPremiumOpen > reservePoolUsd && plannedPremiumOpen > 0) {
-    const scale = reservePoolUsd / plannedPremiumOpen;
+  if (plannedPremiumOpen > optionsReserveCashBudget && plannedPremiumOpen > 0) {
+    const scale = optionsReserveCashBudget / plannedPremiumOpen;
     const updated: typeof optionOrders = [];
     for (const o of optionOrders) {
       if (o.action !== 'OPEN') {
@@ -902,11 +1037,12 @@ export const runBot = async (options: RunOptions) => {
     asOf,
     round: 4,
     reservePoolUsd,
+    optionsReserveCashUsd: optionsReserveCashBudget,
     startingPositions,
     orders: optionOrders,
     summary: {
       estimatedPremiumSpendUsd: projectedSpend,
-      reserveRemainingUsd: Math.max(0, reservePoolUsd - projectedSpend)
+      reserveRemainingUsd: Math.max(0, optionsReserveCashBudget - clampedPremiumOpen)
     },
     warnings: []
   };
@@ -920,7 +1056,10 @@ export const runBot = async (options: RunOptions) => {
     .filter((o) => o.side === 'BUY')
     .reduce((acc, o) => acc + (o.notionalUSD || 0), 0);
   const etfPlannedSellUsd = sellProceeds;
-  const allowedBuyBudget = Math.max(0, Math.min(deployBudgetUsd, corePoolUsd, coreCashBudget + sellProceeds));
+  const allowedBuyBudget = Math.max(
+    0,
+    Math.min(deployBudgetUsd, coreCashBudget + sellProceeds, capitalLanes.coreHeadroomUsd + sellProceeds)
+  );
   let etfAdjustments: Array<{
     symbol: string;
     beforeNotional: number;
@@ -1058,12 +1197,13 @@ export const runBot = async (options: RunOptions) => {
   const hasExecutableEtfOrders =
     planner.status !== 'UNEXECUTABLE' && (proposal.intent.orders || []).some((o) => o.side === 'BUY' || o.side === 'SELL');
   const hasExecutableOptionOrders = optionOrders.some(
-    (o) => (o.action === 'OPEN' || o.action === 'CLOSE') && (o.estimatedPremiumUsd || 0) <= reservePoolUsd
+    (o) => (o.action === 'OPEN' || o.action === 'CLOSE') && (o.estimatedPremiumUsd || 0) <= optionsReserveCashBudget
   );
   const round5Flags: any[] = [];
   let narrativesGenerated = false;
   let consolidatedGenerated = false;
   const generateNarrativesOnce = () => {
+    if (options.skipReports) return;
     if (narrativesGenerated) return;
     [0, 1, 2, 3, 4, 5, 6].forEach((r) => generateRoundNarrative(runId, r as any));
     generateRound6Metrics(runId);
@@ -1071,6 +1211,7 @@ export const runBot = async (options: RunOptions) => {
     narrativesGenerated = true;
   };
   const generateConsolidatedOnce = () => {
+    if (options.skipReports) return;
     if (consolidatedGenerated) return;
     try {
       const res = spawnSync('ts-node', ['scripts/generateConsolidatedReport.ts', runId], { stdio: 'inherit' });
@@ -1184,6 +1325,22 @@ export const runBot = async (options: RunOptions) => {
     mode: runMode as any,
     brokerProvider
   });
+  if (execution.fills.length && execution.placedOrders?.length) {
+    const ordersById = Object.fromEntries(execution.placedOrders.map((entry) => [entry.orderId, entry.order]));
+    const updatedSleevePositions = applyFilledSleeveOrders({
+      positions: sleevePositions,
+      fills: execution.fills.filter(
+        (fill) =>
+          typeof fill?.orderId === 'string' &&
+          typeof fill?.symbol === 'string' &&
+          typeof fill?.quantity === 'number'
+      ),
+      ordersById,
+      asOf
+    });
+    saveSleevePositions(updatedSleevePositions, sleeveEnv, sleeveAccountKey);
+    writeRunArtifact(runId, 'sleeve_positions_snapshot.json', snapshotSleevePositions(updatedSleevePositions, asOf));
+  }
   appendEvent(makeEvent(runId, 'RUN_COMPLETED', { fills: execution.fills.length }));
   console.log(`Run ${runId} completed with ${execution.fills.length} fills.`);
   generateNarrativesOnce();

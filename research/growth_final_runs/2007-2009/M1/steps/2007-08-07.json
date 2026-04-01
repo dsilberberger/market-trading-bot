@@ -1,0 +1,146 @@
+{
+  "date": "2007-08-07",
+  "asOf": "2007-08-07T16:00",
+  "runId": "growth-final-2007-2009-M1-2007-08-07",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.375,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 81193.91647499999,
+  "targetAllocations": {
+    "TIP": 0.47746849614245146,
+    "SHY": 0.47746849614245146,
+    "USMV": 0.022820242698614563,
+    "VXUS": 0.022242765016482573
+  },
+  "achievedAllocations": {
+    "TIP": 0.47776319063596134,
+    "SHY": 0.4777262531729935,
+    "USMV": 0.02229854952350282,
+    "VXUS": 0.022212006667542226
+  },
+  "orders": [
+    {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 21469.61863068466,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 4026.971426311417,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (70.98) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 21443.843678160923,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 3886.320567703446,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (60.77) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 302322.5668326136,
+    "holdings": [
+      {
+        "symbol": "IEF",
+        "quantity": 244.87756121939034,
+        "avgPrice": 87.54357491249999,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 25.97103875889276,
+        "avgPrice": 72.094705338,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 259.87006496751627,
+        "avgPrice": 82.39394838599999,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "VXUS",
+        "quantity": 30.96654551052083,
+        "avgPrice": 61.7954612895,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      }
+    ],
+    "equity": 348842.07997514954,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 244189.45598260465,
+    "coreCashUsd": 197669.94284006872,
+    "coreHeadroomUsd": 197669.94284006872,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 104652.62399254486,
+    "optionsReserveCashUsd": 104652.62399254486,
+    "optionsReserveHeadroomUsd": 104652.62399254486
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "postRiskOffEpisodeStartISO": "2007-07-25T06:00:00.000Z",
+    "postRiskOffTriggerCount": 0,
+    "currentTier": 0
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-final-2007-2009-M1-2007-08-07"
+}

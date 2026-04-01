@@ -1,0 +1,190 @@
+{
+  "date": "2022-06-20",
+  "asOf": "2022-06-20T16:00",
+  "runId": "growth-scout-2020-2022-G8-2022-06-20",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.375,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 95568.71607499999,
+  "targetAllocations": {
+    "VXUS": 0.4735349262858919,
+    "VTI": 0.001174122834577175,
+    "USMV": 0.5252909508795309
+  },
+  "achievedAllocations": {
+    "VXUS": 0.4740931575191749,
+    "VTI": 0,
+    "USMV": 0.525906842480825
+  },
+  "orders": [
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 54907.45627186408,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 32360.95952023988,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 32298.570714642683,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 32104.587706146925,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 112.2952969992032,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (118.56) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 73.60200751945462,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (78.83) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 163362.89565876412,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 672.9815505181375,
+        "avgPrice": 69.89103415138536,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 0.9980029950160256,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 668.9995090090216,
+        "avgPrice": 77.1141964202954,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "TIP",
+        "quantity": 277.8610694652674,
+        "avgPrice": 114.94744499999999,
+        "holdSince": "2022-03-22T06:00:00.000Z"
+      },
+      {
+        "symbol": "IEF",
+        "quantity": 341.8290854572714,
+        "avgPrice": 93.40668,
+        "holdSince": "2022-03-22T06:00:00.000Z"
+      },
+      {
+        "symbol": "SHY",
+        "quantity": 607.696151924038,
+        "avgPrice": 52.536255,
+        "holdSince": "2022-03-22T06:00:00.000Z"
+      }
+    ],
+    "equity": 410606.69669911405,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 287424.6876893798,
+    "coreCashUsd": 40180.88664902985,
+    "coreHeadroomUsd": 40180.88664902985,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 123182.0090097342,
+    "optionsReserveCashUsd": 123182.0090097342,
+    "optionsReserveHeadroomUsd": 123182.0090097342
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2022-06-21T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0,
+    "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-scout-2020-2022-G8-2022-06-20"
+}

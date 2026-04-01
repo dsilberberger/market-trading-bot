@@ -1,0 +1,152 @@
+{
+  "date": "2020-11-24",
+  "asOf": "2020-11-24T16:00",
+  "runId": "growth-targeted-2020-2022-F4-2020-11-24",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.8484729835552078,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 91294.434,
+  "targetAllocations": {},
+  "achievedAllocations": {},
+  "orders": [
+    {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 48843.41829085458,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 48263.96801599201,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 47066.62668665667,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 44742.91854072964,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 183713.4151546154,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 863.568215892054,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 504.7476261869066,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 701.6491754122939,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 372630.3466888483,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [
+    {
+      "date": "2020-11-24",
+      "asOf": "2020-11-24T16:00",
+      "type": "OPT_CLOSE_CREDIT",
+      "amount": 10635.672724615386,
+      "reason": "growth_planner_close",
+      "symbol": "VTI",
+      "sleeve": "growth",
+      "positionId": "VTI:CALL:91.1020:2021-01-11",
+      "contracts": 18,
+      "strike": 91.102,
+      "expiry": "2021-01-11"
+    }
+  ],
+  "capitalLanes": {
+    "coreCapitalUsd": 260841.24268219378,
+    "coreCashUsd": 71924.31114796089,
+    "coreHeadroomUsd": 71924.31114796089,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 111789.10400665448,
+    "optionsReserveCashUsd": 111789.10400665448,
+    "optionsReserveHeadroomUsd": 111789.10400665448
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0,
+    "postRiskOffEpisodeStartISO": "2020-11-25T08:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-targeted-2020-2022-F4-2020-11-24"
+}

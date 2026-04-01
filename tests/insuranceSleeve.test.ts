@@ -1,5 +1,6 @@
-import { planInsuranceSleeve, selectInsuranceContract } from '../src/sleeves/insuranceSleeve';
-import { arbitrateSleeves } from '../src/sleeves/sleeveArbitration';
+import fs from 'fs';
+import path from 'path';
+import { planInsuranceSleeve, saveInsuranceState, selectInsuranceContract } from '../src/sleeves/insuranceSleeve';
 import { BotConfig } from '../src/core/types';
 
 const baseConfig: BotConfig = {
@@ -37,76 +38,262 @@ const baseConfig: BotConfig = {
   requireApproval: true,
   optionsUnderlyings: ['SPY'],
   hedgeProxyPolicy: { hedgePreferred: ['SPY'] },
-  insurance: { spendPct: 0.85, minMonths: 3, maxMonths: 6, minMoneyness: 0.95, maxMoneyness: 1.0, limitPriceBufferPct: 0.05, closeWithinDays: 21, allowExpire: false },
+  insurance: {
+    spendPct: 0.85,
+    minMonths: 3,
+    maxMonths: 6,
+    minMoneyness: 0.95,
+    maxMoneyness: 1.0,
+    limitPriceBufferPct: 0.05,
+    closeWithinDays: 21,
+    allowExpire: false
+  },
   uiPort: 8787,
   uiBind: '127.0.0.1'
 };
 
+const resetState = (env: string, account: string) => {
+  const fname = ['insurance_state', env, account].join('.') + '.json';
+  const statePath = path.resolve(process.cwd(), 'data_cache', fname);
+  if (fs.existsSync(statePath)) fs.unlinkSync(statePath);
+};
+
+const buildStressInput = (accountKey: string, asOf: string, overrides: Partial<Parameters<typeof planInsuranceSleeve>[0]> = {}) => ({
+  runId: `run-${accountKey}-${asOf}`,
+  asOf,
+  config: baseConfig,
+  arbitratorAllowed: true,
+  reserveBudget: 10000,
+  reservePoolUsd: 10000,
+  cashAvailable: 10000,
+  quotes: { SPY: 100 },
+  regimes: { equityRegime: { label: 'risk_off', confidence: 0.9 }, volRegime: { label: 'stressed', confidence: 0.9 } } as any,
+  dislocationState: {
+    active: true,
+    phase: 'ADD',
+    currentTier: 2,
+    triggeredAtISO: '2025-01-01T16:00:00.000Z'
+  },
+  env: 'test-insurance',
+  accountKey,
+  ...overrides
+});
+
 describe('insurance sleeve activation', () => {
-  it('skips when arbitrator disallows', async () => {
-    const sleeves = arbitrateSleeves({ dislocationActive: false, regimes: { equityRegime: { label: 'risk_on', confidence: 0.9 } } as any });
-    const res = await planInsuranceSleeve({
-      runId: 'r1',
-      asOf: '2025-01-01',
-      config: baseConfig,
-      arbitratorAllowed: sleeves.allowed.insurance,
-      reserveBudget: 1000,
-      cashAvailable: 1000,
-      quotes: { SPY: 100 },
-      env: 'test-insurance',
-      accountKey: 'case1'
-    });
-    // disallowed sleeve should never open
-    expect(res.plannedAction).not.toBe('OPEN');
+  it('does not open on risk_off alone without confirmed dislocation stress', async () => {
+    resetState('test-insurance', 'risk-off-only');
+    const res = await planInsuranceSleeve(
+      buildStressInput('risk-off-only', '2025-01-01', {
+        dislocationState: {
+          active: false,
+          phase: 'INACTIVE',
+          currentTier: 0
+        }
+      })
+    );
+
+    expect(res.plannedAction).toBe('NONE');
+    expect(res.reason).toContain('active dislocation');
   });
 
-  it('opens when allowed and budget sufficient', async () => {
-    resetState('test-insurance', 'case2');
-    const sleeves = arbitrateSleeves({ dislocationActive: true, regimes: { equityRegime: { label: 'risk_off', confidence: 0.9 } } as any });
-    const res = await planInsuranceSleeve({
-      runId: 'r2',
-      asOf: '2025-01-02',
-      config: baseConfig,
-      arbitratorAllowed: sleeves.allowed.insurance,
-      reserveBudget: 1000,
-      cashAvailable: 1000,
-      quotes: { SPY: 100 },
-      env: 'test-insurance',
-      accountKey: 'case2'
-    });
-    expect(res.plannedAction).toBe('OPEN');
+  it('opens only after two confirmed dislocation-stress steps', async () => {
+    resetState('test-insurance', 'confirmed-entry');
+    const first = await planInsuranceSleeve(buildStressInput('confirmed-entry', '2025-01-01'));
+    const second = await planInsuranceSleeve(buildStressInput('confirmed-entry', '2025-01-08'));
+
+    expect(first.plannedAction).toBe('NONE');
+    expect(first.reason).toContain('2-step stress confirmation');
+    expect(second.plannedAction).toBe('OPEN');
+    expect(second.order).toBeTruthy();
+    expect(second.reserveContext?.entryTargetUsd).toBeCloseTo(1200, 6);
+  });
+
+  it('opens immediately on panic-tier override and adds bounded tranches only while panic persists', async () => {
+    resetState('test-insurance', 'panic-entry');
+    const panicState = {
+      active: true,
+      phase: 'ADD',
+      currentTier: 3,
+      triggeredAtISO: '2025-01-01T16:00:00.000Z'
+    };
+    const open = await planInsuranceSleeve(
+      buildStressInput('panic-entry', '2025-01-01', {
+        dislocationState: panicState
+      })
+    );
+    const add = await planInsuranceSleeve(
+      buildStressInput('panic-entry', '2025-01-08', {
+        dislocationState: panicState,
+        optionPositions: [
+          {
+            underlying: 'SPY',
+            optionSymbol: 'SPY:PUT:95:2025-04-01',
+            type: 'PUT',
+            strike: 95,
+            expiry: '2025-04-01',
+            contracts: 2,
+            multiplier: 100,
+            avgOpenPrice: 5.526315789,
+            openDate: '2025-01-01',
+            marketPrice: 5,
+            marketValueUsd: 1000,
+            unrealizedPnlUsd: -105.26
+          }
+        ]
+      })
+    );
+
+    expect(open.plannedAction).toBe('OPEN');
+    expect(open.reserveContext?.entryTargetUsd).toBeCloseTo(1200, 6);
+    expect(add.plannedAction).toBe('OPEN');
+    expect(add.reserveContext?.entryTargetUsd).toBeCloseTo(800, 6);
+    expect(add.reserveContext?.trancheCount).toBe(2);
+    expect(add.flags.some((flag) => flag.code === 'INSURANCE_ADD_TRANCHE_PLANNED')).toBe(true);
+  });
+
+  it('closes only after two normalized steps once stress ends', async () => {
+    resetState('test-insurance', 'normalized-exit');
+    await planInsuranceSleeve(
+      buildStressInput('normalized-exit', '2025-01-01', {
+        dislocationState: {
+          active: true,
+          phase: 'ADD',
+          currentTier: 3,
+          triggeredAtISO: '2025-01-01T16:00:00.000Z'
+        }
+      })
+    );
+
+    const position = {
+      underlying: 'SPY',
+      optionSymbol: 'SPY:PUT:95:2025-04-01',
+      type: 'PUT' as const,
+      strike: 95,
+      expiry: '2025-04-01',
+      contracts: 2,
+      multiplier: 100,
+      avgOpenPrice: 5.5,
+      openDate: '2025-01-01',
+      marketPrice: 4.5,
+      marketValueUsd: 900,
+      unrealizedPnlUsd: -200
+    };
+
+    const firstNormalization = await planInsuranceSleeve(
+      buildStressInput('normalized-exit', '2025-01-08', {
+        regimes: { equityRegime: { label: 'neutral', confidence: 0.7 }, volRegime: { label: 'low', confidence: 0.8 } } as any,
+        dislocationState: {
+          active: false,
+          phase: 'INACTIVE',
+          currentTier: 0
+        },
+        optionPositions: [position]
+      })
+    );
+    const secondNormalization = await planInsuranceSleeve(
+      buildStressInput('normalized-exit', '2025-01-15', {
+        regimes: { equityRegime: { label: 'neutral', confidence: 0.7 }, volRegime: { label: 'low', confidence: 0.8 } } as any,
+        dislocationState: {
+          active: false,
+          phase: 'INACTIVE',
+          currentTier: 0
+        },
+        optionPositions: [position]
+      })
+    );
+
+    expect(firstNormalization.plannedAction).toBe('HOLD');
+    expect(secondNormalization.plannedAction).toBe('CLOSE');
+    expect(secondNormalization.flags.some((flag) => flag.code === 'INSURANCE_CLOSE_CONFIRMED_NORMALIZATION')).toBe(true);
+  });
+
+  it('rolls near expiry when confirmed stress persists', async () => {
+    resetState('test-insurance', 'roll-forward');
+    saveInsuranceState(
+      {
+        status: 'DEPLOYED',
+        openedRunId: 'run-roll-forward',
+        openedAsOf: '2025-01-01',
+        underlying: 'SPY',
+        strike: 95,
+        expiry: '2025-01-22',
+        contracts: 2,
+        premiumUSD: 1100,
+        activeEpisodeId: 'episode-1',
+        stagedEntryCount: 1,
+        consecutiveStressSteps: 2,
+        consecutiveNormalizationSteps: 0,
+        lastEntryAsOf: '2025-01-01'
+      },
+      'test-insurance',
+      'roll-forward'
+    );
+
+    const res = await planInsuranceSleeve(
+      buildStressInput('roll-forward', '2025-01-15', {
+        optionPositions: [
+          {
+            underlying: 'SPY',
+            optionSymbol: 'SPY:PUT:95:2025-01-22',
+            type: 'PUT',
+            strike: 95,
+            expiry: '2025-01-22',
+            contracts: 2,
+            multiplier: 100,
+            avgOpenPrice: 5.5,
+            openDate: '2025-01-01',
+            marketPrice: 4.8,
+            marketValueUsd: 960,
+            unrealizedPnlUsd: -140
+          }
+        ],
+        optionMarks: [
+          {
+            positionId: 'SPY:PUT:95:2025-01-22',
+            underlying: 'SPY',
+            type: 'PUT',
+            strike: 95,
+            expiry: '2025-01-22',
+            daysToExpiry: 7,
+            marketPrice: 4.8,
+            marketValueUsd: 960,
+            estimatedMark: 4.8
+          }
+        ]
+      })
+    );
+
+    expect(res.plannedAction).toBe('ROLL');
     expect(res.order).toBeTruthy();
+    expect(res.rollOrder).toBeTruthy();
+    expect(res.flags.some((flag) => flag.code === 'INSURANCE_ROLL_PLANNED')).toBe(true);
   });
 
-  it('fails gracefully when budget too small for 1 contract', async () => {
-    const sleeves = arbitrateSleeves({ dislocationActive: true, regimes: { equityRegime: { label: 'risk_off', confidence: 0.9 } } as any });
-    const res = await planInsuranceSleeve({
-      runId: 'r3',
-      asOf: '2025-01-03',
-      config: baseConfig,
-      arbitratorAllowed: sleeves.allowed.insurance,
-      reserveBudget: 1,
-      cashAvailable: 1,
-      quotes: { SPY: 100 },
-      env: 'test-insurance',
-      accountKey: 'case3'
-    });
-    expect(res.plannedAction === 'OPEN').toBe(false);
+  it('fails gracefully when budget is too small for one staged tranche', async () => {
+    resetState('test-insurance', 'tiny-budget');
+    const res = await planInsuranceSleeve(
+      buildStressInput('tiny-budget', '2025-01-01', {
+        dislocationState: {
+          active: true,
+          phase: 'ADD',
+          currentTier: 3,
+          triggeredAtISO: '2025-01-01T16:00:00.000Z'
+        },
+        reserveBudget: 10,
+        reservePoolUsd: 10,
+        cashAvailable: 10
+      })
+    );
+
+    expect(res.plannedAction).toBe('NONE');
+    expect(res.reason).toBe('Budget insufficient for 1 contract');
   });
 });
 
 describe('contract selection', () => {
   it('returns synthetic contract without chain', async () => {
-    const c = await selectInsuranceContract('SPY', '2025-01-01', 100, baseConfig);
-    expect(c).toBeTruthy();
-    expect(c?.type).toBe('PUT');
+    const contract = await selectInsuranceContract('SPY', '2025-01-01', 100, baseConfig);
+    expect(contract).toBeTruthy();
+    expect(contract?.type).toBe('PUT');
   });
 });
-import fs from 'fs';
-import path from 'path';
-
-const resetState = (env: string, account: string) => {
-  const fname = ['insurance_state', env, account].join('.') + '.json';
-  const p = path.resolve(process.cwd(), 'data_cache', fname);
-  if (fs.existsSync(p)) fs.unlinkSync(p);
-};

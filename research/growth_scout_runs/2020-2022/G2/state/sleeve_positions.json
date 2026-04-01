@@ -1,0 +1,37 @@
+{
+  "VXUS": {
+    "baseQty": 637.9825435150098,
+    "dislocationQty": 0,
+    "updatedAtISO": "2022-06-13T23:00:00.000Z"
+  },
+  "VTI": {
+    "baseQty": 0.9980029951412761,
+    "dislocationQty": 0,
+    "updatedAtISO": "2022-03-14T23:00:00.000Z"
+  },
+  "USMV": {
+    "baseQty": 633.9994999957436,
+    "dislocationQty": 0,
+    "updatedAtISO": "2022-06-27T23:00:00.000Z"
+  },
+  "VTV": {
+    "baseQty": 498.7506246876563,
+    "dislocationQty": 0,
+    "updatedAtISO": "2020-07-27T23:00:00.000Z"
+  },
+  "IEF": {
+    "baseQty": 439.94194806644657,
+    "dislocationQty": 0,
+    "updatedAtISO": "2022-10-10T23:00:00.000Z"
+  },
+  "SHY": {
+    "baseQty": 769.9995,
+    "dislocationQty": 0,
+    "updatedAtISO": "2022-12-28T00:00:00.000Z"
+  },
+  "TIP": {
+    "baseQty": 356.95295780395656,
+    "dislocationQty": 0,
+    "updatedAtISO": "2022-10-10T23:00:00.000Z"
+  }
+}

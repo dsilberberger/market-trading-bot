@@ -3,17 +3,46 @@ import { BotConfig } from '../core/types';
 export const getAllowedExposurePct = ({
   phase,
   baseExposureCapPct,
-  maxTotalExposureCapPct
+  maxTotalExposureCapPct,
+  handoffExtraExposurePct = 0
 }: {
   phase?: string;
   baseExposureCapPct: number;
   maxTotalExposureCapPct: number;
+  handoffExtraExposurePct?: number;
 }) => {
   if (phase === 'ADD' || phase === 'HOLD') return maxTotalExposureCapPct;
+  if (handoffExtraExposurePct > 0) {
+    return Math.min(1, Math.max(baseExposureCapPct, Math.min(maxTotalExposureCapPct, baseExposureCapPct + handoffExtraExposurePct)));
+  }
   return baseExposureCapPct;
 };
 
+const resolveHandoffExtraExposurePct = ({
+  asOf,
+  handoffStartedAtISO,
+  handoffEndsAtISO,
+  handoffBaseExtraExposurePct
+}: {
+  asOf?: string;
+  handoffStartedAtISO?: string;
+  handoffEndsAtISO?: string;
+  handoffBaseExtraExposurePct?: number;
+}) => {
+  if (!asOf || !handoffStartedAtISO || !handoffEndsAtISO || !handoffBaseExtraExposurePct || handoffBaseExtraExposurePct <= 0) {
+    return 0;
+  }
+  const now = new Date(asOf).getTime();
+  const start = new Date(handoffStartedAtISO).getTime();
+  const end = new Date(handoffEndsAtISO).getTime();
+  if (!Number.isFinite(now) || !Number.isFinite(start) || !Number.isFinite(end) || end <= start || now >= end) return 0;
+  if (now <= start) return handoffBaseExtraExposurePct;
+  const remaining = 1 - (now - start) / (end - start);
+  return Math.max(0, handoffBaseExtraExposurePct * remaining);
+};
+
 export interface OverlayBudgetInput {
+  asOf?: string;
   equityUSD: number;
   cashUSD: number;
   minCashUSD: number;
@@ -28,16 +57,21 @@ export interface OverlayBudgetInput {
   allowAdd?: boolean;
   dislocationActive?: boolean;
   pacingDeployPct?: number;
+  handoffStartedAtISO?: string;
+  handoffEndsAtISO?: string;
+  handoffBaseExtraExposurePct?: number;
 }
 
 export interface OverlayBudgetResult {
   overlayBudgetUSD: number;
   availableCashUSD: number;
   remainingInvestCapacityUSD: number;
+  source?: 'add_phase' | 'handoff_decay' | 'disabled';
   flags: Array<{ code: string; severity: 'info' | 'warn' | 'error'; message: string; observed?: any }>;
 }
 
 export const computeOverlayBudget = ({
+  asOf,
   equityUSD,
   cashUSD,
   minCashUSD,
@@ -51,14 +85,21 @@ export const computeOverlayBudget = ({
   baseExposureCapPct = 0,
   allowAdd = true,
   dislocationActive = true,
-  pacingDeployPct = 1
+  pacingDeployPct = 1,
+  handoffStartedAtISO,
+  handoffEndsAtISO,
+  handoffBaseExtraExposurePct
 }: OverlayBudgetInput): OverlayBudgetResult => {
   const flags: OverlayBudgetResult['flags'] = [];
   const isAddPhase = phase === 'ADD' && allowAdd === true && dislocationActive === true;
+  const handoffExtraExposurePct = isAddPhase
+    ? 0
+    : resolveHandoffExtraExposurePct({ asOf, handoffStartedAtISO, handoffEndsAtISO, handoffBaseExtraExposurePct });
+  const handoffActive = handoffExtraExposurePct > 0;
   const availableCashUSD = Math.max(0, cashUSD - minCashUSD);
 
-  // If not in ADD phase, disable overlay entirely and log why for clean diagnostics.
-  if (!isAddPhase) {
+  // If not in ADD phase and no handoff decay is active, disable overlay entirely and log why.
+  if (!isAddPhase && !handoffActive) {
     const effectivePct = baseExposureCapPct;
     const effectiveAllowedInvestedUSD = Math.max(0, effectivePct * equityUSD);
     const remainingInvestCapacityUSD = Math.max(0, effectiveAllowedInvestedUSD - currentInvestedUSD);
@@ -86,7 +127,7 @@ export const computeOverlayBudget = ({
         effectiveAllowedInvestedUSD
       }
     });
-    return { overlayBudgetUSD: 0, availableCashUSD, remainingInvestCapacityUSD, flags };
+    return { overlayBudgetUSD: 0, availableCashUSD, remainingInvestCapacityUSD, source: 'disabled', flags };
   }
 
   if (availableCashUSD <= 0) {
@@ -98,13 +139,18 @@ export const computeOverlayBudget = ({
     });
   }
 
-  const overlayNominalBudget = Math.max(0, overlayExtraExposurePct * equityUSD);
-  const effectivePct = getAllowedExposurePct({ phase, baseExposureCapPct, maxTotalExposureCapPct });
+  const overlayNominalBudget = Math.max(0, (isAddPhase ? overlayExtraExposurePct : handoffExtraExposurePct) * equityUSD);
+  const effectivePct = getAllowedExposurePct({
+    phase: isAddPhase ? phase : undefined,
+    baseExposureCapPct,
+    maxTotalExposureCapPct,
+    handoffExtraExposurePct
+  });
   const totalAllowedInvestedUSD = Math.max(0, effectivePct * equityUSD);
   const remainingInvestCapacityUSD = Math.max(0, totalAllowedInvestedUSD - currentInvestedUSD);
 
   let overlayBudgetUSD = Math.min(overlayNominalBudget, remainingInvestCapacityUSD, availableCashUSD);
-  if (pacingDeployPct < 1) {
+  if (isAddPhase && pacingDeployPct < 1) {
     overlayBudgetUSD = Math.min(overlayBudgetUSD, overlayNominalBudget * pacingDeployPct);
   }
   if (overlayBudgetUSD <= 0) {
@@ -113,6 +159,20 @@ export const computeOverlayBudget = ({
       severity: 'info',
       message: 'Overlay limited by exposure cap or cash',
       observed: { remainingInvestCapacityUSD, availableCashUSD, overlayNominalBudget }
+    });
+  }
+  if (handoffActive) {
+    flags.push({
+      code: 'OVERLAY_HANDOFF_ACTIVE',
+      severity: 'info',
+      message: 'Dislocation overlay handoff decay is active',
+      observed: {
+        handoffStartedAtISO,
+        handoffEndsAtISO,
+        handoffExtraExposurePct,
+        baseExposureCapPct,
+        effectiveExposurePct: effectivePct
+      }
     });
   }
 
@@ -150,15 +210,22 @@ export const computeOverlayBudget = ({
     code: 'OVERLAY_BUDGET_COMPUTED',
     severity: 'info',
     message: 'Overlay budget computed',
-    observed: {
-      overlayBudgetUSD,
-      overlayNominalBudget,
-      remainingInvestCapacityUSD,
-      availableCashUSD,
-      effectiveExposurePct: effectivePct,
-      effectiveAllowedInvestedUSD: effectivePct * equityUSD
-    }
-  });
+      observed: {
+        overlayBudgetUSD,
+        overlayNominalBudget,
+        remainingInvestCapacityUSD,
+        availableCashUSD,
+        source: handoffActive ? 'handoff_decay' : 'add_phase',
+        effectiveExposurePct: effectivePct,
+        effectiveAllowedInvestedUSD: effectivePct * equityUSD
+      }
+    });
 
-  return { overlayBudgetUSD, availableCashUSD, remainingInvestCapacityUSD, flags };
+  return {
+    overlayBudgetUSD,
+    availableCashUSD,
+    remainingInvestCapacityUSD,
+    source: handoffActive ? 'handoff_decay' : 'add_phase',
+    flags
+  };
 };

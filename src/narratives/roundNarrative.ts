@@ -175,6 +175,8 @@ const round3Summary = (runDir: string) => {
   const nav = inputs?.portfolio?.equity ?? budgets?.nav ?? capital?.navUsd ?? 'n/a';
   const core = capital?.corePoolUsd ?? budgets?.coreBudget ?? 'n/a';
   const reserve = capital?.reservePoolUsd ?? budgets?.reserveBudget ?? 'n/a';
+  const corePct = inputs?.config?.capital?.corePct ?? 0.85;
+  const reservePct = inputs?.config?.capital?.reservePct ?? 0.15;
   const maxPosPct = inputs?.config?.maxPositionPct ?? 0.35;
   const maxPosUsd = typeof nav === 'number' ? nav * maxPosPct : 'n/a';
 
@@ -197,8 +199,8 @@ const round3Summary = (runDir: string) => {
   summary.push(
     bulletList([
       `Account NAV: ${typeof nav === 'number' ? `$${nav.toFixed(2)}` : 'n/a'}`,
-      `Core allocation (70%): ${typeof core === 'number' ? `$${core.toFixed(2)}` : 'n/a'}`,
-      `Reserve allocation (30%): ${typeof reserve === 'number' ? `$${reserve.toFixed(2)}` : 'n/a'}`,
+      `Core allocation (${(corePct * 100).toFixed(0)}%): ${typeof core === 'number' ? `$${core.toFixed(2)}` : 'n/a'}`,
+      `Reserve allocation (${(reservePct * 100).toFixed(0)}%): ${typeof reserve === 'number' ? `$${reserve.toFixed(2)}` : 'n/a'}`,
       `Max position size: ${typeof maxPosUsd === 'number' ? `$${maxPosUsd.toFixed(2)}` : 'n/a'} (${(maxPosPct * 100).toFixed(0)}% of NAV)`
     ])
   );

@@ -1,21 +1,25 @@
 import fs from 'fs';
 import path from 'path';
-import { Holding, SleevePositions } from '../core/types';
+import { Fill, Holding, SleevePositions, TradeOrder } from '../core/types';
+import { runtimeNowISO } from '../core/time';
 
 const dataDir = path.resolve(process.cwd(), 'data_cache');
 
 const positionsPath = (env?: string, accountKey?: string) => {
+  const override = process.env.SLEEVE_POSITIONS_PATH;
+  if (override) return path.resolve(process.cwd(), override);
   const suffix = [env || 'default', accountKey || 'default'].filter(Boolean).join('.');
   return path.join(dataDir, `sleeve_positions.${suffix}.json`);
 };
 
-const ensureDir = () => {
-  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+const ensureDir = (filePath?: string) => {
+  const dir = filePath ? path.dirname(filePath) : dataDir;
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 };
 
 export const loadSleevePositions = (env?: string, accountKey?: string): SleevePositions => {
-  ensureDir();
   const p = positionsPath(env, accountKey);
+  ensureDir(p);
   if (!fs.existsSync(p)) return {};
   try {
     const json = JSON.parse(fs.readFileSync(p, 'utf-8'));
@@ -26,8 +30,8 @@ export const loadSleevePositions = (env?: string, accountKey?: string): SleevePo
 };
 
 export const saveSleevePositions = (positions: SleevePositions, env?: string, accountKey?: string) => {
-  ensureDir();
   const p = positionsPath(env, accountKey);
+  ensureDir(p);
   fs.writeFileSync(p, JSON.stringify(positions, null, 2));
 };
 
@@ -38,10 +42,11 @@ export interface SleeveReconcileResult {
 
 export const reconcileSleevePositions = (
   holdings: Holding[],
-  positions: SleevePositions
+  positions: SleevePositions,
+  asOf?: string
 ): SleeveReconcileResult => {
   const flags: SleeveReconcileResult['flags'] = [];
-  const now = new Date().toISOString();
+  const now = runtimeNowISO(asOf);
   const pos: SleevePositions = { ...positions };
 
   const initIfMissing = () => {
@@ -114,7 +119,58 @@ export const reconcileSleevePositions = (
   return { positions: pos, flags };
 };
 
-export const snapshotSleevePositions = (positions: SleevePositions) => ({
-  updatedAtISO: new Date().toISOString(),
+export const applyFilledSleeveOrders = ({
+  positions,
+  fills,
+  ordersById,
+  asOf
+}: {
+  positions: SleevePositions;
+  fills: Fill[];
+  ordersById: Record<string, TradeOrder>;
+  asOf?: string;
+}): SleevePositions => {
+  const now = runtimeNowISO(asOf);
+  const next: SleevePositions = { ...positions };
+
+  for (const fill of fills || []) {
+    const order = ordersById[fill.orderId];
+    if (!order || !fill.symbol || !Number.isFinite(fill.quantity) || fill.quantity <= 0) continue;
+    const current = next[fill.symbol] || { baseQty: 0, dislocationQty: 0, updatedAtISO: now };
+    let baseQty = current.baseQty || 0;
+    let dislocationQty = current.dislocationQty || 0;
+
+    if (order.side === 'BUY') {
+      if (order.sleeve === 'dislocation') dislocationQty += fill.quantity;
+      else baseQty += fill.quantity;
+    } else {
+      let remaining = fill.quantity;
+      if (order.sleeve === 'dislocation') {
+        const reduceDislocation = Math.min(dislocationQty, remaining);
+        dislocationQty -= reduceDislocation;
+        remaining -= reduceDislocation;
+      }
+      if (remaining > 0) {
+        const reduceBase = Math.min(baseQty, remaining);
+        baseQty -= reduceBase;
+        remaining -= reduceBase;
+      }
+      if (remaining > 0) {
+        dislocationQty = Math.max(0, dislocationQty - remaining);
+      }
+    }
+
+    next[fill.symbol] = {
+      baseQty: Math.max(0, baseQty),
+      dislocationQty: Math.max(0, dislocationQty),
+      updatedAtISO: now
+    };
+  }
+
+  return next;
+};
+
+export const snapshotSleevePositions = (positions: SleevePositions, asOf?: string) => ({
+  updatedAtISO: runtimeNowISO(asOf),
   positions
 });

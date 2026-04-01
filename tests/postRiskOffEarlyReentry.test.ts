@@ -296,11 +296,10 @@ const replayEpisode = (returns: number[]) => {
       !triggerDate
     ) {
       triggerDate = date;
-      const reserveOnlyCash = Math.max(0, (portfolio.cash || 0) - coreBudget);
+      const coreCash = Math.max(0, (portfolio.cash || 0) - reserveBudget);
       const budget = computePostRiskOffReentryBudget({
         corePoolUsd: coreBudget,
-        reservePoolUsd: reserveBudget,
-        reserveOnlyCashUsd: reserveOnlyCash,
+        coreCashUsd: coreCash,
         config: replayConfig as any
       });
       const overlayPlan = planWholeShareExecution({

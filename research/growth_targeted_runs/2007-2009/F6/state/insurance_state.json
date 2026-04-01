@@ -1,0 +1,10 @@
+{
+  "status": "INACTIVE",
+  "stagedEntryCount": 0,
+  "consecutiveStressSteps": 0,
+  "consecutiveNormalizationSteps": 73,
+  "openedRunId": "growth-targeted-2007-2009-F6-2008-07-29",
+  "openedAsOf": "2008-07-22T16:00",
+  "lastEntryAsOf": "2008-07-22T23:00",
+  "activeEpisodeId": "2008-07-23T06:00:00.000Z"
+}

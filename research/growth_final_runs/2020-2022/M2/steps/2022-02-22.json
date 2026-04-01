@@ -1,0 +1,139 @@
+{
+  "date": "2022-02-22",
+  "asOf": "2022-02-22T16:00",
+  "runId": "growth-final-2020-2022-M2-2022-02-22",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.35174322538003977,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 100398.551225,
+  "targetAllocations": {
+    "IEF": 0.3073381228549694,
+    "TIP": 0.3073381228549694,
+    "SHY": 0.3073381228549694,
+    "VXUS": 0.027400447790669552,
+    "VTI": 0.026251562456787777,
+    "USMV": 0.024333621187634658
+  },
+  "achievedAllocations": {
+    "IEF": 0.30772672686571895,
+    "TIP": 0.30829013705282693,
+    "SHY": 0.30800823202663025,
+    "VXUS": 0.026919530810070088,
+    "VTI": 0.02521040661401174,
+    "USMV": 0.023844966630742103
+  },
+  "orders": [
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52628.165917041486,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 8562.242303775583,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (71.89) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 8261.294020796007,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (118.51) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 363519.61478254886,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 36.9411478045716,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 20.965586532041954,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 125.71203142800778,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 431349.4783422809,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 301944.63483959663,
+    "coreCashUsd": 234114.7712798646,
+    "coreHeadroomUsd": 234114.7712798646,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 129404.84350268426,
+    "optionsReserveCashUsd": 129404.84350268426,
+    "optionsReserveHeadroomUsd": 129404.84350268426
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0,
+    "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-final-2020-2022-M2-2022-02-22"
+}

@@ -1,0 +1,100 @@
+{
+  "date": "2021-04-12",
+  "asOf": "2021-04-12T16:00",
+  "runId": "growth-targeted-2020-2022-F1-2021-04-12",
+  "runStatus": "completed",
+  "regime": "risk_on",
+  "confidence": 0.7962815669119113,
+  "exposureCap": 0.7,
+  "deployBudgetUsd": 264110.72549999994,
+  "targetAllocations": {},
+  "achievedAllocations": {},
+  "orders": [],
+  "holdingsAfterExecution": {
+    "cash": 178097.0154024535,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 863.568215892054,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 504.7476261869066,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 701.6491754122939,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 397220.05638023064,
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:102.7978:2021-05-12",
+        "type": "CALL",
+        "strike": 102.7978,
+        "expiry": "2021-05-12",
+        "contracts": 24,
+        "multiplier": 100,
+        "avgOpenPrice": 3.4000372349999997,
+        "openDate": "2021-02-16T16:00",
+        "costBasisUsd": 8160.0893639999995,
+        "marketPrice": 4.953707520517252,
+        "marketValueUsd": 11888.898049241405,
+        "unrealizedPnlUsd": 3728.8086852414053
+      }
+    ],
+    "optionsMarketValueUsd": 11888.898049241405
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 278054.03946616146,
+    "coreCashUsd": 67091.0878523843,
+    "coreHeadroomUsd": 70819.8965376257,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 119166.01691406919,
+    "optionsReserveCashUsd": 111005.92755006919,
+    "optionsReserveHeadroomUsd": 111005.92755006919
+  },
+  "executedOptionReserveUsageUsd": 8160.0893639999995,
+  "executedReserveUsageUsd": 8160.0893639999995,
+  "reserveUsageUsd": 8160.0893639999995,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-targeted-2020-2022-F1-2021-04-12"
+}

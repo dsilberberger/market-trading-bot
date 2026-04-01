@@ -1,0 +1,139 @@
+{
+  "date": "2022-02-22",
+  "asOf": "2022-02-22T16:00",
+  "runId": "growth-scout-2020-2022-G2-2022-02-22",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.35174322538003977,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 90976.95757499998,
+  "targetAllocations": {
+    "IEF": 0.30513101408689314,
+    "TIP": 0.30513101408689314,
+    "SHY": 0.30513101408689314,
+    "VXUS": 0.029670997313496095,
+    "VTI": 0.028531770269952104,
+    "USMV": 0.026404190155872434
+  },
+  "achievedAllocations": {
+    "IEF": 0.3053278808137457,
+    "TIP": 0.3056822923842592,
+    "SHY": 0.30528735146074726,
+    "VXUS": 0.02965757432483109,
+    "VTI": 0.027774611422074772,
+    "USMV": 0.02627028959434193
+  },
+  "orders": [
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52628.165917041486,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 8270.976670959173,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (71.89) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 8020.993870720974,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (118.51) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 323278.81704230973,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 36.94314980607258,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 20.96658753279246,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 122.71053067763273,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 390870.2971932288,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 273609.20803526015,
+    "coreCashUsd": 206017.7278843411,
+    "coreHeadroomUsd": 206017.7278843411,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 117261.08915796863,
+    "optionsReserveCashUsd": 117261.08915796863,
+    "optionsReserveHeadroomUsd": 117261.08915796863
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0,
+    "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-scout-2020-2022-G2-2022-02-22"
+}

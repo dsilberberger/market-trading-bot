@@ -1,0 +1,10 @@
+{
+  "status": "DEPLOYED",
+  "openedRunId": "growth-scout-2020-2022-G8-2022-12-27",
+  "openedAsOf": "2022-10-10T16:00",
+  "underlying": "VTI",
+  "expiry": "2023-01-30",
+  "strike": 123.6618,
+  "contracts": 16,
+  "premiumUSD": 6544.1824560000005
+}

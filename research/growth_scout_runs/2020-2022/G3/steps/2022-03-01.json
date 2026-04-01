@@ -1,0 +1,139 @@
+{
+  "date": "2022-03-01",
+  "asOf": "2022-03-01T16:00",
+  "runId": "growth-scout-2020-2022-G3-2022-03-01",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.35162685337726535,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 90483.20172499999,
+  "targetAllocations": {
+    "IEF": 0.31908928621235516,
+    "TIP": 0.31908928621235516,
+    "SHY": 0.31908928621235516,
+    "VXUS": 0.007684315319208716,
+    "VTI": 0.007194825476115837,
+    "USMV": 0.027853000567609924
+  },
+  "achievedAllocations": {
+    "IEF": 0.3198396466604453,
+    "TIP": 0.3192466239549915,
+    "SHY": 0.31957827328858357,
+    "VXUS": 0.007283538121993527,
+    "VTI": 0.006675662137561981,
+    "USMV": 0.02737625583642416
+  },
+  "orders": [
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52757.84107946028,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 7306.577979087,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.44) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 2040.0928258089643,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (72.05) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 330346.97372852854,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 8.986021686190249,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 20.96608703241722,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 30.95412179555896,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 388752.3643178044,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 272126.65502246306,
+    "coreCashUsd": 213721.2644331872,
+    "coreHeadroomUsd": 213721.2644331872,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 116625.70929534132,
+    "optionsReserveCashUsd": 116625.70929534132,
+    "optionsReserveHeadroomUsd": 116625.70929534132
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0,
+    "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-scout-2020-2022-G3-2022-03-01"
+}

@@ -1,0 +1,218 @@
+[
+  {
+    "date": "2020-01-07",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 210000,
+    "quantity": 2100,
+    "reason": "initial_allocation"
+  },
+  {
+    "date": "2020-01-07",
+    "requestedSymbol": "VXUS",
+    "resolvedSymbol": "VXUS",
+    "side": "BUY",
+    "notionalUSD": 140000,
+    "quantity": 2333.3333333333335,
+    "reason": "initial_allocation"
+  },
+  {
+    "date": "2020-04-06",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 2931.6000000000276,
+    "quantity": 43.534303534303945,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2020-04-06",
+    "requestedSymbol": "VXUS",
+    "resolvedSymbol": "VXUS",
+    "side": "BUY",
+    "notionalUSD": 2931.5999999999995,
+    "quantity": 76.52310101801095,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2020-07-06",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 1771.7426259896613,
+    "quantity": 21.049573791014154,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2020-07-06",
+    "requestedSymbol": "VXUS",
+    "resolvedSymbol": "VXUS",
+    "side": "SELL",
+    "notionalUSD": 1771.7426259896392,
+    "quantity": 36.07702353878312,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2020-10-05",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 579.1846908725244,
+    "quantity": 6.382903800667009,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2020-10-05",
+    "requestedSymbol": "VXUS",
+    "resolvedSymbol": "VXUS",
+    "side": "SELL",
+    "notionalUSD": 579.1846908725197,
+    "quantity": 10.856320353749197,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-01-05",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 988.743475391436,
+    "quantity": 9.889412636441648,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-01-05",
+    "requestedSymbol": "VXUS",
+    "resolvedSymbol": "VXUS",
+    "side": "SELL",
+    "notionalUSD": 988.7434753914483,
+    "quantity": 16.623125006581176,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-04-05",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 616.1930975882805,
+    "quantity": 5.80110240621616,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-04-05",
+    "requestedSymbol": "VXUS",
+    "resolvedSymbol": "VXUS",
+    "side": "SELL",
+    "notionalUSD": 616.193097588336,
+    "quantity": 9.684002790952945,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-07-05",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 669.9149678073492,
+    "quantity": 5.965404878070785,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-07-05",
+    "requestedSymbol": "VXUS",
+    "resolvedSymbol": "VXUS",
+    "side": "SELL",
+    "notionalUSD": 669.9149678073622,
+    "quantity": 9.88804380527472,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-10-04",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 612.3852575675518,
+    "quantity": 5.182239634150392,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-10-04",
+    "requestedSymbol": "VXUS",
+    "resolvedSymbol": "VXUS",
+    "side": "SELL",
+    "notionalUSD": 612.3852575675389,
+    "quantity": 8.537365921755736,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-01-04",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 260.1952613610283,
+    "quantity": 2.117646792227788,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-01-04",
+    "requestedSymbol": "VXUS",
+    "resolvedSymbol": "VXUS",
+    "side": "SELL",
+    "notionalUSD": 260.19526136100836,
+    "quantity": 3.479941973532277,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-04-04",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 838.5495555622238,
+    "quantity": 7.240735304051668,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-04-04",
+    "requestedSymbol": "VXUS",
+    "resolvedSymbol": "VXUS",
+    "side": "BUY",
+    "notionalUSD": 838.5495555622284,
+    "quantity": 12.001567991444517,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-07-04",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 775.2779368160463,
+    "quantity": 6.8487450248767345,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-07-04",
+    "requestedSymbol": "VXUS",
+    "resolvedSymbol": "VXUS",
+    "side": "BUY",
+    "notionalUSD": 775.2779368160187,
+    "quantity": 11.444906064600218,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-10-03",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 435.368154045783,
+    "quantity": 3.6371608525128067,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-10-03",
+    "requestedSymbol": "VXUS",
+    "resolvedSymbol": "VXUS",
+    "side": "SELL",
+    "notionalUSD": 435.36815404582177,
+    "quantity": 6.051823103222432,
+    "reason": "quarterly_rebalance"
+  }
+]

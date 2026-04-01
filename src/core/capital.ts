@@ -6,21 +6,90 @@ interface NavResult {
   cash: number;
 }
 
-export const computeNav = (holdings: Array<{ symbol: string; quantity: number }>, cash: number, quotes: Record<string, number>): NavResult => {
+export interface CapitalLaneSnapshot {
+  navUsd: number;
+  totalCashUsd: number;
+  etfInvestedUsd: number;
+  coreCapitalUsd: number;
+  coreHeadroomUsd: number;
+  coreCashUsd: number;
+  optionsReserveCapitalUsd: number;
+  optionsReserveHeadroomUsd: number;
+  optionsReserveCashUsd: number;
+  executedOptionReserveUsageUsd: number;
+  unassignedCashUsd: number;
+}
+
+export const computeOptionReserveUsageUsd = (
+  positions: Array<{
+    costBasisUsd?: number;
+    avgOpenPrice?: number;
+    contracts?: number;
+    multiplier?: number;
+  }> = []
+) =>
+  positions.reduce((sum, position) => {
+    const fallback =
+      (position.avgOpenPrice || 0) * (position.contracts || 0) * (position.multiplier || 100);
+    return sum + Math.max(0, position.costBasisUsd ?? fallback);
+  }, 0);
+
+export const computeNav = (
+  holdings: Array<{ symbol: string; quantity: number }>,
+  cash: number,
+  quotes: Record<string, number>,
+  optionMarketValueUsd = 0
+): NavResult => {
   const invested = (holdings || []).reduce((acc, h) => {
     const px = quotes?.[h.symbol] ?? 0;
     return acc + (h.quantity || 0) * px;
   }, 0);
-  const nav = invested + (cash || 0);
+  const nav = invested + (cash || 0) + Math.max(0, optionMarketValueUsd || 0);
   return { nav, invested, cash: cash || 0 };
 };
 
 export const computeBudgets = (nav: number, config: BotConfig) => {
-  const corePct = config.capital?.corePct ?? 0.7;
-  const reservePct = config.capital?.reservePct ?? 0.3;
+  const corePct = config.capital?.corePct ?? 0.85;
+  const reservePct = config.capital?.reservePct ?? 0.15;
   const coreBudget = nav * corePct;
   const reserveBudget = nav * reservePct;
   return { coreBudget, reserveBudget };
+};
+
+export const computeCapitalLanes = ({
+  navUsd,
+  etfInvestedUsd,
+  cashUsd,
+  executedOptionReserveUsageUsd,
+  config
+}: {
+  navUsd: number;
+  etfInvestedUsd: number;
+  cashUsd: number;
+  executedOptionReserveUsageUsd: number;
+  config: BotConfig;
+}): CapitalLaneSnapshot => {
+  const { coreBudget, reserveBudget } = computeBudgets(navUsd, config);
+  const coreHeadroomUsd = Math.max(0, coreBudget - etfInvestedUsd);
+  const optionsReserveHeadroomUsd = Math.max(0, reserveBudget - executedOptionReserveUsageUsd);
+  const optionsReserveCashUsd = Math.min(Math.max(0, cashUsd), optionsReserveHeadroomUsd);
+  const residualCashUsd = Math.max(0, cashUsd - optionsReserveCashUsd);
+  const coreCashUsd = Math.min(residualCashUsd, coreHeadroomUsd);
+  const unassignedCashUsd = Math.max(0, cashUsd - optionsReserveCashUsd - coreCashUsd);
+
+  return {
+    navUsd,
+    totalCashUsd: cashUsd,
+    etfInvestedUsd,
+    coreCapitalUsd: coreBudget,
+    coreHeadroomUsd,
+    coreCashUsd,
+    optionsReserveCapitalUsd: reserveBudget,
+    optionsReserveHeadroomUsd,
+    optionsReserveCashUsd,
+    executedOptionReserveUsageUsd,
+    unassignedCashUsd
+  };
 };
 
 export const clampBuyOrdersToBudget = (orders: TradeOrder[], maxBuyNotional: number) => {

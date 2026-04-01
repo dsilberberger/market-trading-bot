@@ -1,0 +1,145 @@
+{
+  "metadata": {
+    "runPrefix": "growth-scout-2007-2009-G8",
+    "dateRange": {
+      "start": "2007-01-02",
+      "end": "2009-12-29"
+    },
+    "barFrequency": "1w",
+    "warmup": {
+      "preRollBarsRequested": 0,
+      "warmupStepCount": 29,
+      "firstWarmupDate": "2007-01-02",
+      "lastWarmupDate": "2007-07-17",
+      "firstCompletedDate": "2007-07-24"
+    },
+    "benchmarkNames": [
+      "60/40 (VTI/BND)",
+      "80/20 (VTI/BND)",
+      "100% Equity (VTI/VXUS)"
+    ]
+  },
+  "portfolios": [
+    {
+      "runPrefix": "growth-scout-2007-2009-G8",
+      "windowStart": "2007-01-02",
+      "windowEnd": "2009-12-29",
+      "portfolio": "Current Strategy",
+      "type": "strategy",
+      "totalReturnPct": -0.018773031849450006,
+      "maxDrawdownPct": 0.09702137851111195,
+      "endingValue": 343429.4388526925,
+      "startingValue": 350000,
+      "tradeCount": 514,
+      "grossTradedNotionalUsd": 12805776.43854792,
+      "annualizedReturnPct": -0.006318806096071494,
+      "annualizedVolatilityPct": 0.030036154999424435,
+      "turnoverPct": 37.94245654217301,
+      "peakDateBeforeMaxDrawdown": "2008-01-29",
+      "troughDate": "2008-05-20"
+    },
+    {
+      "runPrefix": "growth-scout-2007-2009-G8",
+      "windowStart": "2007-01-02",
+      "windowEnd": "2009-12-29",
+      "portfolio": "60/40 (VTI/BND)",
+      "type": "benchmark",
+      "totalReturnPct": -0.00901960103783439,
+      "maxDrawdownPct": 0.22359215362439894,
+      "endingValue": 346843.13963675796,
+      "startingValue": 350000,
+      "tradeCount": 24,
+      "grossTradedNotionalUsd": 478512.12323887186,
+      "annualizedReturnPct": -0.003025958641648341,
+      "annualizedVolatilityPct": 0.06942835309591269,
+      "turnoverPct": 1.4452646640602937,
+      "peakDateBeforeMaxDrawdown": "2007-07-24",
+      "troughDate": "2008-05-06"
+    },
+    {
+      "runPrefix": "growth-scout-2007-2009-G8",
+      "windowStart": "2007-01-02",
+      "windowEnd": "2009-12-29",
+      "portfolio": "80/20 (VTI/BND)",
+      "type": "benchmark",
+      "totalReturnPct": -0.10547554889225785,
+      "maxDrawdownPct": 0.3288623586227556,
+      "endingValue": 313083.55788770976,
+      "startingValue": 350000,
+      "tradeCount": 24,
+      "grossTradedNotionalUsd": 431769.35473233863,
+      "annualizedReturnPct": -0.036595522921474166,
+      "annualizedVolatilityPct": 0.10099846749137203,
+      "turnoverPct": 1.3998591478800115,
+      "peakDateBeforeMaxDrawdown": "2007-07-24",
+      "troughDate": "2008-05-06"
+    },
+    {
+      "runPrefix": "growth-scout-2007-2009-G8",
+      "windowStart": "2007-01-02",
+      "windowEnd": "2009-12-29",
+      "portfolio": "100% Equity (VTI/VXUS)",
+      "type": "benchmark",
+      "totalReturnPct": -0.23306494219251706,
+      "maxDrawdownPct": 0.45317620355498,
+      "endingValue": 268427.270232619,
+      "startingValue": 350000,
+      "tradeCount": 24,
+      "grossTradedNotionalUsd": 362985.7003240499,
+      "annualizedReturnPct": -0.08493007628960936,
+      "annualizedVolatilityPct": 0.14267509303285267,
+      "turnoverPct": 1.2981917902915447,
+      "peakDateBeforeMaxDrawdown": "2007-07-24",
+      "troughDate": "2008-05-13"
+    }
+  ],
+  "strategy": {
+    "regimeOccupancy": {
+      "counts": {
+        "risk_on": 49,
+        "neutral": 11,
+        "risk_off": 97,
+        "unknown": 0
+      },
+      "percentages": {
+        "risk_on": 0.31210191082802546,
+        "neutral": 0.07006369426751592,
+        "risk_off": 0.6178343949044586,
+        "unknown": 0
+      }
+    },
+    "sleeveMetrics": {
+      "dislocationTriggerCount": 2,
+      "sleeveBuyExecutionCount": 4,
+      "totalReserveCapitalDeployedUsd": 48920.52961299999,
+      "peakReserveDeploymentUsd": 12209.820123789472,
+      "peakReserveDeploymentDate": "2008-07-22"
+    },
+    "coreLaneMetrics": {
+      "averageCoreCashUsd": 91315.44030531927,
+      "averageCoreCashPct": 0.2630420661361053,
+      "averageDislocationCoreUsageUsd": 27218.02814568997,
+      "peakDislocationCoreUsageUsd": 46718.0902455155,
+      "peakDislocationCoreUsageDate": "2009-12-29"
+    },
+    "reserveMetrics": {
+      "accountingScope": "executed_replay_only",
+      "averageReserveUsageUsd": 1154.9569568744555,
+      "peakReserveUsageUsd": 12209.820123789472,
+      "peakReserveUsageDate": "2008-07-22",
+      "averageReservePct": 0.0036095667645110415,
+      "minReservePct": 0,
+      "maxReservePct": 0.0380827232793464
+    },
+    "plannedOptionSleeveState": {
+      "accountingScope": "planned_non_executed_option_state",
+      "averagePlannedOptionReserveStateUsd": 0,
+      "peakPlannedOptionReserveStateUsd": 0,
+      "activeStepCount": 0,
+      "averageInsurancePremiumStateUsd": 0,
+      "averageGrowthPremiumStateUsd": 0,
+      "peakInsurancePremiumStateUsd": 0,
+      "peakGrowthPremiumStateUsd": 0
+    }
+  }
+}

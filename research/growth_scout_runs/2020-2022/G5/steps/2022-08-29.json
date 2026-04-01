@@ -1,0 +1,109 @@
+{
+  "date": "2022-08-29",
+  "asOf": "2022-08-29T16:00",
+  "runId": "growth-scout-2020-2022-G5-2022-08-29",
+  "runStatus": "completed",
+  "regime": "neutral",
+  "confidence": 0.44999999999999996,
+  "exposureCap": 0.7,
+  "deployBudgetUsd": 197266.04554999998,
+  "targetAllocations": {
+    "TIP": 0.33414178514777315,
+    "SHY": 0.33133139672650497,
+    "IEF": 0.3345268181257219
+  },
+  "achievedAllocations": {
+    "TIP": 0.3342974764439851,
+    "SHY": 0.33154833902924646,
+    "IEF": 0.3341541845267684
+  },
+  "orders": [],
+  "holdingsAfterExecution": {
+    "cash": 168099.24971310646,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 686.9810535195138,
+        "avgPrice": 69.8954872703704,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 0.9980029948907756,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 681.9994999953681,
+        "avgPrice": 77.11737682696737,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "TIP",
+        "quantity": 283.85807096451776,
+        "avgPrice": 114.94744499999999,
+        "holdSince": "2022-03-22T06:00:00.000Z"
+      },
+      {
+        "symbol": "SHY",
+        "quantity": 620.6896551724138,
+        "avgPrice": 52.536255,
+        "holdSince": "2022-03-22T06:00:00.000Z"
+      },
+      {
+        "symbol": "IEF",
+        "quantity": 348.8255872063968,
+        "avgPrice": 93.40668,
+        "holdSince": "2022-03-22T06:00:00.000Z"
+      }
+    ],
+    "equity": 423772.3901011128,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 296640.6730707789,
+    "coreCashUsd": 40967.53268277258,
+    "coreHeadroomUsd": 40967.53268277258,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 127131.71703033382,
+    "optionsReserveCashUsd": 127131.71703033382,
+    "optionsReserveHeadroomUsd": 127131.71703033382
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [],
+  "dislocationState": {
+    "active": true,
+    "phase": "HOLD",
+    "lastTier": 1,
+    "lastTierChangeISO": "2022-06-21T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 1,
+    "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z",
+    "triggeredAtISO": "2022-07-05T06:00:00.000Z",
+    "addUntilISO": "2022-07-26T06:00:00.000Z",
+    "holdUntilISO": "2022-10-04T06:00:00.000Z",
+    "reintegrateAfterISO": "2022-10-04T06:00:00.000Z",
+    "triggerReason": "post_risk_off_reentry",
+    "entryAnchorPrice": 113.2,
+    "troughAnchorPrice": 113.2,
+    "troughDateISO": "2022-07-05T06:00:00.000Z",
+    "postRiskOffTriggeredAtISO": "2022-07-05T06:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-scout-2020-2022-G5-2022-08-29"
+}

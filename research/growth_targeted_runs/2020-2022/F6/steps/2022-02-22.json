@@ -1,0 +1,139 @@
+{
+  "date": "2022-02-22",
+  "asOf": "2022-02-22T16:00",
+  "runId": "growth-targeted-2020-2022-F6-2022-02-22",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.35174322538003977,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 97453.58542499998,
+  "targetAllocations": {
+    "IEF": 0.30662928115443716,
+    "TIP": 0.30662928115443716,
+    "SHY": 0.30662928115443716,
+    "VXUS": 0.028099165620660345,
+    "VTI": 0.02709627104442759,
+    "USMV": 0.024916719871600542
+  },
+  "achievedAllocations": {
+    "IEF": 0.30736340883660124,
+    "TIP": 0.3069061086025257,
+    "SHY": 0.30748859503305237,
+    "VXUS": 0.02772277146178872,
+    "VTI": 0.025962649421719042,
+    "USMV": 0.02455646664431297
+  },
+  "orders": [
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52628.165917041486,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 8489.425895571485,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (71.89) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 8261.294020796007,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (118.51) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 350946.2537543448,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 36.94164830494684,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 20.965586532041954,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 124.71153117788276,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 418696.6039656067,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 293087.6227759247,
+    "coreCashUsd": 225337.2725646628,
+    "coreHeadroomUsd": 225337.2725646628,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 125608.981189682,
+    "optionsReserveCashUsd": 125608.981189682,
+    "optionsReserveHeadroomUsd": 125608.981189682
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0,
+    "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-targeted-2020-2022-F6-2022-02-22"
+}

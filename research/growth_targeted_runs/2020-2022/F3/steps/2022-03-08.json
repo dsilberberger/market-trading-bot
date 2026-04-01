@@ -1,0 +1,139 @@
+{
+  "date": "2022-03-08",
+  "asOf": "2022-03-08T16:00",
+  "runId": "growth-targeted-2020-2022-F3-2022-03-08",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.35151116951379774,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 95160.44265,
+  "targetAllocations": {
+    "IEF": 0.3281142564592146,
+    "TIP": 0.3281142564592146,
+    "SHY": 0.3281142564592146,
+    "VXUS": 0.001819940686425746,
+    "VTI": 0.00700420269859701,
+    "USMV": 0.006833087237333412
+  },
+  "achievedAllocations": {
+    "IEF": 0.32834144637325696,
+    "TIP": 0.32861553579693126,
+    "SHY": 0.32842102072206564,
+    "VXUS": 0.0015418056367058365,
+    "VTI": 0.0063580536240589874,
+    "USMV": 0.006722137846981263
+  },
+  "orders": [
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52887.51624187908,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 1928.8629743863246,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (119.00) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 1832.3875879945165,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.55) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 354064.2562491156,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 8.986021936565624,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 4.9920129629652745,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 7.9885174480764505,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 408850.7171715646,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 286195.5020200952,
+    "coreCashUsd": 231409.04109764623,
+    "coreHeadroomUsd": 231409.04109764623,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 122655.21515146937,
+    "optionsReserveCashUsd": 122655.21515146937,
+    "optionsReserveHeadroomUsd": 122655.21515146937
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0,
+    "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-targeted-2020-2022-F3-2022-03-08"
+}

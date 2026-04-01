@@ -1,0 +1,18 @@
+{
+  "active": false,
+  "phase": "REINTEGRATE",
+  "lastTier": 1,
+  "lastTierChangeISO": "2022-06-21T06:00:00.000Z",
+  "currentTier": 0,
+  "postRiskOffTriggerCount": 1,
+  "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z",
+  "triggeredAtISO": "2022-07-05T06:00:00.000Z",
+  "addUntilISO": "2022-07-26T06:00:00.000Z",
+  "holdUntilISO": "2022-10-04T06:00:00.000Z",
+  "reintegrateAfterISO": "2022-10-04T06:00:00.000Z",
+  "triggerReason": "post_risk_off_reentry",
+  "entryAnchorPrice": 113.2,
+  "troughAnchorPrice": 113.2,
+  "troughDateISO": "2022-07-05T06:00:00.000Z",
+  "postRiskOffTriggeredAtISO": "2022-07-05T06:00:00.000Z"
+}

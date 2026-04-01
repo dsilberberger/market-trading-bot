@@ -1,10 +1,11 @@
-import { RegimeContext } from '../core/types';
+import { BotConfig, RegimeContext } from '../core/types';
 
 export type SleeveType = 'dislocation' | 'insurance' | 'growthConvexity';
 
 export interface SleeveArbitrationInput {
   regimes?: RegimeContext;
   dislocationActive?: boolean;
+  config?: BotConfig;
 }
 
 export interface SleeveArbitrationResult {
@@ -14,16 +15,18 @@ export interface SleeveArbitrationResult {
 
 export const arbitrateSleeves = (input: SleeveArbitrationInput): SleeveArbitrationResult => {
   const reasons: string[] = [];
-  const { regimes, dislocationActive } = input;
+  const { regimes, dislocationActive, config } = input;
   const equity = regimes?.equityRegime;
   const vol = regimes?.volRegime;
   const severeStress = equity?.label === 'risk_off' || vol?.label === 'stressed';
   const timeInRegimeWeeks = equity?.supports?.timeInRegimeWeeks ?? 0;
   const confidence = equity?.confidence ?? 0;
+  const growthConfidenceMin = config?.growth?.confidenceMin ?? 0.6;
+  const growthMinTimeInRegimeWeeks = config?.growth?.minTimeInRegimeWeeks ?? 2;
   const robust =
     equity?.label === 'risk_on' &&
-    confidence >= 0.6 &&
-    timeInRegimeWeeks >= 2 &&
+    confidence >= growthConfidenceMin &&
+    timeInRegimeWeeks >= growthMinTimeInRegimeWeeks &&
     vol?.label !== 'stressed';
 
   let insurance = false;
@@ -41,8 +44,10 @@ export const arbitrateSleeves = (input: SleeveArbitrationInput): SleeveArbitrati
     reasons.push('Growth convexity disabled: dislocation active');
   } else if (!robust) {
     if (equity?.label !== 'risk_on') reasons.push('Growth convexity disabled: equity regime not risk_on');
-    else if (confidence < 0.6) reasons.push('Growth convexity disabled: confidence below 0.6');
-    else if (timeInRegimeWeeks < 2) reasons.push('Growth convexity disabled: time in regime < 2 weeks');
+    else if (confidence < growthConfidenceMin)
+      reasons.push(`Growth convexity disabled: confidence below ${growthConfidenceMin}`);
+    else if (timeInRegimeWeeks < growthMinTimeInRegimeWeeks)
+      reasons.push(`Growth convexity disabled: time in regime < ${growthMinTimeInRegimeWeeks} weeks`);
     else if (vol?.label === 'stressed') reasons.push('Growth convexity disabled: vol stressed');
     else reasons.push('Growth convexity disabled: regime not robust');
   }

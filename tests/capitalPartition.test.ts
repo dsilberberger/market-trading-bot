@@ -41,7 +41,13 @@ const baseConfig: BotConfig = {
 };
 
 describe('capital partition', () => {
-  it('computes 70/30 budgets', () => {
+  it('defaults budgets to 85/15', () => {
+    const budgets = computeBudgets(1000, baseConfig);
+    expect(budgets.coreBudget).toBeCloseTo(850);
+    expect(budgets.reserveBudget).toBeCloseTo(150);
+  });
+
+  it('computes explicit override budgets', () => {
     const budgets = computeBudgets(1000, { ...baseConfig, capital: { corePct: 0.7, reservePct: 0.3 } });
     expect(budgets.coreBudget).toBeCloseTo(700);
     expect(budgets.reserveBudget).toBeCloseTo(300);

@@ -1,0 +1,3538 @@
+[
+  {
+    "date": "2020-07-27",
+    "runId": "growth-scout-2020-2022-G3-2020-07-27",
+    "order": {
+      "symbol": "VXUS",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 42845.76,
+      "thesis": "Momentum score 27.84% (regime tilt applied)",
+      "invalidation": "Invalidate if weekly close < MA200 (48.68) or drawdown > 39.8% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 60,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-07-27",
+    "runId": "growth-scout-2020-2022-G3-2020-07-27",
+    "order": {
+      "symbol": "VTI",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 42884.6,
+      "thesis": "Momentum score 24.63% (regime tilt applied)",
+      "invalidation": "Invalidate if weekly close < MA200 (83.13) or drawdown > 36.2% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 60,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-07-27",
+    "runId": "growth-scout-2020-2022-G3-2020-07-27",
+    "order": {
+      "symbol": "USMV",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 42864.12,
+      "thesis": "Momentum score 20.65% (regime tilt applied)",
+      "invalidation": "Invalidate if weekly close < MA200 (59.85) or drawdown > 31.4% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 60,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-07-27",
+    "runId": "growth-scout-2020-2022-G3-2020-07-27",
+    "order": {
+      "symbol": "VTV",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 42904.020000000004,
+      "thesis": "Momentum score 3.02% (regime tilt applied)",
+      "invalidation": "Invalidate if weekly close < MA200 (82.96) or drawdown > 2% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 60,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-09-14",
+    "runId": "growth-scout-2020-2022-G3-2020-09-14",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 45630.94452773614,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-09-14",
+    "runId": "growth-scout-2020-2022-G3-2020-09-14",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 45391.95402298851,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-09-14",
+    "runId": "growth-scout-2020-2022-G3-2020-09-14",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 44891.51424287856,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-09-14",
+    "runId": "growth-scout-2020-2022-G3-2020-09-14",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 43645.6671664168,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-11-17",
+    "runId": "growth-scout-2020-2022-G3-2020-11-17",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 48687.97601199401,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-11-17",
+    "runId": "growth-scout-2020-2022-G3-2020-11-17",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 48117.5912043978,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-11-17",
+    "runId": "growth-scout-2020-2022-G3-2020-11-17",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 46975.41229385308,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-11-17",
+    "runId": "growth-scout-2020-2022-G3-2020-11-17",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 44633.193403298355,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-11-24",
+    "runId": "growth-scout-2020-2022-G3-2020-11-24",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 48843.41829085458,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-11-24",
+    "runId": "growth-scout-2020-2022-G3-2020-11-24",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 48263.96801599201,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-11-24",
+    "runId": "growth-scout-2020-2022-G3-2020-11-24",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 47066.62668665667,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-11-24",
+    "runId": "growth-scout-2020-2022-G3-2020-11-24",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 44742.91854072964,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-12-08",
+    "runId": "growth-scout-2020-2022-G3-2020-12-08",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 49154.30284857572,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-12-08",
+    "runId": "growth-scout-2020-2022-G3-2020-12-08",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 48556.72163918042,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-12-08",
+    "runId": "growth-scout-2020-2022-G3-2020-12-08",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 47249.05547226387,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2020-12-08",
+    "runId": "growth-scout-2020-2022-G3-2020-12-08",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 44962.368815592214,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-02-09",
+    "runId": "growth-scout-2020-2022-G3-2021-02-09",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52185.427286356826,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-02-09",
+    "runId": "growth-scout-2020-2022-G3-2021-02-09",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 51221.789105447286,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-02-09",
+    "runId": "growth-scout-2020-2022-G3-2021-02-09",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 49354.00299850075,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-02-09",
+    "runId": "growth-scout-2020-2022-G3-2021-02-09",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 45994.78260869566,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-04-19",
+    "runId": "growth-scout-2020-2022-G3-2021-04-19",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 55294.27286356822,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-04-19",
+    "runId": "growth-scout-2020-2022-G3-2021-04-19",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53937.33133433284,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-04-19",
+    "runId": "growth-scout-2020-2022-G3-2021-04-19",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 51409.83508245877,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-04-19",
+    "runId": "growth-scout-2020-2022-G3-2021-04-19",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 47151.88405797103,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-06-21",
+    "runId": "growth-scout-2020-2022-G3-2021-06-21",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 58126.77661169416,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-06-21",
+    "runId": "growth-scout-2020-2022-G3-2021-06-21",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 56344.97751124438,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-06-21",
+    "runId": "growth-scout-2020-2022-G3-2021-06-21",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53283.23838080959,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-06-21",
+    "runId": "growth-scout-2020-2022-G3-2021-06-21",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 48229.18540729636,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-08-23",
+    "runId": "growth-scout-2020-2022-G3-2021-08-23",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 60354.782608695656,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-08-23",
+    "runId": "growth-scout-2020-2022-G3-2021-08-23",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 58288.25587206397,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-08-23",
+    "runId": "growth-scout-2020-2022-G3-2021-08-23",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 54672.503748125935,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-08-23",
+    "runId": "growth-scout-2020-2022-G3-2021-08-23",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 49321.44927536233,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-10-25",
+    "runId": "growth-scout-2020-2022-G3-2021-10-25",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 62539.610194902554,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-10-25",
+    "runId": "growth-scout-2020-2022-G3-2021-10-25",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 60186.106946526736,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-10-25",
+    "runId": "growth-scout-2020-2022-G3-2021-10-25",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 56012.65367316342,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-10-25",
+    "runId": "growth-scout-2020-2022-G3-2021-10-25",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 50443.638180909555,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-11-01",
+    "runId": "growth-scout-2020-2022-G3-2021-11-01",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 62738.23088455773,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-11-01",
+    "runId": "growth-scout-2020-2022-G3-2021-11-01",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 60367.816091954024,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-11-01",
+    "runId": "growth-scout-2020-2022-G3-2021-11-01",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 56124.917541229384,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-11-01",
+    "runId": "growth-scout-2020-2022-G3-2021-11-01",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 50568.32583708147,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-11-16",
+    "runId": "growth-scout-2020-2022-G3-2021-11-16",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 63135.47226386807,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-11-16",
+    "runId": "growth-scout-2020-2022-G3-2021-11-16",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 60731.234382808594,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-11-16",
+    "runId": "growth-scout-2020-2022-G3-2021-11-16",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 56349.44527736132,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2021-11-16",
+    "runId": "growth-scout-2020-2022-G3-2021-11-16",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 50817.7011494253,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-01-18",
+    "runId": "growth-scout-2020-2022-G3-2022-01-18",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 64983.50824587706,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-01-18",
+    "runId": "growth-scout-2020-2022-G3-2022-01-18",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 62391.85407296352,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-01-18",
+    "runId": "growth-scout-2020-2022-G3-2022-01-18",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 57359.82008995502,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-01-18",
+    "runId": "growth-scout-2020-2022-G3-2022-01-18",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 51979.79010494754,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-02-15",
+    "runId": "growth-scout-2020-2022-G3-2022-02-15",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52498.490754622704,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-02-15",
+    "runId": "growth-scout-2020-2022-G3-2022-02-15",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 51624.274062968514,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (71.73) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-02-15",
+    "runId": "growth-scout-2020-2022-G3-2022-02-15",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 49777.463283358324,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (118.26) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-02-15",
+    "runId": "growth-scout-2020-2022-G3-2022-02-15",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 45915.81206896551,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.23) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-02-22",
+    "runId": "growth-scout-2020-2022-G3-2022-02-22",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52628.165917041486,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-02-22",
+    "runId": "growth-scout-2020-2022-G3-2022-02-22",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 8343.793079163279,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (71.89) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-02-22",
+    "runId": "growth-scout-2020-2022-G3-2022-02-22",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 8141.143945758494,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (118.51) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-03-01",
+    "runId": "growth-scout-2020-2022-G3-2022-03-01",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52757.84107946028,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-03-01",
+    "runId": "growth-scout-2020-2022-G3-2022-03-01",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 7306.577979087,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.44) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-03-01",
+    "runId": "growth-scout-2020-2022-G3-2022-03-01",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 2040.0928258089643,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (72.05) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-03-08",
+    "runId": "growth-scout-2020-2022-G3-2022-03-08",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52887.51624187908,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-03-08",
+    "runId": "growth-scout-2020-2022-G3-2022-03-08",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 1928.8629743863246,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (119.00) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-03-08",
+    "runId": "growth-scout-2020-2022-G3-2022-03-08",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 1832.4275429394718,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.55) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-03-14",
+    "runId": "growth-scout-2020-2022-G3-2022-03-14",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53022.17891054474,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-03-14",
+    "runId": "growth-scout-2020-2022-G3-2022-03-14",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 513.2630132843975,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (72.36) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-03-14",
+    "runId": "growth-scout-2020-2022-G3-2022-03-14",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 483.71221072250233,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (119.25) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-03-21",
+    "runId": "growth-scout-2020-2022-G3-2022-03-21",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53156.841579210406,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-03-21",
+    "runId": "growth-scout-2020-2022-G3-2022-03-21",
+    "order": {
+      "symbol": "TIP",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 30101.18,
+      "thesis": "Momentum score 1.32% (regime tilt applied)",
+      "invalidation": "Invalidate if weekly close < MA200 (113.08) or drawdown > 2% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 60,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-03-21",
+    "runId": "growth-scout-2020-2022-G3-2022-03-21",
+    "order": {
+      "symbol": "SHY",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 30088.23,
+      "thesis": "Momentum score 0.57% (regime tilt applied)",
+      "invalidation": "Invalidate if weekly close < MA200 (52.11) or drawdown > 2% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 60,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-03-21",
+    "runId": "growth-scout-2020-2022-G3-2022-03-21",
+    "order": {
+      "symbol": "IEF",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 30061.92,
+      "thesis": "Momentum score 1.56% (regime tilt applied)",
+      "invalidation": "Invalidate if weekly close < MA200 (91.73) or drawdown > 2% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 60,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-03-21",
+    "runId": "growth-scout-2020-2022-G3-2022-03-21",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 459.8582356114656,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.66) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-03-21",
+    "runId": "growth-scout-2020-2022-G3-2022-03-21",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 138.61735893663231,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (72.40) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-03-28",
+    "runId": "growth-scout-2020-2022-G3-2022-03-28",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53291.50424787607,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-03-28",
+    "runId": "growth-scout-2020-2022-G3-2022-03-28",
+    "order": {
+      "symbol": "USMV",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 33930.77049350335,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.66) or drawdown > 4% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-03-28",
+    "runId": "growth-scout-2020-2022-G3-2022-03-28",
+    "order": {
+      "symbol": "VXUS",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 30715.89340991018,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (72.43) or drawdown > 4% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-03-28",
+    "runId": "growth-scout-2020-2022-G3-2022-03-28",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30104.467766116944,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-03-28",
+    "runId": "growth-scout-2020-2022-G3-2022-03-28",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30084.647676161923,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-03-28",
+    "runId": "growth-scout-2020-2022-G3-2022-03-28",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30066.206896551725,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-04",
+    "runId": "growth-scout-2020-2022-G3-2022-04-04",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53426.16691654174,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-04",
+    "runId": "growth-scout-2020-2022-G3-2022-04-04",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30122.798600699654,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-04",
+    "runId": "growth-scout-2020-2022-G3-2022-04-04",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30096.101949025488,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-04",
+    "runId": "growth-scout-2020-2022-G3-2022-04-04",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30085.51724137931,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-04",
+    "runId": "growth-scout-2020-2022-G3-2022-04-04",
+    "order": {
+      "symbol": "VXUS",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 12033.038757710521,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (72.45) or drawdown > 4% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-04-04",
+    "runId": "growth-scout-2020-2022-G3-2022-04-04",
+    "order": {
+      "symbol": "USMV",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 13276.469965488686,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.65) or drawdown > 4% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-04-11",
+    "runId": "growth-scout-2020-2022-G3-2022-04-11",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 115.92802790106154,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (119.46) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-04-11",
+    "runId": "growth-scout-2020-2022-G3-2022-04-11",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53560.82958520741,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-11",
+    "runId": "growth-scout-2020-2022-G3-2022-04-11",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30141.12943528236,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-11",
+    "runId": "growth-scout-2020-2022-G3-2022-04-11",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30107.55622188906,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-11",
+    "runId": "growth-scout-2020-2022-G3-2022-04-11",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30104.8275862069,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-18",
+    "runId": "growth-scout-2020-2022-G3-2022-04-18",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53695.492253873075,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-18",
+    "runId": "growth-scout-2020-2022-G3-2022-04-18",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30159.460269865074,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-18",
+    "runId": "growth-scout-2020-2022-G3-2022-04-18",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30124.137931034482,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-18",
+    "runId": "growth-scout-2020-2022-G3-2022-04-18",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30119.010494752627,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-18",
+    "runId": "growth-scout-2020-2022-G3-2022-04-18",
+    "order": {
+      "symbol": "USMV",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 19973.280737672605,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.64) or drawdown > 4% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-04-18",
+    "runId": "growth-scout-2020-2022-G3-2022-04-18",
+    "order": {
+      "symbol": "VXUS",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 18146.03138217391,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (72.50) or drawdown > 4% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-04-25",
+    "runId": "growth-scout-2020-2022-G3-2022-04-25",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53830.15492253874,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-25",
+    "runId": "growth-scout-2020-2022-G3-2022-04-25",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30251.114442778613,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-25",
+    "runId": "growth-scout-2020-2022-G3-2022-04-25",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30147.64617691155,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-04-25",
+    "runId": "growth-scout-2020-2022-G3-2022-04-25",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30243.2183908046,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-02",
+    "runId": "growth-scout-2020-2022-G3-2022-05-02",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53964.81759120441,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-02",
+    "runId": "growth-scout-2020-2022-G3-2022-05-02",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30269.445277361327,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-02",
+    "runId": "growth-scout-2020-2022-G3-2022-05-02",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30159.100449775113,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-02",
+    "runId": "growth-scout-2020-2022-G3-2022-05-02",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30262.528735632186,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-09",
+    "runId": "growth-scout-2020-2022-G3-2022-05-09",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 54099.48025987008,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-09",
+    "runId": "growth-scout-2020-2022-G3-2022-05-09",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30287.776111944033,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-09",
+    "runId": "growth-scout-2020-2022-G3-2022-05-09",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30170.554722638684,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-09",
+    "runId": "growth-scout-2020-2022-G3-2022-05-09",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30281.839080459773,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-16",
+    "runId": "growth-scout-2020-2022-G3-2022-05-16",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 54234.142928535744,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-16",
+    "runId": "growth-scout-2020-2022-G3-2022-05-16",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30306.106946526743,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-16",
+    "runId": "growth-scout-2020-2022-G3-2022-05-16",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30182.008995502252,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-16",
+    "runId": "growth-scout-2020-2022-G3-2022-05-16",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30301.14942528736,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-23",
+    "runId": "growth-scout-2020-2022-G3-2022-05-23",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 54368.80559720141,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-23",
+    "runId": "growth-scout-2020-2022-G3-2022-05-23",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30324.43778110945,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-23",
+    "runId": "growth-scout-2020-2022-G3-2022-05-23",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30193.46326836582,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-23",
+    "runId": "growth-scout-2020-2022-G3-2022-05-23",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30320.45977011494,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-30",
+    "runId": "growth-scout-2020-2022-G3-2022-05-30",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 54503.46826586708,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-30",
+    "runId": "growth-scout-2020-2022-G3-2022-05-30",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30410.574712643676,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-30",
+    "runId": "growth-scout-2020-2022-G3-2022-05-30",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30384.667666166923,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-30",
+    "runId": "growth-scout-2020-2022-G3-2022-05-30",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30222.09895052474,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-05-30",
+    "runId": "growth-scout-2020-2022-G3-2022-05-30",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 15196.545939307216,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.20) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-05-30",
+    "runId": "growth-scout-2020-2022-G3-2022-05-30",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 13592.081000450926,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (72.13) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-06-06",
+    "runId": "growth-scout-2020-2022-G3-2022-06-06",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 54638.130934532746,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-06",
+    "runId": "growth-scout-2020-2022-G3-2022-06-06",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30429.885057471263,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-06",
+    "runId": "growth-scout-2020-2022-G3-2022-06-06",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30402.99850074963,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-06",
+    "runId": "growth-scout-2020-2022-G3-2022-06-06",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30233.55322338831,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-06",
+    "runId": "growth-scout-2020-2022-G3-2022-06-06",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 111.6166549625923,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (118.89) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-06-06",
+    "runId": "growth-scout-2020-2022-G3-2022-06-06",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 67.07262801774965,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.08) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-06-13",
+    "runId": "growth-scout-2020-2022-G3-2022-06-13",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 54772.793603198406,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-13",
+    "runId": "growth-scout-2020-2022-G3-2022-06-13",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30449.19540229885,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-13",
+    "runId": "growth-scout-2020-2022-G3-2022-06-13",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30421.32933533234,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-13",
+    "runId": "growth-scout-2020-2022-G3-2022-06-13",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30245.007496251877,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-13",
+    "runId": "growth-scout-2020-2022-G3-2022-06-13",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 2619.3663795247376,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (78.95) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-06-13",
+    "runId": "growth-scout-2020-2022-G3-2022-06-13",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 2341.3077254479963,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (71.88) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-06-20",
+    "runId": "growth-scout-2020-2022-G3-2022-06-20",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 54907.45627186408,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-20",
+    "runId": "growth-scout-2020-2022-G3-2022-06-20",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30468.505747126437,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-20",
+    "runId": "growth-scout-2020-2022-G3-2022-06-20",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30439.660169915045,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-20",
+    "runId": "growth-scout-2020-2022-G3-2022-06-20",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30256.461769115445,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-20",
+    "runId": "growth-scout-2020-2022-G3-2022-06-20",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 112.2952969992032,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (118.56) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-06-20",
+    "runId": "growth-scout-2020-2022-G3-2022-06-20",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 73.67703536161032,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (78.83) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-06-27",
+    "runId": "growth-scout-2020-2022-G3-2022-06-27",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 55047.10644677663,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.55,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-27",
+    "runId": "growth-scout-2020-2022-G3-2022-06-27",
+    "order": {
+      "symbol": "IEF",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30487.816091954024,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.55,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-27",
+    "runId": "growth-scout-2020-2022-G3-2022-06-27",
+    "order": {
+      "symbol": "TIP",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30457.991004497755,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.55,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-27",
+    "runId": "growth-scout-2020-2022-G3-2022-06-27",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 30267.916041979013,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.55,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-06-27",
+    "runId": "growth-scout-2020-2022-G3-2022-06-27",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 150.24306933012193,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (78.70) or drawdown > 4% from entry.",
+      "confidence": 0.55,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-06-27",
+    "runId": "growth-scout-2020-2022-G3-2022-06-27",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 133.8612536912188,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (71.62) or drawdown > 4% from entry.",
+      "confidence": 0.55,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-10-10",
+    "runId": "growth-scout-2020-2022-G3-2022-10-10",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 57151.834082958536,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-10",
+    "runId": "growth-scout-2020-2022-G3-2022-10-10",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 49555.721319990356,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-10",
+    "runId": "growth-scout-2020-2022-G3-2022-10-10",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 45611.368424174485,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-10",
+    "runId": "growth-scout-2020-2022-G3-2022-10-10",
+    "order": {
+      "symbol": "TIP",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 10923.327311344323,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (115.90) or drawdown > 4% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-10-10",
+    "runId": "growth-scout-2020-2022-G3-2022-10-10",
+    "order": {
+      "symbol": "IEF",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 10910.35908045977,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (94.30) or drawdown > 4% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-10-10",
+    "runId": "growth-scout-2020-2022-G3-2022-10-10",
+    "order": {
+      "symbol": "SHY",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 10804.669865067463,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (52.77) or drawdown > 4% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-10-17",
+    "runId": "growth-scout-2020-2022-G3-2022-10-17",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 45756.72819606807,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-17",
+    "runId": "growth-scout-2020-2022-G3-2022-10-17",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 120.1795206598298,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-17",
+    "runId": "growth-scout-2020-2022-G3-2022-10-17",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 49656.521159949654,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-17",
+    "runId": "growth-scout-2020-2022-G3-2022-10-17",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 57296.47176411795,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-17",
+    "runId": "growth-scout-2020-2022-G3-2022-10-17",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 47.76833303737971,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (52.80) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-10-24",
+    "runId": "growth-scout-2020-2022-G3-2022-10-24",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 45902.08796796165,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-24",
+    "runId": "growth-scout-2020-2022-G3-2022-10-24",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 120.53880173803557,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-24",
+    "runId": "growth-scout-2020-2022-G3-2022-10-24",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 49757.32099990896,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-24",
+    "runId": "growth-scout-2020-2022-G3-2022-10-24",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 57441.109445277376,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-24",
+    "runId": "growth-scout-2020-2022-G3-2022-10-24",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53.166094896856436,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (52.82) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-10-31",
+    "runId": "growth-scout-2020-2022-G3-2022-10-31",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 46047.44773985524,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-31",
+    "runId": "growth-scout-2020-2022-G3-2022-10-31",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 120.89808281624134,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-31",
+    "runId": "growth-scout-2020-2022-G3-2022-10-31",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 49858.12083986825,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-31",
+    "runId": "growth-scout-2020-2022-G3-2022-10-31",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 57585.74712643679,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-10-31",
+    "runId": "growth-scout-2020-2022-G3-2022-10-31",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53.183393653873246,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (52.84) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-11-08",
+    "runId": "growth-scout-2020-2022-G3-2022-11-08",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 46192.807511748826,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-08",
+    "runId": "growth-scout-2020-2022-G3-2022-11-08",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 121.25736389444711,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-08",
+    "runId": "growth-scout-2020-2022-G3-2022-11-08",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 49958.92067982755,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-08",
+    "runId": "growth-scout-2020-2022-G3-2022-11-08",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 57730.384807596216,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-08",
+    "runId": "growth-scout-2020-2022-G3-2022-11-08",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53.20338500067235,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (52.86) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-11-15",
+    "runId": "growth-scout-2020-2022-G3-2022-11-15",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 46338.16728364241,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-15",
+    "runId": "growth-scout-2020-2022-G3-2022-11-15",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 121.61664497265288,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-15",
+    "runId": "growth-scout-2020-2022-G3-2022-11-15",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 50059.720519786846,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-15",
+    "runId": "growth-scout-2020-2022-G3-2022-11-15",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 57875.02248875564,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-15",
+    "runId": "growth-scout-2020-2022-G3-2022-11-15",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53.22337500000063,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (52.89) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-11-22",
+    "runId": "growth-scout-2020-2022-G3-2022-11-22",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 47128.16604393364,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-22",
+    "runId": "growth-scout-2020-2022-G3-2022-11-22",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 123.4429904535322,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-22",
+    "runId": "growth-scout-2020-2022-G3-2022-11-22",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 50759.019409504486,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-22",
+    "runId": "growth-scout-2020-2022-G3-2022-11-22",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 58019.660169915056,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-22",
+    "runId": "growth-scout-2020-2022-G3-2022-11-22",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53.24336500000063,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (52.91) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-11-29",
+    "runId": "growth-scout-2020-2022-G3-2022-11-29",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 47279.84580590956,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-29",
+    "runId": "growth-scout-2020-2022-G3-2022-11-29",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 123.81225156168814,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-29",
+    "runId": "growth-scout-2020-2022-G3-2022-11-29",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 50859.81924946379,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-29",
+    "runId": "growth-scout-2020-2022-G3-2022-11-29",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 58164.29785107448,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-11-29",
+    "runId": "growth-scout-2020-2022-G3-2022-11-29",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53.26335500000063,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (52.93) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-12-06",
+    "runId": "growth-scout-2020-2022-G3-2022-12-06",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 47431.525567885474,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-06",
+    "runId": "growth-scout-2020-2022-G3-2022-12-06",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 124.18151266984408,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-06",
+    "runId": "growth-scout-2020-2022-G3-2022-12-06",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 50960.61908942309,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-06",
+    "runId": "growth-scout-2020-2022-G3-2022-12-06",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 58308.935532233896,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-06",
+    "runId": "growth-scout-2020-2022-G3-2022-12-06",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53.28334500000063,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (52.95) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-12-13",
+    "runId": "growth-scout-2020-2022-G3-2022-12-13",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 47583.2053298614,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-13",
+    "runId": "growth-scout-2020-2022-G3-2022-12-13",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 124.55077377799999,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-13",
+    "runId": "growth-scout-2020-2022-G3-2022-12-13",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 51061.41892938238,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-13",
+    "runId": "growth-scout-2020-2022-G3-2022-12-13",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 58453.57321339332,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-13",
+    "runId": "growth-scout-2020-2022-G3-2022-12-13",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53.30333500000063,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (52.97) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-12-20",
+    "runId": "growth-scout-2020-2022-G3-2022-12-20",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 47734.88509183731,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-20",
+    "runId": "growth-scout-2020-2022-G3-2022-12-20",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 124.92003488615593,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-20",
+    "runId": "growth-scout-2020-2022-G3-2022-12-20",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 51162.21876934168,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-20",
+    "runId": "growth-scout-2020-2022-G3-2022-12-20",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 58598.210894552736,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-20",
+    "runId": "growth-scout-2020-2022-G3-2022-12-20",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53.32332500000063,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (52.99) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  },
+  {
+    "date": "2022-12-27",
+    "runId": "growth-scout-2020-2022-G3-2022-12-27",
+    "order": {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 47886.56485381322,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-27",
+    "runId": "growth-scout-2020-2022-G3-2022-12-27",
+    "order": {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 125.29927602426201,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-27",
+    "runId": "growth-scout-2020-2022-G3-2022-12-27",
+    "order": {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 51263.01860930098,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-27",
+    "runId": "growth-scout-2020-2022-G3-2022-12-27",
+    "order": {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 58742.84857571216,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  },
+  {
+    "date": "2022-12-27",
+    "runId": "growth-scout-2020-2022-G3-2022-12-27",
+    "order": {
+      "symbol": "SHY",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53.34331500000063,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (53.02) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  }
+]

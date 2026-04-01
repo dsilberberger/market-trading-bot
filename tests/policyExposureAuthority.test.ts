@@ -43,14 +43,14 @@ const makeConfig = () =>
   }) as any;
 
 describe('netExposureTarget authority reduction', () => {
-  it('keeps neutral low-vol policy cap at 0.50 even when proposal requests 0.35', () => {
+  it('keeps neutral low-vol policy cap at the smoothed floor even when proposal requests 0.35', () => {
     const intent = makeIntent(0.35, 400);
     const llmContext = makeContext('neutral', 'low', 0.2);
     const result = applyDecisionPolicyGate(intent as any, llmContext, makePortfolio(), makeConfig());
 
-    expect(derivePolicyExposureCap({ equityConfidence: 0.2, regimeLabel: 'neutral', volLabel: 'low' })).toBe(0.5);
-    expect(result.policyApplied.exposureCap).toBe(0.5);
-    expect(result.orders[0].notionalUSD).toBe(400);
+    expect(derivePolicyExposureCap({ equityConfidence: 0.2, regimeLabel: 'neutral', volLabel: 'low' })).toBe(0.35);
+    expect(result.policyApplied.exposureCap).toBe(0.35);
+    expect(result.orders[0].notionalUSD).toBe(350);
   });
 
   it('ignores proposal netExposureTarget when non-neutral low-confidence policy cap is 0.35', () => {
@@ -85,7 +85,7 @@ describe('netExposureTarget authority reduction', () => {
     });
     const result = applyDecisionPolicyGate(makeIntent(0.2, 600) as any, makeContext('neutral', 'low', 0.5), makePortfolio(), makeConfig());
 
-    expect(expectedExposureCap).toBe(0.7);
+    expect(expectedExposureCap).toBe(0.35);
     expect(result.policyApplied.baseExposureCap).toBe(expectedExposureCap);
     expect(result.policyApplied.exposureCap).toBe(expectedExposureCap);
   });

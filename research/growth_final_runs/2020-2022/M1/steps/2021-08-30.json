@@ -1,0 +1,180 @@
+{
+  "date": "2021-08-30",
+  "asOf": "2021-08-30T16:00",
+  "runId": "growth-final-2020-2022-M1-2021-08-30",
+  "runStatus": "completed",
+  "regime": "risk_on",
+  "confidence": 0.7189781021897811,
+  "exposureCap": 0.7,
+  "deployBudgetUsd": 283842.026,
+  "targetAllocations": {},
+  "achievedAllocations": {},
+  "orders": [
+    {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 60544.76761619191,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 58464.91754122939,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 54784.7676161919,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 49446.136931534245,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 197159.55680261357,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 863.568215892054,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 504.7476261869066,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 701.6491754122939,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 426912.977832761,
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:115.8300:2021-11-22",
+        "type": "CALL",
+        "strike": 115.83,
+        "expiry": "2021-11-22",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.8310772500000003,
+        "openDate": "2021-08-30T16:00",
+        "costBasisUsd": 6512.831325,
+        "marketPrice": 3.8310772500000003,
+        "marketValueUsd": 6512.831325,
+        "unrealizedPnlUsd": 0
+      }
+    ],
+    "optionsMarketValueUsd": 6512.831325
+  },
+  "optionCashEvents": [
+    {
+      "date": "2021-08-30",
+      "asOf": "2021-08-30T16:00",
+      "type": "OPT_CLOSE_CREDIT",
+      "amount": 11794.698276923089,
+      "reason": "growth_roll_close",
+      "symbol": "VTI",
+      "sleeve": "growth",
+      "positionId": "VTI:CALL:111.9600:2021-09-20",
+      "contracts": 24,
+      "strike": 111.96,
+      "expiry": "2021-09-20"
+    },
+    {
+      "date": "2021-08-30",
+      "asOf": "2021-08-30T16:00",
+      "type": "OPT_OPEN_DEBIT",
+      "amount": -6512.831325,
+      "reason": "growth_open",
+      "symbol": "VTI",
+      "sleeve": "growth",
+      "positionId": "VTI:CALL:115.8300:2021-11-22",
+      "contracts": 17,
+      "strike": 115.83,
+      "expiry": "2021-11-22"
+    }
+  ],
+  "capitalLanes": {
+    "coreCapitalUsd": 298839.0844829327,
+    "coreCashUsd": 75598.49477778526,
+    "coreHeadroomUsd": 75598.49477778526,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 128073.8933498283,
+    "optionsReserveCashUsd": 121561.0620248283,
+    "optionsReserveHeadroomUsd": 121561.0620248283
+  },
+  "executedOptionReserveUsageUsd": 6512.831325,
+  "executedReserveUsageUsd": 6512.831325,
+  "reserveUsageUsd": 6512.831325,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-final-2020-2022-M1-2021-08-30"
+}

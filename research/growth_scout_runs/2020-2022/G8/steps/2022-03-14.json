@@ -1,0 +1,139 @@
+{
+  "date": "2022-03-14",
+  "asOf": "2022-03-14T16:00",
+  "runId": "growth-scout-2020-2022-G8-2022-03-14",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.35180238270695136,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 96038.851125,
+  "targetAllocations": {
+    "IEF": 0.33157765322992516,
+    "TIP": 0.33157765322992516,
+    "SHY": 0.33157765322992516,
+    "VXUS": 0.001826236299320517,
+    "VTI": 0.0016732108644849958,
+    "USMV": 0.0017675931464189794
+  },
+  "achievedAllocations": {
+    "IEF": 0.33145809827692246,
+    "TIP": 0.3318726843194358,
+    "SHY": 0.332203184717695,
+    "VXUS": 0.0015329459760168131,
+    "VTI": 0.001264101428569193,
+    "USMV": 0.0016689852813608938
+  },
+  "orders": [
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 53022.17891054474,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 513.2630316794764,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (72.36) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 483.71221072250233,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (119.25) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 358697.3555943047,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 1.9965052416525442,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 0.9980029950160256,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 7.988517698451826,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 412626.1472985589,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 288838.30310899124,
+    "coreCashUsd": 234909.51140473702,
+    "coreHeadroomUsd": 234909.51140473702,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 123787.84418956767,
+    "optionsReserveCashUsd": 123787.84418956767,
+    "optionsReserveHeadroomUsd": 123787.84418956767
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0,
+    "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-scout-2020-2022-G8-2022-03-14"
+}

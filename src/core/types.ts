@@ -201,6 +201,10 @@ export interface BotConfig {
   };
   growth?: {
     spendPct?: number;
+    confidenceMin?: number;
+    minTimeInRegimeWeeks?: number;
+    initialTranchePct?: number;
+    maxTotalPct?: number;
     minMonths?: number;
     maxMonths?: number;
     minMoneyness?: number;
@@ -347,10 +351,42 @@ export interface Holding {
   holdSince?: string;
 }
 
+export interface OptionPosition {
+  underlying: string | null;
+  optionSymbol: string | null;
+  type: 'CALL' | 'PUT';
+  strike: number;
+  expiry: string;
+  contracts: number;
+  multiplier: number;
+  avgOpenPrice: number;
+  openDate: string;
+  costBasisUsd?: number;
+  marketPrice?: number | null;
+  marketValueUsd?: number | null;
+  unrealizedPnlUsd?: number | null;
+}
+
+export interface OptionCashEvent {
+  date: string;
+  asOf: string;
+  type: 'OPT_OPEN_DEBIT' | 'OPT_CLOSE_CREDIT' | 'OPT_EXPIRE';
+  amount: number;
+  reason: string;
+  symbol: string;
+  sleeve: 'insurance' | 'growth';
+  positionId: string;
+  contracts: number;
+  strike: number;
+  expiry: string;
+}
+
 export interface PortfolioState {
   cash: number;
   holdings: Holding[];
   equity: number;
+  optionPositions?: OptionPosition[];
+  optionsMarketValueUsd?: number;
 }
 
 export interface SleevePositions {
@@ -389,6 +425,7 @@ export interface ExecutionResult {
   previews: OrderPreview[];
   placements: OrderPlacement[];
   fills: Fill[];
+  placedOrders?: Array<{ orderId: string; order: TradeOrder }>;
 }
 
 export interface RunInputs {

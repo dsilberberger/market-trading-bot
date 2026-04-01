@@ -1,0 +1,139 @@
+{
+  "date": "2022-03-01",
+  "asOf": "2022-03-01T16:00",
+  "runId": "growth-targeted-2020-2022-F4-2022-03-01",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.35162685337726535,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 100435.18939999997,
+  "targetAllocations": {
+    "IEF": 0.3204415981387799,
+    "TIP": 0.3204415981387799,
+    "SHY": 0.3204415981387799,
+    "VXUS": 0.0068454366412271095,
+    "VTI": 0.00640946699569934,
+    "USMV": 0.02542030194673378
+  },
+  "achievedAllocations": {
+    "IEF": 0.3205072383967949,
+    "TIP": 0.3206431215137519,
+    "SHY": 0.3208225351516445,
+    "VXUS": 0.0065604288994336145,
+    "VTI": 0.006012902805831612,
+    "USMV": 0.02545377323254354
+  },
+  "orders": [
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52757.84107946028,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 7466.03754386938,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.44) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 2039.9832012117727,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (72.05) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 373025.63552763005,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 8.986022437316375,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 20.965586532041954,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 31.953120544558274,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 431510.5561168082,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 302057.38928176573,
+    "coreCashUsd": 243572.46869258757,
+    "coreHeadroomUsd": 243572.46869258757,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 129453.16683504246,
+    "optionsReserveCashUsd": 129453.16683504246,
+    "optionsReserveHeadroomUsd": 129453.16683504246
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0,
+    "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-targeted-2020-2022-F4-2022-03-01"
+}

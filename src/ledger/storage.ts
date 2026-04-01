@@ -3,19 +3,23 @@ import path from 'path';
 import { ensureDir, writeJSONFile } from '../core/utils';
 import { LedgerEvent } from '../core/types';
 
-const configuredPath = process.env.LEDGER_FILE ? path.resolve(process.env.LEDGER_FILE) : undefined;
-const ledgerFile = configuredPath ?? path.join(path.resolve(process.cwd(), 'ledger'), 'events.jsonl');
-const ledgerDir = path.dirname(ledgerFile);
+const resolveLedgerFile = () => {
+  const configuredPath = process.env.LEDGER_FILE ? path.resolve(process.env.LEDGER_FILE) : undefined;
+  return configuredPath ?? path.join(path.resolve(process.cwd(), 'ledger'), 'events.jsonl');
+};
 
-export const getLedgerFile = () => ledgerFile;
+export const getLedgerFile = () => resolveLedgerFile();
 
 export const appendLedgerEvent = (event: LedgerEvent) => {
+  const ledgerFile = resolveLedgerFile();
+  const ledgerDir = path.dirname(ledgerFile);
   ensureDir(ledgerDir);
   const line = JSON.stringify(event);
   fs.appendFileSync(ledgerFile, `${line}\n`);
 };
 
 export const readLedgerEvents = (): LedgerEvent[] => {
+  const ledgerFile = resolveLedgerFile();
   if (!fs.existsSync(ledgerFile)) return [];
   const content = fs.readFileSync(ledgerFile, 'utf-8');
   const lines = content.trim().length ? content.trim().split('\n') : [];

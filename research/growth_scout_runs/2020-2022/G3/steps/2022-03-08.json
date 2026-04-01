@@ -1,0 +1,139 @@
+{
+  "date": "2022-03-08",
+  "asOf": "2022-03-08T16:00",
+  "runId": "growth-scout-2020-2022-G3-2022-03-08",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.35151116951379774,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 90515.68364999999,
+  "targetAllocations": {
+    "IEF": 0.3278093872761478,
+    "TIP": 0.3278093872761478,
+    "SHY": 0.3278093872761478,
+    "VXUS": 0.0019262378003695425,
+    "VTI": 0.007413296543188406,
+    "USMV": 0.007232303827998854
+  },
+  "achievedAllocations": {
+    "IEF": 0.3281438826888467,
+    "TIP": 0.32818022498317784,
+    "SHY": 0.328283933481635,
+    "VXUS": 0.001622993680983573,
+    "VTI": 0.00669285453985614,
+    "USMV": 0.007076110625500745
+  },
+  "orders": [
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52887.51624187908,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 1928.8629743863246,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (119.00) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 1832.4275429394718,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.55) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 334108.26424585434,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 8.986021686190249,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 4.9920129629652745,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 7.988517197701075,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 388894.7251299783,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 272226.3075909848,
+    "coreCashUsd": 217439.84670686082,
+    "coreHeadroomUsd": 217439.84670686082,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 116668.4175389935,
+    "optionsReserveCashUsd": 116668.4175389935,
+    "optionsReserveHeadroomUsd": 116668.4175389935
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0,
+    "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-scout-2020-2022-G3-2022-03-08"
+}

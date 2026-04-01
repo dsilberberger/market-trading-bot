@@ -1,0 +1,10 @@
+{
+  "status": "DEPLOYED",
+  "openedRunId": "growth-final-2020-2022-M4-2022-12-27",
+  "openedAsOf": "2022-10-10T16:00",
+  "underlying": "VTI",
+  "expiry": "2023-02-27",
+  "strike": 121.2606,
+  "contracts": 17,
+  "premiumUSD": 6818.1803865
+}

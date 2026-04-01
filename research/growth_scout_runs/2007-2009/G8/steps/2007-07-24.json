@@ -1,0 +1,146 @@
+{
+  "date": "2007-07-24",
+  "asOf": "2007-07-24T16:00",
+  "runId": "growth-scout-2007-2009-G8-2007-07-24",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.5603310247252796,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 85750,
+  "targetAllocations": {
+    "IEF": 0.25,
+    "USMV": 0.25,
+    "VTV": 0.25,
+    "VXUS": 0.25
+  },
+  "achievedAllocations": {
+    "IEF": 0.25019524012210603,
+    "USMV": 0.249774732094127,
+    "VTV": 0.24989487212643807,
+    "VXUS": 0.25013515565732886
+  },
+  "orders": [
+    {
+      "symbol": "IEF",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 21437.457125,
+      "thesis": "Momentum score 1.21% (regime tilt applied)",
+      "invalidation": "Invalidate if weekly close < MA200 (86.24) or drawdown > 2% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 60,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "USMV",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 21401.426772000003,
+      "thesis": "Momentum score 1.21% (regime tilt applied)",
+      "invalidation": "Invalidate if weekly close < MA200 (71.02) or drawdown > 2% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 60,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VTV",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 21411.72072,
+      "thesis": "Momentum score 1.21% (regime tilt applied)",
+      "invalidation": "Invalidate if weekly close < MA200 (81.17) or drawdown > 2% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 60,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VXUS",
+      "side": "BUY",
+      "orderType": "MARKET",
+      "notionalUSD": 21432.308913,
+      "thesis": "Momentum score 1.21% (regime tilt applied)",
+      "invalidation": "Invalidate if weekly close < MA200 (60.88) or drawdown > 2% from entry.",
+      "confidence": 0.6,
+      "portfolioLevel": {
+        "targetHoldDays": 60,
+        "netExposureTarget": 1
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 264317.08647000004,
+    "holdings": [
+      {
+        "symbol": "IEF",
+        "quantity": 244.87756121939034,
+        "avgPrice": 87.54357491249999,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 296.8515742128936,
+        "avgPrice": 72.094705338,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 259.87006496751627,
+        "avgPrice": 82.39394838599999,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "VXUS",
+        "quantity": 346.8265867066467,
+        "avgPrice": 61.7954612895,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      }
+    ],
+    "equity": 349957.1799532584,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 244970.02596728088,
+    "coreCashUsd": 159329.9324840225,
+    "coreHeadroomUsd": 159329.9324840225,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 104987.15398597752,
+    "optionsReserveCashUsd": 104987.15398597752,
+    "optionsReserveHeadroomUsd": 104987.15398597752
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "postRiskOffEpisodeStartISO": "2007-07-25T06:00:00.000Z",
+    "postRiskOffTriggerCount": 0,
+    "currentTier": 0
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-scout-2007-2009-G8-2007-07-24"
+}

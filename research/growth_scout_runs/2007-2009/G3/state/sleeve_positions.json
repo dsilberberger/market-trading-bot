@@ -1,0 +1,37 @@
+{
+  "IEF": {
+    "baseQty": 517.9989904932648,
+    "dislocationQty": 0,
+    "updatedAtISO": "2009-12-09T00:00:00.000Z"
+  },
+  "USMV": {
+    "baseQty": 511.999500499251,
+    "dislocationQty": 0,
+    "updatedAtISO": "2009-11-11T00:00:00.000Z"
+  },
+  "VTV": {
+    "baseQty": 189.08145751763408,
+    "dislocationQty": 172.9135432283858,
+    "updatedAtISO": "2009-12-30T00:00:00.000Z"
+  },
+  "VXUS": {
+    "baseQty": 483.7586201905292,
+    "dislocationQty": 0,
+    "updatedAtISO": "2008-01-30T00:00:00.000Z"
+  },
+  "TIP": {
+    "baseQty": 190.99950024962575,
+    "dislocationQty": 0,
+    "updatedAtISO": "2009-11-11T00:00:00.000Z"
+  },
+  "SHY": {
+    "baseQty": 654.9995000000001,
+    "dislocationQty": 0,
+    "updatedAtISO": "2009-12-30T00:00:00.000Z"
+  },
+  "VTI": {
+    "baseQty": 0,
+    "dislocationQty": 385.99949999987524,
+    "updatedAtISO": "2008-06-24T23:00:00.000Z"
+  }
+}

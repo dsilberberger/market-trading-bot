@@ -2,6 +2,8 @@ type EquityRegimeLabel = 'risk_on' | 'risk_off' | 'neutral' | 'RISK_ON' | 'RISK_
 type VolRegimeLabel = 'low' | 'rising' | 'stressed' | undefined;
 type TransitionRisk = 'low' | 'elevated' | 'high' | undefined;
 
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
 const normalizeEquityRegimeLabel = (label: EquityRegimeLabel): 'risk_on' | 'risk_off' | 'neutral' | undefined => {
   if (!label) return undefined;
   if (label === 'RISK_ON' || label === 'risk_on') return 'risk_on';
@@ -14,15 +16,20 @@ export const mapPolicyExposureCap = (
   regimeLabel?: EquityRegimeLabel,
   volLabel?: VolRegimeLabel
 ): number => {
+  const confidence = clamp(equityConfidence, 0, 1);
   const normalizedRegimeLabel = normalizeEquityRegimeLabel(regimeLabel);
   const isNeutralLowVol = normalizedRegimeLabel === 'neutral' && volLabel === 'low';
-  if (isNeutralLowVol) {
-    if (equityConfidence < 0.35) return 0.5;
-    if (equityConfidence < 0.6) return 0.7;
-    return 1;
+  const isSmoothReRiskingCase = normalizedRegimeLabel === 'risk_on' || isNeutralLowVol;
+
+  if (isSmoothReRiskingCase) {
+    if (confidence <= 0.5) return 0.35;
+    if (confidence >= 0.8) return 1;
+    const t = (confidence - 0.5) / 0.3;
+    return clamp(0.35 + t * (1 - 0.35), 0.35, 1);
   }
-  if (equityConfidence < 0.35) return 0.35;
-  if (equityConfidence < 0.6) return 0.6;
+
+  if (confidence < 0.35) return 0.35;
+  if (confidence < 0.6) return 0.6;
   return 1;
 };
 

@@ -1,36 +1,41 @@
-# Project TODO (Snapshot)
+# Project TODO
 
-Last updated: 2026-01-06
+Last updated: 2026-03-31
 
-## Reporting & Transparency
-- [ ] Report: Add clearer per-symbol rationale for ETF rankings/weights (anchor vs peers), grounded in artifacts.
-- [ ] Report: Include confidence quality (full/degraded/blocked) summaries for quick auditing.
-- [ ] Report: Ensure regime rationale references anchor fields only (no legacy names).
+## Highest Priority
+- [ ] Supply normalized real historical bars for `2010–2015` so broader validation can start.
+- [ ] Build the first real-history or proxy-backed `2010–2015` replay bundle using:
+  - `scripts/buildHistoricalReplayBundle.ts`, or
+  - `scripts/buildProxyHistoricalReplayBundle.ts`
+- [ ] Run the broader validation matrix for `2010–2015`:
+  - baseline `85/15`, growth off
+  - baseline `85/15` + `M4` growth
+  - compare against `60/40`, `80/20`, `100% equity`
 
-## Regime & Confidence
-- [ ] Volatility: Consider multi-horizon or EWMA volatility for regimes; hysteresis already added (enter >0.7, exit <0.6).
-- [ ] Data adequacy: Tighten thresholds per-lookback window and surface “degraded mode” flag in proposals.
-- [ ] Benchmarks: Make benchmark symbol explicit in config (avoid SPY fallback where not intended).
-- [ ] Growth tilt: Consider a small, regime-gated growth/exposure role (higher beta/tech/quality) with strict caps for better upside participation in strong risk-on regimes.
+## Broader Validation
+- [ ] After `2010–2015`, enable at least one more regime-diverse real-history window:
+  - `1998–2003`, or
+  - `2016–2019`
+- [ ] Decide whether dislocation handoff should stay in the main baseline only after a window shows it actually activates and matters.
+- [ ] Expand validation reporting with a compact cross-window comparison view for:
+  - return
+  - CAGR
+  - max drawdown
+  - volatility
+  - recovery timing
+  - dislocation/growth sleeve activity
 
-## Universe & Proxies
-- [ ] Clean remaining legacy SPY/QQQ references in docs/tests unless needed for legacy scenarios.
-- [ ] Confirm options underlyings align with new universe; keep configurable.
+## Data Tooling
+- [ ] Add one small example dataset or fixture for the new replay-bundle converter path so the workflow is easier to re-run.
+- [ ] Optionally add a lightweight validator/check command for externally supplied historical bar files before replay.
 
-## Harness & Scenarios
-- [ ] Refresh harness scenarios to reflect the new universe (VTI/VXUS/VTV/USMV/SHY/IEF/TIP) and updated dislocation overlays.
-- [ ] Add a harness case that exercises options sleeve with live-like prices/reserve, verifying reserve ledger.
+## Lower Priority
+- [ ] Revisit dislocation handoff only if broader validation shows a clear remaining transition gap.
+- [ ] Revisit insurance only if broader validation exposes a downside gap that the ETF/dislocation baseline does not handle well enough.
+- [ ] Consider later hardening around benchmark/report packaging after cross-window validation is complete.
 
-## Data & Healthchecks
-- [ ] Healthcheck: Use new-universe symbols by default; ensure stub/real modes are explicit.
-- [ ] Add “degraded data” indicator to proposals when coarse percentiles or inadequate history are present.
-
-## Testing & Safety
-- [ ] Expand tests to cover confidence quality propagation into report artifacts.
-- [ ] Add regression test for anchor-based regime supports (no hardcoded SPY fields).
-
-## Notes
-- Core math, budgets, and regimes should remain unchanged unless explicitly requested.
-- Anchor is configurable (currently VTI); proxies separated (execution vs confidence).
-- Weekly mapping retained; vol window lengthened and hysteresis applied to stabilize regimes.
-- Regime system is deliberately conservative: signals are simple (anchor return/vol/trend + macro rates) and role-based allocation avoids momentum chasing. Good for capital preservation/diversification, but less aggressive in upside capture unless growth tilts are added.
+## Explicitly Deprioritized For Now
+- [ ] More option logic beyond the narrow `M4` growth sleeve
+- [ ] Insurance as part of the main default architecture
+- [ ] Further re-entry tuning beyond the already shipped exposure smoothing
+- [ ] Broad regime-model redesign or new indicator expansion

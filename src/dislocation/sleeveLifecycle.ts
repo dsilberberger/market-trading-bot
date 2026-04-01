@@ -2,6 +2,15 @@ import { BotConfig, PriceBar } from '../core/types';
 import { DislocationSleeveState, SleevePhase, loadSleeveState, saveSleeveState } from './sleeveState';
 import { evaluatePostRiskOffStabilization } from './postRiskOffReentry';
 
+type HandoffSleeveState = DislocationSleeveState & {
+  handoffStartedAtISO?: string;
+  handoffEndsAtISO?: string;
+  handoffBaseExtraExposurePct?: number;
+};
+
+const HANDOFF_DECAY_WEEKS = 3;
+const HANDOFF_CARRY_FRACTION = 0.25;
+
 const addWeeks = (iso: string, weeks: number): string => {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
@@ -22,7 +31,7 @@ export interface SleeveLifecycleInput {
 }
 
 export interface SleeveLifecycleResult {
-  state: DislocationSleeveState;
+  state: HandoffSleeveState;
   allowAdd: boolean;
   protectFromSells: boolean;
   allowReintegration: boolean;
@@ -54,7 +63,8 @@ export const runSleeveLifecycle = ({
 }: SleeveLifecycleInput): SleeveLifecycleResult => {
   const flags: SleeveLifecycleResult['flags'] = [];
   const cfg = config.dislocation || {};
-  let state = loadSleeveState();
+  let state = loadSleeveState() as HandoffSleeveState;
+  const phaseBeforeStep = state.phase;
   const now = nowIso(asOf);
   const minWeeksBetweenTier = cfg.minWeeksBetweenTierChanges ?? 0;
   const hysteresis = cfg.tierHysteresisPct ?? 0;
@@ -104,6 +114,11 @@ export const runSleeveLifecycle = ({
     else if (nowDate <= new Date(state.holdUntilISO)) state.phase = 'HOLD';
     else state.phase = 'REINTEGRATE';
   }
+  if (state.handoffEndsAtISO && new Date(now) >= new Date(state.handoffEndsAtISO)) {
+    state.handoffStartedAtISO = undefined;
+    state.handoffEndsAtISO = undefined;
+    state.handoffBaseExtraExposurePct = undefined;
+  }
 
   // tier management with hysteresis and cadence
   const prevTier = state.currentTier ?? 0;
@@ -135,16 +150,22 @@ export const runSleeveLifecycle = ({
         })
       : null;
 
-  // New trigger only allowed from INACTIVE
-  if ((!state.phase || state.phase === 'INACTIVE') && (engaged || postRiskOffReentry?.eligible)) {
+  const canActivateFromInactive = !state.phase || state.phase === 'INACTIVE';
+  const canReactivateFromReintegrate = state.phase === 'REINTEGRATE' && !!postRiskOffReentry?.eligible;
+
+  // New trigger allowed from INACTIVE, and post-risk-off re-entry may restart from REINTEGRATE.
+  if ((canActivateFromInactive || canReactivateFromReintegrate) && (engaged || postRiskOffReentry?.eligible)) {
     const addWeeksCfg = cfg.durationWeeksAdd ?? 3;
     const holdWeeksCfg = cfg.durationWeeksHold ?? 10;
-    if (!state.triggeredAtISO) state.triggeredAtISO = now;
-    if (!state.addUntilISO) state.addUntilISO = addWeeks(state.triggeredAtISO, addWeeksCfg);
-    if (!state.holdUntilISO) state.holdUntilISO = addWeeks(state.triggeredAtISO, addWeeksCfg + holdWeeksCfg);
-    if (!state.reintegrateAfterISO) state.reintegrateAfterISO = state.holdUntilISO;
+    state.triggeredAtISO = now;
+    state.addUntilISO = addWeeks(state.triggeredAtISO, addWeeksCfg);
+    state.holdUntilISO = addWeeks(state.triggeredAtISO, addWeeksCfg + holdWeeksCfg);
+    state.reintegrateAfterISO = state.holdUntilISO;
     state.phase = 'ADD';
     state.triggerReason = postRiskOffReentry?.eligible ? 'post_risk_off_reentry' : 'dislocation';
+    state.handoffStartedAtISO = undefined;
+    state.handoffEndsAtISO = undefined;
+    state.handoffBaseExtraExposurePct = undefined;
     state.entryAnchorPrice = state.entryAnchorPrice ?? anchorPrice;
     if (!state.troughAnchorPrice || (anchorPrice && anchorPrice < state.troughAnchorPrice)) {
       state.troughAnchorPrice = anchorPrice;
@@ -172,7 +193,6 @@ export const runSleeveLifecycle = ({
   if (state.phase === 'HOLD' && state.holdUntilISO && new Date(now) > new Date(state.holdUntilISO)) {
     state.phase = 'REINTEGRATE';
   }
-
   // Once in REINTEGRATE, ignore future triggers until returning to INACTIVE
   if (state.phase === 'REINTEGRATE' && engaged) {
     flags.push({
@@ -192,7 +212,13 @@ export const runSleeveLifecycle = ({
   }
 
   const sleeveActiveForExit = state.phase === 'ADD' || state.phase === 'HOLD';
-  if (earlyExitEnabled && sleeveActiveForExit && (deepFailsafe || (riskOff && riskConf >= riskOffThreshold))) {
+  const justActivatedThisStep = phaseBeforeStep !== state.phase && state.phase === 'ADD';
+  if (
+    earlyExitEnabled &&
+    sleeveActiveForExit &&
+    !justActivatedThisStep &&
+    (deepFailsafe || (riskOff && riskConf >= riskOffThreshold))
+  ) {
     state.phase = 'REINTEGRATE';
     state.cooldownUntilISO = addWeeks(now, cfg.cooldownWeeks ?? 0);
     flags.push({
@@ -201,6 +227,29 @@ export const runSleeveLifecycle = ({
       message: 'Dislocation sleeve early exit',
       observed: { riskOff, riskConf, anchorPrice, entryAnchorPrice: state.entryAnchorPrice }
     });
+  }
+  if (phaseBeforeStep === 'ADD' && state.phase !== 'ADD' && !riskOff && !deepFailsafe) {
+    const tierCfg = (cfg.tiers || []).find((t) => t.tier === currentTier);
+    const overlayExtraExposurePct =
+      tierCfg?.overlayExtraExposurePct ?? cfg.overlayExtraExposurePct ?? cfg.opportunisticExtraExposurePct ?? 0;
+    const handoffBaseExtraExposurePct = Math.max(0, overlayExtraExposurePct * HANDOFF_CARRY_FRACTION);
+    if (handoffBaseExtraExposurePct > 0) {
+      state.handoffStartedAtISO = now;
+      state.handoffEndsAtISO = addWeeks(now, HANDOFF_DECAY_WEEKS);
+      state.handoffBaseExtraExposurePct = handoffBaseExtraExposurePct;
+      flags.push({
+        code: 'DISLOCATION_HANDOFF_STARTED',
+        severity: 'info',
+        message: 'Dislocation overlay handoff decay started',
+        observed: {
+          fromPhase: phaseBeforeStep,
+          toPhase: state.phase,
+          handoffStartedAtISO: state.handoffStartedAtISO,
+          handoffEndsAtISO: state.handoffEndsAtISO,
+          handoffBaseExtraExposurePct
+        }
+      });
+    }
   }
 
   // Derive active/controls from phase

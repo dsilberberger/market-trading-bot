@@ -1,5 +1,17 @@
 export const formatISODate = (date: Date): string => date.toISOString().slice(0, 10);
 
+export const runtimeNowISO = (fallback?: string | Date): string => {
+  const candidate = process.env.REPLAY_CLOCK_ISO ?? fallback;
+  if (candidate instanceof Date) {
+    return Number.isNaN(candidate.getTime()) ? new Date().toISOString() : candidate.toISOString();
+  }
+  if (typeof candidate === 'string' && candidate.length) {
+    const parsed = new Date(candidate);
+    if (!Number.isNaN(parsed.getTime())) return parsed.toISOString();
+  }
+  return new Date().toISOString();
+};
+
 export const parseAsOf = (asOf?: string): string => {
   // Backward-compatible date-only parser
   if (!asOf) return formatISODate(new Date());

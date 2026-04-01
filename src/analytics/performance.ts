@@ -53,8 +53,11 @@ export const buildEquityCurve = async (
   let peak = config.startingCapitalUSD;
 
   for (const runId of runs) {
-    const asOfForRun = runIdToAsOf(runId);
-    const runEvents = events.filter((e) => e.runId === runId && e.type === 'FILL_RECORDED');
+    const eventsForRun = events.filter((e) => e.runId === runId);
+    const started = eventsForRun.find((e) => e.type === 'RUN_STARTED');
+    const asOfForRun =
+      typeof started?.details?.asOf === 'string' ? (started.details.asOf as string) : runIdToAsOf(runId);
+    const runEvents = eventsForRun.filter((e) => e.type === 'FILL_RECORDED');
     for (const evt of runEvents) {
       const detail = evt.details as { fill?: Fill } | undefined;
       if (!detail?.fill) continue;

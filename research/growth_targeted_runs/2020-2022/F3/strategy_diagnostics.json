@@ -1,0 +1,2301 @@
+{
+  "regimeDistribution": {
+    "counts": {
+      "risk_on": 90,
+      "neutral": 34,
+      "risk_off": 32,
+      "unknown": 0
+    },
+    "percentages": {
+      "risk_on": 0.5769230769230769,
+      "neutral": 0.21794871794871795,
+      "risk_off": 0.20512820512820512,
+      "unknown": 0
+    }
+  },
+  "sleeveMetrics": {
+    "dislocationTriggerCount": 0,
+    "sleeveBuyExecutionCount": 0,
+    "totalReserveCapitalDeployedUsd": 0,
+    "peakReserveDeploymentUsd": 7554.142134,
+    "peakReserveDeploymentDate": "2021-02-16"
+  },
+  "coreLaneSummary": {
+    "averageCoreCashUsd": 92155.98443292838,
+    "averageCoreCashPct": 0.24876653425346937,
+    "averageDislocationCoreUsageUsd": 0,
+    "peakDislocationCoreUsageUsd": 0
+  },
+  "sleeveTriggerTimeline": [
+    {
+      "date": "2020-07-27",
+      "runId": "growth-targeted-2020-2022-F3-2020-07-27",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-08-03",
+      "runId": "growth-targeted-2020-2022-F3-2020-08-03",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-08-10",
+      "runId": "growth-targeted-2020-2022-F3-2020-08-10",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-08-17",
+      "runId": "growth-targeted-2020-2022-F3-2020-08-17",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-08-24",
+      "runId": "growth-targeted-2020-2022-F3-2020-08-24",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-08-31",
+      "runId": "growth-targeted-2020-2022-F3-2020-08-31",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-09-07",
+      "runId": "growth-targeted-2020-2022-F3-2020-09-07",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-09-14",
+      "runId": "growth-targeted-2020-2022-F3-2020-09-14",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-09-21",
+      "runId": "growth-targeted-2020-2022-F3-2020-09-21",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-09-28",
+      "runId": "growth-targeted-2020-2022-F3-2020-09-28",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-10-05",
+      "runId": "growth-targeted-2020-2022-F3-2020-10-05",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-10-12",
+      "runId": "growth-targeted-2020-2022-F3-2020-10-12",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-10-19",
+      "runId": "growth-targeted-2020-2022-F3-2020-10-19",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-10-26",
+      "runId": "growth-targeted-2020-2022-F3-2020-10-26",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-11-03",
+      "runId": "growth-targeted-2020-2022-F3-2020-11-03",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-11-10",
+      "runId": "growth-targeted-2020-2022-F3-2020-11-10",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-11-17",
+      "runId": "growth-targeted-2020-2022-F3-2020-11-17",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-11-24",
+      "runId": "growth-targeted-2020-2022-F3-2020-11-24",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-12-01",
+      "runId": "growth-targeted-2020-2022-F3-2020-12-01",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-12-08",
+      "runId": "growth-targeted-2020-2022-F3-2020-12-08",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-12-15",
+      "runId": "growth-targeted-2020-2022-F3-2020-12-15",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-12-22",
+      "runId": "growth-targeted-2020-2022-F3-2020-12-22",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2020-12-29",
+      "runId": "growth-targeted-2020-2022-F3-2020-12-29",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-01-05",
+      "runId": "growth-targeted-2020-2022-F3-2021-01-05",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-01-12",
+      "runId": "growth-targeted-2020-2022-F3-2021-01-12",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-01-19",
+      "runId": "growth-targeted-2020-2022-F3-2021-01-19",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-01-26",
+      "runId": "growth-targeted-2020-2022-F3-2021-01-26",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-02-02",
+      "runId": "growth-targeted-2020-2022-F3-2021-02-02",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-02-09",
+      "runId": "growth-targeted-2020-2022-F3-2021-02-09",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-02-16",
+      "runId": "growth-targeted-2020-2022-F3-2021-02-16",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-02-23",
+      "runId": "growth-targeted-2020-2022-F3-2021-02-23",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-03-02",
+      "runId": "growth-targeted-2020-2022-F3-2021-03-02",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-03-09",
+      "runId": "growth-targeted-2020-2022-F3-2021-03-09",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-03-15",
+      "runId": "growth-targeted-2020-2022-F3-2021-03-15",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-03-22",
+      "runId": "growth-targeted-2020-2022-F3-2021-03-22",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-03-29",
+      "runId": "growth-targeted-2020-2022-F3-2021-03-29",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-04-05",
+      "runId": "growth-targeted-2020-2022-F3-2021-04-05",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-04-12",
+      "runId": "growth-targeted-2020-2022-F3-2021-04-12",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-04-19",
+      "runId": "growth-targeted-2020-2022-F3-2021-04-19",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-04-26",
+      "runId": "growth-targeted-2020-2022-F3-2021-04-26",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-05-03",
+      "runId": "growth-targeted-2020-2022-F3-2021-05-03",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-05-10",
+      "runId": "growth-targeted-2020-2022-F3-2021-05-10",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-05-17",
+      "runId": "growth-targeted-2020-2022-F3-2021-05-17",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-05-24",
+      "runId": "growth-targeted-2020-2022-F3-2021-05-24",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-05-31",
+      "runId": "growth-targeted-2020-2022-F3-2021-05-31",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-06-07",
+      "runId": "growth-targeted-2020-2022-F3-2021-06-07",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-06-14",
+      "runId": "growth-targeted-2020-2022-F3-2021-06-14",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-06-21",
+      "runId": "growth-targeted-2020-2022-F3-2021-06-21",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-06-28",
+      "runId": "growth-targeted-2020-2022-F3-2021-06-28",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-07-05",
+      "runId": "growth-targeted-2020-2022-F3-2021-07-05",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-07-12",
+      "runId": "growth-targeted-2020-2022-F3-2021-07-12",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-07-19",
+      "runId": "growth-targeted-2020-2022-F3-2021-07-19",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-07-26",
+      "runId": "growth-targeted-2020-2022-F3-2021-07-26",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-08-02",
+      "runId": "growth-targeted-2020-2022-F3-2021-08-02",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-08-09",
+      "runId": "growth-targeted-2020-2022-F3-2021-08-09",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-08-16",
+      "runId": "growth-targeted-2020-2022-F3-2021-08-16",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-08-23",
+      "runId": "growth-targeted-2020-2022-F3-2021-08-23",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-08-30",
+      "runId": "growth-targeted-2020-2022-F3-2021-08-30",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-09-06",
+      "runId": "growth-targeted-2020-2022-F3-2021-09-06",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-09-13",
+      "runId": "growth-targeted-2020-2022-F3-2021-09-13",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-09-20",
+      "runId": "growth-targeted-2020-2022-F3-2021-09-20",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-09-27",
+      "runId": "growth-targeted-2020-2022-F3-2021-09-27",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-10-04",
+      "runId": "growth-targeted-2020-2022-F3-2021-10-04",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-10-11",
+      "runId": "growth-targeted-2020-2022-F3-2021-10-11",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-10-18",
+      "runId": "growth-targeted-2020-2022-F3-2021-10-18",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-10-25",
+      "runId": "growth-targeted-2020-2022-F3-2021-10-25",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-11-01",
+      "runId": "growth-targeted-2020-2022-F3-2021-11-01",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-11-09",
+      "runId": "growth-targeted-2020-2022-F3-2021-11-09",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-11-16",
+      "runId": "growth-targeted-2020-2022-F3-2021-11-16",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-11-23",
+      "runId": "growth-targeted-2020-2022-F3-2021-11-23",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-11-30",
+      "runId": "growth-targeted-2020-2022-F3-2021-11-30",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-12-07",
+      "runId": "growth-targeted-2020-2022-F3-2021-12-07",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-12-14",
+      "runId": "growth-targeted-2020-2022-F3-2021-12-14",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-12-21",
+      "runId": "growth-targeted-2020-2022-F3-2021-12-21",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2021-12-28",
+      "runId": "growth-targeted-2020-2022-F3-2021-12-28",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-01-04",
+      "runId": "growth-targeted-2020-2022-F3-2022-01-04",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-01-11",
+      "runId": "growth-targeted-2020-2022-F3-2022-01-11",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-01-18",
+      "runId": "growth-targeted-2020-2022-F3-2022-01-18",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-01-25",
+      "runId": "growth-targeted-2020-2022-F3-2022-01-25",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-02-01",
+      "runId": "growth-targeted-2020-2022-F3-2022-02-01",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-02-08",
+      "runId": "growth-targeted-2020-2022-F3-2022-02-08",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-02-15",
+      "runId": "growth-targeted-2020-2022-F3-2022-02-15",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-02-22",
+      "runId": "growth-targeted-2020-2022-F3-2022-02-22",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-03-01",
+      "runId": "growth-targeted-2020-2022-F3-2022-03-01",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-03-08",
+      "runId": "growth-targeted-2020-2022-F3-2022-03-08",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-03-14",
+      "runId": "growth-targeted-2020-2022-F3-2022-03-14",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-03-21",
+      "runId": "growth-targeted-2020-2022-F3-2022-03-21",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-03-28",
+      "runId": "growth-targeted-2020-2022-F3-2022-03-28",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-04-04",
+      "runId": "growth-targeted-2020-2022-F3-2022-04-04",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-04-11",
+      "runId": "growth-targeted-2020-2022-F3-2022-04-11",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-04-18",
+      "runId": "growth-targeted-2020-2022-F3-2022-04-18",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-04-25",
+      "runId": "growth-targeted-2020-2022-F3-2022-04-25",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-05-02",
+      "runId": "growth-targeted-2020-2022-F3-2022-05-02",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-05-09",
+      "runId": "growth-targeted-2020-2022-F3-2022-05-09",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-05-16",
+      "runId": "growth-targeted-2020-2022-F3-2022-05-16",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-05-23",
+      "runId": "growth-targeted-2020-2022-F3-2022-05-23",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-05-30",
+      "runId": "growth-targeted-2020-2022-F3-2022-05-30",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-06-06",
+      "runId": "growth-targeted-2020-2022-F3-2022-06-06",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-06-13",
+      "runId": "growth-targeted-2020-2022-F3-2022-06-13",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-06-20",
+      "runId": "growth-targeted-2020-2022-F3-2022-06-20",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-06-27",
+      "runId": "growth-targeted-2020-2022-F3-2022-06-27",
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    },
+    {
+      "date": "2022-07-04",
+      "runId": "growth-targeted-2020-2022-F3-2022-07-04",
+      "code": "POST_RISK_OFF_REENTRY_TRIGGERED",
+      "message": "Post-risk-off dislocation sleeve trigger fired",
+      "observed": {
+        "currentPrice": 113.2,
+        "episodeLowPrice": 111.51,
+        "episodeLowDateISO": "2022-05-30",
+        "daysSinceLow": 5,
+        "ret3": 0.009092529862720689,
+        "ret5": 0.015155591426777804,
+        "nonNegativeShare5": 1,
+        "recentVol3": 0.000007455167128643656,
+        "episodeVolPeak3": 0.025007227896048183,
+        "sma5": 112.52000000000001,
+        "priorSma5": 112.18199999999999,
+        "gates": {
+          "volCooling": true,
+          "ret3": true,
+          "ret5": true,
+          "nonNegativeShare5": true,
+          "offBottom": true,
+          "daysSinceLow": true,
+          "aboveSma5": true
+        }
+      }
+    },
+    {
+      "date": "2022-07-04",
+      "runId": "growth-targeted-2020-2022-F3-2022-07-04",
+      "code": "POST_RISK_OFF_REENTRY_ACTIVE",
+      "message": "Post-risk-off dislocation sleeve buys added",
+      "observed": {
+        "reserveDeployPctOfCore": 0.15,
+        "overlayBudgetUSD": 39281.38951549164
+      }
+    },
+    {
+      "date": "2022-07-04",
+      "runId": "growth-targeted-2020-2022-F3-2022-07-04",
+      "code": "POST_RISK_OFF_REENTRY_BUDGET",
+      "message": "Post-risk-off re-entry budget computed",
+      "observed": {
+        "requestedBudgetUSD": 42829.5045,
+        "budgetUSD": 39281.38951549164,
+        "corePoolUsd": 285530.03,
+        "coreCashUsd": 39281.38951549164
+      }
+    },
+    {
+      "date": "2022-07-11",
+      "runId": "growth-targeted-2020-2022-F3-2022-07-11",
+      "code": "POST_RISK_OFF_REENTRY_ACTIVE",
+      "message": "Post-risk-off dislocation sleeve buys added",
+      "observed": {
+        "reserveDeployPctOfCore": 0.15,
+        "overlayBudgetUSD": 39150.12164759054
+      }
+    },
+    {
+      "date": "2022-07-11",
+      "runId": "growth-targeted-2020-2022-F3-2022-07-11",
+      "code": "POST_RISK_OFF_REENTRY_BUDGET",
+      "message": "Post-risk-off re-entry budget computed",
+      "observed": {
+        "requestedBudgetUSD": 42875.4495,
+        "budgetUSD": 39150.12164759054,
+        "corePoolUsd": 285836.33,
+        "coreCashUsd": 39150.12164759054
+      }
+    },
+    {
+      "date": "2022-07-18",
+      "runId": "growth-targeted-2020-2022-F3-2022-07-18",
+      "code": "POST_RISK_OFF_REENTRY_ACTIVE",
+      "message": "Post-risk-off dislocation sleeve buys added",
+      "observed": {
+        "reserveDeployPctOfCore": 0.15,
+        "overlayBudgetUSD": 39018.85377968957
+      }
+    },
+    {
+      "date": "2022-07-18",
+      "runId": "growth-targeted-2020-2022-F3-2022-07-18",
+      "code": "POST_RISK_OFF_REENTRY_BUDGET",
+      "message": "Post-risk-off re-entry budget computed",
+      "observed": {
+        "requestedBudgetUSD": 42921.393,
+        "budgetUSD": 39018.85377968957,
+        "corePoolUsd": 286142.62,
+        "coreCashUsd": 39018.85377968957
+      }
+    },
+    {
+      "date": "2022-07-25",
+      "runId": "growth-targeted-2020-2022-F3-2022-07-25",
+      "code": "POST_RISK_OFF_REENTRY_ACTIVE",
+      "message": "Post-risk-off dislocation sleeve buys added",
+      "observed": {
+        "reserveDeployPctOfCore": 0.15,
+        "overlayBudgetUSD": 38887.58591178854
+      }
+    },
+    {
+      "date": "2022-07-25",
+      "runId": "growth-targeted-2020-2022-F3-2022-07-25",
+      "code": "POST_RISK_OFF_REENTRY_BUDGET",
+      "message": "Post-risk-off re-entry budget computed",
+      "observed": {
+        "requestedBudgetUSD": 42967.3365,
+        "budgetUSD": 38887.58591178854,
+        "corePoolUsd": 286448.91,
+        "coreCashUsd": 38887.58591178854
+      }
+    }
+  ],
+  "reserveUsageSummary": {
+    "accountingScope": "executed_replay_only",
+    "averageReserveUsageUsd": 2942.5336453557693,
+    "peakReserveUsageUsd": 7554.142134,
+    "peakReserveUsageDate": "2021-02-16",
+    "averageReservePct": 0.007455411431865671,
+    "minReservePct": 0,
+    "maxReservePct": 0.01991209522533798
+  },
+  "plannedOptionSleeveStateSummary": {
+    "accountingScope": "planned_non_executed_option_state",
+    "averagePlannedOptionReserveStateUsd": 0,
+    "peakPlannedOptionReserveStateUsd": 0,
+    "activeStepCount": 0,
+    "averageInsurancePremiumStateUsd": 0,
+    "averageGrowthPremiumStateUsd": 0,
+    "peakInsurancePremiumStateUsd": 0,
+    "peakGrowthPremiumStateUsd": 0
+  },
+  "tradeSummary": {
+    "tradeCount": 201,
+    "grossTradedNotionalUsd": 7096299.206692277,
+    "turnoverPct": 18.271098323887514
+  },
+  "blockedOrRejectedActions": [
+    {
+      "date": "2020-01-07",
+      "runId": "growth-targeted-2020-2022-F3-2020-01-07",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-01-14",
+      "runId": "growth-targeted-2020-2022-F3-2020-01-14",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-01-21",
+      "runId": "growth-targeted-2020-2022-F3-2020-01-21",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-01-28",
+      "runId": "growth-targeted-2020-2022-F3-2020-01-28",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-02-04",
+      "runId": "growth-targeted-2020-2022-F3-2020-02-04",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-02-11",
+      "runId": "growth-targeted-2020-2022-F3-2020-02-11",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-02-18",
+      "runId": "growth-targeted-2020-2022-F3-2020-02-18",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-02-25",
+      "runId": "growth-targeted-2020-2022-F3-2020-02-25",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-03-03",
+      "runId": "growth-targeted-2020-2022-F3-2020-03-03",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-03-09",
+      "runId": "growth-targeted-2020-2022-F3-2020-03-09",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-03-16",
+      "runId": "growth-targeted-2020-2022-F3-2020-03-16",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-03-23",
+      "runId": "growth-targeted-2020-2022-F3-2020-03-23",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-03-30",
+      "runId": "growth-targeted-2020-2022-F3-2020-03-30",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-04-06",
+      "runId": "growth-targeted-2020-2022-F3-2020-04-06",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-04-13",
+      "runId": "growth-targeted-2020-2022-F3-2020-04-13",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-04-20",
+      "runId": "growth-targeted-2020-2022-F3-2020-04-20",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-04-27",
+      "runId": "growth-targeted-2020-2022-F3-2020-04-27",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-05-04",
+      "runId": "growth-targeted-2020-2022-F3-2020-05-04",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-05-11",
+      "runId": "growth-targeted-2020-2022-F3-2020-05-11",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-05-18",
+      "runId": "growth-targeted-2020-2022-F3-2020-05-18",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-05-25",
+      "runId": "growth-targeted-2020-2022-F3-2020-05-25",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-06-01",
+      "runId": "growth-targeted-2020-2022-F3-2020-06-01",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-06-08",
+      "runId": "growth-targeted-2020-2022-F3-2020-06-08",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-06-15",
+      "runId": "growth-targeted-2020-2022-F3-2020-06-15",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-06-22",
+      "runId": "growth-targeted-2020-2022-F3-2020-06-22",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-06-29",
+      "runId": "growth-targeted-2020-2022-F3-2020-06-29",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-07-06",
+      "runId": "growth-targeted-2020-2022-F3-2020-07-06",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-07-13",
+      "runId": "growth-targeted-2020-2022-F3-2020-07-13",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-07-20",
+      "runId": "growth-targeted-2020-2022-F3-2020-07-20",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "INSUFFICIENT_HISTORY"
+      ]
+    },
+    {
+      "date": "2020-08-03",
+      "runId": "growth-targeted-2020-2022-F3-2020-08-03",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-08-10",
+      "runId": "growth-targeted-2020-2022-F3-2020-08-10",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-08-17",
+      "runId": "growth-targeted-2020-2022-F3-2020-08-17",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-08-24",
+      "runId": "growth-targeted-2020-2022-F3-2020-08-24",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-08-31",
+      "runId": "growth-targeted-2020-2022-F3-2020-08-31",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-09-07",
+      "runId": "growth-targeted-2020-2022-F3-2020-09-07",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-09-14",
+      "runId": "growth-targeted-2020-2022-F3-2020-09-14",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-09-28",
+      "runId": "growth-targeted-2020-2022-F3-2020-09-28",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-10-05",
+      "runId": "growth-targeted-2020-2022-F3-2020-10-05",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-10-12",
+      "runId": "growth-targeted-2020-2022-F3-2020-10-12",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-10-19",
+      "runId": "growth-targeted-2020-2022-F3-2020-10-19",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-10-26",
+      "runId": "growth-targeted-2020-2022-F3-2020-10-26",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-11-03",
+      "runId": "growth-targeted-2020-2022-F3-2020-11-03",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-11-10",
+      "runId": "growth-targeted-2020-2022-F3-2020-11-10",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-11-17",
+      "runId": "growth-targeted-2020-2022-F3-2020-11-17",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-12-01",
+      "runId": "growth-targeted-2020-2022-F3-2020-12-01",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-12-08",
+      "runId": "growth-targeted-2020-2022-F3-2020-12-08",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-12-22",
+      "runId": "growth-targeted-2020-2022-F3-2020-12-22",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2020-12-29",
+      "runId": "growth-targeted-2020-2022-F3-2020-12-29",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-01-05",
+      "runId": "growth-targeted-2020-2022-F3-2021-01-05",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-01-12",
+      "runId": "growth-targeted-2020-2022-F3-2021-01-12",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-01-19",
+      "runId": "growth-targeted-2020-2022-F3-2021-01-19",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-01-26",
+      "runId": "growth-targeted-2020-2022-F3-2021-01-26",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-02-02",
+      "runId": "growth-targeted-2020-2022-F3-2021-02-02",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-02-09",
+      "runId": "growth-targeted-2020-2022-F3-2021-02-09",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-02-23",
+      "runId": "growth-targeted-2020-2022-F3-2021-02-23",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-03-02",
+      "runId": "growth-targeted-2020-2022-F3-2021-03-02",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-03-09",
+      "runId": "growth-targeted-2020-2022-F3-2021-03-09",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-03-15",
+      "runId": "growth-targeted-2020-2022-F3-2021-03-15",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-03-22",
+      "runId": "growth-targeted-2020-2022-F3-2021-03-22",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-03-29",
+      "runId": "growth-targeted-2020-2022-F3-2021-03-29",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-04-05",
+      "runId": "growth-targeted-2020-2022-F3-2021-04-05",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-04-12",
+      "runId": "growth-targeted-2020-2022-F3-2021-04-12",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-04-19",
+      "runId": "growth-targeted-2020-2022-F3-2021-04-19",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-05-03",
+      "runId": "growth-targeted-2020-2022-F3-2021-05-03",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-05-10",
+      "runId": "growth-targeted-2020-2022-F3-2021-05-10",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-05-17",
+      "runId": "growth-targeted-2020-2022-F3-2021-05-17",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-05-24",
+      "runId": "growth-targeted-2020-2022-F3-2021-05-24",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-05-31",
+      "runId": "growth-targeted-2020-2022-F3-2021-05-31",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-06-07",
+      "runId": "growth-targeted-2020-2022-F3-2021-06-07",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-06-14",
+      "runId": "growth-targeted-2020-2022-F3-2021-06-14",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-06-21",
+      "runId": "growth-targeted-2020-2022-F3-2021-06-21",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-07-05",
+      "runId": "growth-targeted-2020-2022-F3-2021-07-05",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-07-12",
+      "runId": "growth-targeted-2020-2022-F3-2021-07-12",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-07-19",
+      "runId": "growth-targeted-2020-2022-F3-2021-07-19",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-07-26",
+      "runId": "growth-targeted-2020-2022-F3-2021-07-26",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-08-02",
+      "runId": "growth-targeted-2020-2022-F3-2021-08-02",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-08-09",
+      "runId": "growth-targeted-2020-2022-F3-2021-08-09",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-08-16",
+      "runId": "growth-targeted-2020-2022-F3-2021-08-16",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-08-23",
+      "runId": "growth-targeted-2020-2022-F3-2021-08-23",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-09-06",
+      "runId": "growth-targeted-2020-2022-F3-2021-09-06",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-09-13",
+      "runId": "growth-targeted-2020-2022-F3-2021-09-13",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-09-20",
+      "runId": "growth-targeted-2020-2022-F3-2021-09-20",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-09-27",
+      "runId": "growth-targeted-2020-2022-F3-2021-09-27",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-10-04",
+      "runId": "growth-targeted-2020-2022-F3-2021-10-04",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-10-11",
+      "runId": "growth-targeted-2020-2022-F3-2021-10-11",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-10-18",
+      "runId": "growth-targeted-2020-2022-F3-2021-10-18",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-10-25",
+      "runId": "growth-targeted-2020-2022-F3-2021-10-25",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-11-09",
+      "runId": "growth-targeted-2020-2022-F3-2021-11-09",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-11-16",
+      "runId": "growth-targeted-2020-2022-F3-2021-11-16",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-11-30",
+      "runId": "growth-targeted-2020-2022-F3-2021-11-30",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-12-07",
+      "runId": "growth-targeted-2020-2022-F3-2021-12-07",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-12-14",
+      "runId": "growth-targeted-2020-2022-F3-2021-12-14",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2021-12-28",
+      "runId": "growth-targeted-2020-2022-F3-2021-12-28",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2022-01-04",
+      "runId": "growth-targeted-2020-2022-F3-2022-01-04",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2022-01-11",
+      "runId": "growth-targeted-2020-2022-F3-2022-01-11",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2022-01-18",
+      "runId": "growth-targeted-2020-2022-F3-2022-01-18",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2022-01-25",
+      "runId": "growth-targeted-2020-2022-F3-2022-01-25",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2022-02-01",
+      "runId": "growth-targeted-2020-2022-F3-2022-02-01",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2022-02-08",
+      "runId": "growth-targeted-2020-2022-F3-2022-02-08",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2022-07-04",
+      "runId": "growth-targeted-2020-2022-F3-2022-07-04",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "Max positions exceeded: 7 > 4"
+      ]
+    },
+    {
+      "date": "2022-07-11",
+      "runId": "growth-targeted-2020-2022-F3-2022-07-11",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "Max positions exceeded: 7 > 4"
+      ]
+    },
+    {
+      "date": "2022-07-18",
+      "runId": "growth-targeted-2020-2022-F3-2022-07-18",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "Max positions exceeded: 7 > 4"
+      ]
+    },
+    {
+      "date": "2022-07-25",
+      "runId": "growth-targeted-2020-2022-F3-2022-07-25",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "Max positions exceeded: 7 > 4"
+      ]
+    },
+    {
+      "date": "2022-08-01",
+      "runId": "growth-targeted-2020-2022-F3-2022-08-01",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2022-08-08",
+      "runId": "growth-targeted-2020-2022-F3-2022-08-08",
+      "type": "RUN_SKIPPED",
+      "reasons": [
+        "NO_EXECUTABLE_ORDERS"
+      ]
+    },
+    {
+      "date": "2022-08-15",
+      "runId": "growth-targeted-2020-2022-F3-2022-08-15",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "Max positions exceeded: 7 > 4"
+      ]
+    },
+    {
+      "date": "2022-08-22",
+      "runId": "growth-targeted-2020-2022-F3-2022-08-22",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "Max positions exceeded: 7 > 4"
+      ]
+    },
+    {
+      "date": "2022-08-29",
+      "runId": "growth-targeted-2020-2022-F3-2022-08-29",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "Max positions exceeded: 7 > 4"
+      ]
+    },
+    {
+      "date": "2022-09-05",
+      "runId": "growth-targeted-2020-2022-F3-2022-09-05",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "Max positions exceeded: 7 > 4"
+      ]
+    },
+    {
+      "date": "2022-09-12",
+      "runId": "growth-targeted-2020-2022-F3-2022-09-12",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "Max positions exceeded: 7 > 4"
+      ]
+    },
+    {
+      "date": "2022-09-19",
+      "runId": "growth-targeted-2020-2022-F3-2022-09-19",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "Max positions exceeded: 7 > 4"
+      ]
+    },
+    {
+      "date": "2022-09-26",
+      "runId": "growth-targeted-2020-2022-F3-2022-09-26",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "Max positions exceeded: 7 > 4"
+      ]
+    },
+    {
+      "date": "2022-10-03",
+      "runId": "growth-targeted-2020-2022-F3-2022-10-03",
+      "type": "RUN_FAILED",
+      "reasons": [
+        "Max positions exceeded: 7 > 4"
+      ]
+    }
+  ],
+  "blockedOrRejectedSummary": {
+    "count": 113,
+    "byType": {
+      "RUN_FAILED": 41,
+      "RUN_SKIPPED": 72
+    },
+    "byReason": {
+      "INSUFFICIENT_HISTORY": 29,
+      "NO_EXECUTABLE_ORDERS": 72,
+      "Max positions exceeded: 7 > 4": 12
+    }
+  }
+}

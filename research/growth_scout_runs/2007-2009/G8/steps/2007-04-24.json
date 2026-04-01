@@ -1,0 +1,41 @@
+{
+  "date": "2007-04-24",
+  "asOf": "2007-04-24T16:00",
+  "runId": "growth-scout-2007-2009-G8-2007-04-24",
+  "runStatus": "warmup",
+  "regime": "risk_off",
+  "confidence": 0.55,
+  "exposureCap": null,
+  "deployBudgetUsd": null,
+  "targetAllocations": {},
+  "achievedAllocations": {},
+  "orders": [],
+  "holdingsAfterExecution": {
+    "cash": 350000,
+    "holdings": [],
+    "equity": 350000,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 244999.99999999997,
+    "coreCashUsd": 244999.99999999997,
+    "coreHeadroomUsd": 244999.99999999997,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 105000,
+    "optionsReserveCashUsd": 105000,
+    "optionsReserveHeadroomUsd": 105000
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [],
+  "dislocationState": {},
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-scout-2007-2009-G8-2007-04-24"
+}

@@ -1,0 +1,970 @@
+[
+  {
+    "date": "2007-07-24",
+    "runId": "growth-scout-2007-2009-G2-2007-07-24",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-07-31",
+    "runId": "growth-scout-2007-2009-G2-2007-07-31",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-08-07",
+    "runId": "growth-scout-2007-2009-G2-2007-08-07",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-08-14",
+    "runId": "growth-scout-2007-2009-G2-2007-08-14",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-08-21",
+    "runId": "growth-scout-2007-2009-G2-2007-08-21",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-08-28",
+    "runId": "growth-scout-2007-2009-G2-2007-08-28",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-09-04",
+    "runId": "growth-scout-2007-2009-G2-2007-09-04",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-09-11",
+    "runId": "growth-scout-2007-2009-G2-2007-09-11",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-09-18",
+    "runId": "growth-scout-2007-2009-G2-2007-09-18",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-09-25",
+    "runId": "growth-scout-2007-2009-G2-2007-09-25",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-10-02",
+    "runId": "growth-scout-2007-2009-G2-2007-10-02",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-10-09",
+    "runId": "growth-scout-2007-2009-G2-2007-10-09",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-10-16",
+    "runId": "growth-scout-2007-2009-G2-2007-10-16",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-10-23",
+    "runId": "growth-scout-2007-2009-G2-2007-10-23",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-10-30",
+    "runId": "growth-scout-2007-2009-G2-2007-10-30",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-11-06",
+    "runId": "growth-scout-2007-2009-G2-2007-11-06",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-11-13",
+    "runId": "growth-scout-2007-2009-G2-2007-11-13",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-11-20",
+    "runId": "growth-scout-2007-2009-G2-2007-11-20",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-11-27",
+    "runId": "growth-scout-2007-2009-G2-2007-11-27",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-12-04",
+    "runId": "growth-scout-2007-2009-G2-2007-12-04",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-12-11",
+    "runId": "growth-scout-2007-2009-G2-2007-12-11",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-12-18",
+    "runId": "growth-scout-2007-2009-G2-2007-12-18",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2007-12-25",
+    "runId": "growth-scout-2007-2009-G2-2007-12-25",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2008-01-01",
+    "runId": "growth-scout-2007-2009-G2-2008-01-01",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2008-01-08",
+    "runId": "growth-scout-2007-2009-G2-2008-01-08",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2008-01-15",
+    "runId": "growth-scout-2007-2009-G2-2008-01-15",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2008-01-22",
+    "runId": "growth-scout-2007-2009-G2-2008-01-22",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2008-01-29",
+    "runId": "growth-scout-2007-2009-G2-2008-01-29",
+    "code": "DISLOCATION_STATE_INVARIANT",
+    "message": "Lifecycle invariant violated; derived controls used",
+    "observed": {
+      "phase": "INACTIVE",
+      "allowAdd": false,
+      "protectFromSells": false,
+      "active": false
+    }
+  },
+  {
+    "date": "2008-02-05",
+    "runId": "growth-scout-2007-2009-G2-2008-02-05",
+    "code": "DISLOCATION_TRIGGERED",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 3
+    }
+  },
+  {
+    "date": "2008-02-05",
+    "runId": "growth-scout-2007-2009-G2-2008-02-05",
+    "code": "DISLOCATION_SLEEVE_TRIGGERED",
+    "message": "Dislocation sleeve triggered"
+  },
+  {
+    "date": "2008-02-05",
+    "runId": "growth-scout-2007-2009-G2-2008-02-05",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Opportunistic dislocation buys added",
+    "observed": {
+      "extraPct": 0.3,
+      "dislocationCap": 0.7,
+      "baseExposureCap": 0.6,
+      "overlayBudgetUSD": 35928.639446029294
+    }
+  },
+  {
+    "date": "2008-02-12",
+    "runId": "growth-scout-2007-2009-G2-2008-02-12",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 2
+    }
+  },
+  {
+    "date": "2008-02-12",
+    "runId": "growth-scout-2007-2009-G2-2008-02-12",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 1,
+      "anchorPrice": 68.513576,
+      "entryAnchorPrice": 76.126195
+    }
+  },
+  {
+    "date": "2008-02-19",
+    "runId": "growth-scout-2007-2009-G2-2008-02-19",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 1
+    }
+  },
+  {
+    "date": "2008-02-19",
+    "runId": "growth-scout-2007-2009-G2-2008-02-19",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Opportunistic dislocation buys added",
+    "observed": {
+      "extraPct": 0.4,
+      "dislocationCap": 0.7,
+      "baseExposureCap": 0.6,
+      "overlayBudgetUSD": 13048.941304094275
+    }
+  },
+  {
+    "date": "2008-02-26",
+    "runId": "growth-scout-2007-2009-G2-2008-02-26",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-02-26",
+    "runId": "growth-scout-2007-2009-G2-2008-02-26",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 1,
+      "anchorPrice": 59.880865,
+      "entryAnchorPrice": 76.126195
+    }
+  },
+  {
+    "date": "2008-03-04",
+    "runId": "growth-scout-2007-2009-G2-2008-03-04",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-03-04",
+    "runId": "growth-scout-2007-2009-G2-2008-03-04",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 1,
+      "anchorPrice": 59.940746,
+      "entryAnchorPrice": 76.126195
+    }
+  },
+  {
+    "date": "2008-03-11",
+    "runId": "growth-scout-2007-2009-G2-2008-03-11",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-03-11",
+    "runId": "growth-scout-2007-2009-G2-2008-03-11",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 1,
+      "anchorPrice": 60.000687,
+      "entryAnchorPrice": 76.126195
+    }
+  },
+  {
+    "date": "2008-03-18",
+    "runId": "growth-scout-2007-2009-G2-2008-03-18",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-03-18",
+    "runId": "growth-scout-2007-2009-G2-2008-03-18",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 1,
+      "anchorPrice": 60.060688,
+      "entryAnchorPrice": 76.126195
+    }
+  },
+  {
+    "date": "2008-03-25",
+    "runId": "growth-scout-2007-2009-G2-2008-03-25",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-03-25",
+    "runId": "growth-scout-2007-2009-G2-2008-03-25",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 1,
+      "anchorPrice": 60.120749,
+      "entryAnchorPrice": 76.126195
+    }
+  },
+  {
+    "date": "2008-04-01",
+    "runId": "growth-scout-2007-2009-G2-2008-04-01",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-04-01",
+    "runId": "growth-scout-2007-2009-G2-2008-04-01",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 1,
+      "anchorPrice": 60.18087,
+      "entryAnchorPrice": 76.126195
+    }
+  },
+  {
+    "date": "2008-04-08",
+    "runId": "growth-scout-2007-2009-G2-2008-04-08",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-04-08",
+    "runId": "growth-scout-2007-2009-G2-2008-04-08",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 1,
+      "anchorPrice": 60.241051,
+      "entryAnchorPrice": 76.126195
+    }
+  },
+  {
+    "date": "2008-04-15",
+    "runId": "growth-scout-2007-2009-G2-2008-04-15",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-04-15",
+    "runId": "growth-scout-2007-2009-G2-2008-04-15",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 1,
+      "anchorPrice": 60.301292,
+      "entryAnchorPrice": 76.126195
+    }
+  },
+  {
+    "date": "2008-04-22",
+    "runId": "growth-scout-2007-2009-G2-2008-04-22",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-04-22",
+    "runId": "growth-scout-2007-2009-G2-2008-04-22",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 1,
+      "anchorPrice": 60.361593,
+      "entryAnchorPrice": 76.126195
+    }
+  },
+  {
+    "date": "2008-04-29",
+    "runId": "growth-scout-2007-2009-G2-2008-04-29",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-04-29",
+    "runId": "growth-scout-2007-2009-G2-2008-04-29",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 1,
+      "anchorPrice": 60.421955,
+      "entryAnchorPrice": 76.126195
+    }
+  },
+  {
+    "date": "2008-05-06",
+    "runId": "growth-scout-2007-2009-G2-2008-05-06",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-05-06",
+    "runId": "growth-scout-2007-2009-G2-2008-05-06",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 0.9102968950270527,
+      "anchorPrice": 58.609296,
+      "entryAnchorPrice": 76.126195
+    }
+  },
+  {
+    "date": "2008-05-13",
+    "runId": "growth-scout-2007-2009-G2-2008-05-13",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-05-13",
+    "runId": "growth-scout-2007-2009-G2-2008-05-13",
+    "code": "DISLOCATION_TRIGGER_IGNORED_DURING_REINTEGRATE",
+    "message": "Trigger ignored during reintegrate phase",
+    "observed": {
+      "tier": 3
+    }
+  },
+  {
+    "date": "2008-05-20",
+    "runId": "growth-scout-2007-2009-G2-2008-05-20",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-05-20",
+    "runId": "growth-scout-2007-2009-G2-2008-05-20",
+    "code": "DISLOCATION_TRIGGER_IGNORED_DURING_REINTEGRATE",
+    "message": "Trigger ignored during reintegrate phase",
+    "observed": {
+      "tier": 3
+    }
+  },
+  {
+    "date": "2008-05-27",
+    "runId": "growth-scout-2007-2009-G2-2008-05-27",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-05-27",
+    "runId": "growth-scout-2007-2009-G2-2008-05-27",
+    "code": "DISLOCATION_TRIGGER_IGNORED_DURING_REINTEGRATE",
+    "message": "Trigger ignored during reintegrate phase",
+    "observed": {
+      "tier": 3
+    }
+  },
+  {
+    "date": "2008-06-03",
+    "runId": "growth-scout-2007-2009-G2-2008-06-03",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-06-03",
+    "runId": "growth-scout-2007-2009-G2-2008-06-03",
+    "code": "DISLOCATION_TRIGGER_IGNORED_DURING_REINTEGRATE",
+    "message": "Trigger ignored during reintegrate phase",
+    "observed": {
+      "tier": 3
+    }
+  },
+  {
+    "date": "2008-06-10",
+    "runId": "growth-scout-2007-2009-G2-2008-06-10",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-06-10",
+    "runId": "growth-scout-2007-2009-G2-2008-06-10",
+    "code": "DISLOCATION_TRIGGER_IGNORED_DURING_REINTEGRATE",
+    "message": "Trigger ignored during reintegrate phase",
+    "observed": {
+      "tier": 3
+    }
+  },
+  {
+    "date": "2008-06-17",
+    "runId": "growth-scout-2007-2009-G2-2008-06-17",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-06-17",
+    "runId": "growth-scout-2007-2009-G2-2008-06-17",
+    "code": "DISLOCATION_TRIGGER_IGNORED_DURING_REINTEGRATE",
+    "message": "Trigger ignored during reintegrate phase",
+    "observed": {
+      "tier": 3
+    }
+  },
+  {
+    "date": "2008-06-24",
+    "runId": "growth-scout-2007-2009-G2-2008-06-24",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-06-24",
+    "runId": "growth-scout-2007-2009-G2-2008-06-24",
+    "code": "DISLOCATION_TRIGGER_IGNORED_DURING_REINTEGRATE",
+    "message": "Trigger ignored during reintegrate phase",
+    "observed": {
+      "tier": 3
+    }
+  },
+  {
+    "date": "2008-07-01",
+    "runId": "growth-scout-2007-2009-G2-2008-07-01",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-07-01",
+    "runId": "growth-scout-2007-2009-G2-2008-07-01",
+    "code": "DISLOCATION_TRIGGER_IGNORED_DURING_REINTEGRATE",
+    "message": "Trigger ignored during reintegrate phase",
+    "observed": {
+      "tier": 3
+    }
+  },
+  {
+    "date": "2008-07-08",
+    "runId": "growth-scout-2007-2009-G2-2008-07-08",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-07-08",
+    "runId": "growth-scout-2007-2009-G2-2008-07-08",
+    "code": "DISLOCATION_TRIGGER_IGNORED_DURING_REINTEGRATE",
+    "message": "Trigger ignored during reintegrate phase",
+    "observed": {
+      "tier": 3
+    }
+  },
+  {
+    "date": "2008-07-15",
+    "runId": "growth-scout-2007-2009-G2-2008-07-15",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-07-15",
+    "runId": "growth-scout-2007-2009-G2-2008-07-15",
+    "code": "DISLOCATION_TRIGGER_IGNORED_DURING_REINTEGRATE",
+    "message": "Trigger ignored during reintegrate phase",
+    "observed": {
+      "tier": 3
+    }
+  },
+  {
+    "date": "2008-07-22",
+    "runId": "growth-scout-2007-2009-G2-2008-07-22",
+    "code": "DISLOCATION_ACTIVE",
+    "message": "Market dislocation active",
+    "observed": {
+      "expiresISO": "2008-02-27T08:00:00.000Z",
+      "remainingWeeks": 0
+    }
+  },
+  {
+    "date": "2008-07-22",
+    "runId": "growth-scout-2007-2009-G2-2008-07-22",
+    "code": "POST_RISK_OFF_REENTRY_TRIGGERED",
+    "message": "Post-risk-off dislocation sleeve trigger fired",
+    "observed": {
+      "currentPrice": 65.755834,
+      "episodeLowPrice": 58.609296,
+      "episodeLowDateISO": "2008-05-13",
+      "daysSinceLow": 10,
+      "ret3": 0.11411300227509624,
+      "ret5": 0.11634234691453105,
+      "nonNegativeShare5": 1,
+      "recentVol3": 0.025781128392198514,
+      "episodeVolPeak3": 0.03445125127093101,
+      "sma5": 61.0885758,
+      "priorSma5": 59.7179948,
+      "gates": {
+        "volCooling": true,
+        "ret3": true,
+        "ret5": true,
+        "nonNegativeShare5": true,
+        "offBottom": true,
+        "daysSinceLow": true,
+        "aboveSma5": true
+      }
+    }
+  },
+  {
+    "date": "2008-07-22",
+    "runId": "growth-scout-2007-2009-G2-2008-07-22",
+    "code": "POST_RISK_OFF_REENTRY_ACTIVE",
+    "message": "Post-risk-off dislocation sleeve buys added",
+    "observed": {
+      "reserveDeployPctOfCore": 0.15,
+      "overlayBudgetUSD": 32778.53787161333
+    }
+  },
+  {
+    "date": "2008-07-22",
+    "runId": "growth-scout-2007-2009-G2-2008-07-22",
+    "code": "POST_RISK_OFF_REENTRY_BUDGET",
+    "message": "Post-risk-off re-entry budget computed",
+    "observed": {
+      "requestedBudgetUSD": 34203.231,
+      "budgetUSD": 32778.53787161333,
+      "corePoolUsd": 228021.54,
+      "coreCashUsd": 32778.53787161333
+    }
+  },
+  {
+    "date": "2008-07-29",
+    "runId": "growth-scout-2007-2009-G2-2008-07-29",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 1,
+      "anchorPrice": 68.386067,
+      "entryAnchorPrice": 76.126195
+    }
+  },
+  {
+    "date": "2008-08-05",
+    "runId": "growth-scout-2007-2009-G2-2008-08-05",
+    "code": "POST_RISK_OFF_REENTRY_ACTIVE",
+    "message": "Post-risk-off dislocation sleeve buys added",
+    "observed": {
+      "reserveDeployPctOfCore": 0.15,
+      "overlayBudgetUSD": 27977.00723269247
+    }
+  },
+  {
+    "date": "2008-08-05",
+    "runId": "growth-scout-2007-2009-G2-2008-08-05",
+    "code": "POST_RISK_OFF_REENTRY_BUDGET",
+    "message": "Post-risk-off re-entry budget computed",
+    "observed": {
+      "requestedBudgetUSD": 33984.462,
+      "budgetUSD": 27977.00723269247,
+      "corePoolUsd": 226563.08,
+      "coreCashUsd": 27977.00723269247
+    }
+  },
+  {
+    "date": "2008-08-12",
+    "runId": "growth-scout-2007-2009-G2-2008-08-12",
+    "code": "POST_RISK_OFF_REENTRY_ACTIVE",
+    "message": "Post-risk-off dislocation sleeve buys added",
+    "observed": {
+      "reserveDeployPctOfCore": 0.15,
+      "overlayBudgetUSD": 27952.74755012845
+    }
+  },
+  {
+    "date": "2008-08-12",
+    "runId": "growth-scout-2007-2009-G2-2008-08-12",
+    "code": "POST_RISK_OFF_REENTRY_BUDGET",
+    "message": "Post-risk-off re-entry budget computed",
+    "observed": {
+      "requestedBudgetUSD": 34007.9085,
+      "budgetUSD": 27952.74755012845,
+      "corePoolUsd": 226719.39,
+      "coreCashUsd": 27952.74755012845
+    }
+  },
+  {
+    "date": "2008-10-21",
+    "runId": "growth-scout-2007-2009-G2-2008-10-21",
+    "code": "DISLOCATION_EARLY_EXIT_RISK_OFF",
+    "message": "Dislocation sleeve early exit",
+    "observed": {
+      "riskOff": true,
+      "riskConf": 0.7069339650721544,
+      "anchorPrice": 71.216347,
+      "entryAnchorPrice": 76.126195
+    }
+  }
+]

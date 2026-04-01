@@ -25,6 +25,7 @@ export const executeOrders = async (
   const placements: OrderPlacement[] = [];
   const fills: any[] = [];
   const execFlags: any[] = [];
+  const placedOrders: Array<{ orderId: string; order: TradeOrder }> = [];
 
   // Reprice just before preview/placement to avoid sub-1-share failures from small price drift.
   const repricedOrders: TradeOrder[] = orders.map((o) => {
@@ -40,14 +41,14 @@ export const executeOrders = async (
     writeRunArtifact(runId, 'orders.json', orders);
     writeRunArtifact(runId, 'fills.json', [{ type: 'NO_FILL', reason: 'PENDING_APPROVAL' }]);
     writeRunArtifact(runId, 'execution_flags.json', [{ code: 'EXECUTION_SKIPPED_PENDING_APPROVAL' }]);
-    return { previews, placements, fills };
+    return { previews, placements, fills, placedOrders };
   }
 
   if (options.dryRun) {
     writeRunArtifact(runId, 'orders.json', orders);
     writeRunArtifact(runId, 'fills.json', [{ type: 'NO_FILL', reason: 'DRY_RUN' }]);
     writeRunArtifact(runId, 'execution_flags.json', [{ code: 'EXECUTION_SKIPPED', reason: 'DRY_RUN' }]);
-    return { previews, placements, fills };
+    return { previews, placements, fills, placedOrders };
   }
   for (const order of orders) {
     const preview = await broker.previewOrder(order, asOf);
@@ -56,6 +57,7 @@ export const executeOrders = async (
     try {
       const placement = await broker.placeOrder(order, asOf);
       placements.push(placement);
+      placedOrders.push({ orderId: String(placement.orderId), order });
       appendEvent(makeEvent(runId, 'ORDER_PLACED', { order, placement }));
     } catch (err) {
       execFlags.push({ code: 'EXECUTION_FAILED', message: (err as Error).message, symbol: order.symbol });
@@ -99,5 +101,5 @@ export const executeOrders = async (
   writeRunArtifact(runId, 'fills.json', fills.length ? fills : [{ type: 'NO_FILL', reason: 'NO_EXECUTIONS' }]);
   if (execFlags.length) writeRunArtifact(runId, 'execution_flags.json', execFlags);
 
-  return { previews, placements, fills };
+  return { previews, placements, fills, placedOrders };
 };

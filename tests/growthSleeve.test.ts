@@ -79,14 +79,16 @@ describe('growth sleeve activation', () => {
       asOf: '2025-01-02',
       config: baseConfig,
       arbitratorAllowed: sleeves.allowed.growthConvexity,
-      reserveBudget: 1000,
-      cashAvailable: 1000,
+      reserveBudget: 10000,
+      reservePoolUsd: 10000,
+      cashAvailable: 10000,
       quotes: { IWM: 100 },
       env: 'test-growth',
       accountKey: 'case2'
     });
     expect(res.plannedAction).toBe('OPEN');
     expect(res.order).toBeTruthy();
+    expect(res.order?.quantity).toBeGreaterThan(0);
   });
 
   it('fails gracefully when budget too small', async () => {
@@ -104,6 +106,44 @@ describe('growth sleeve activation', () => {
       accountKey: 'case3'
     });
     expect(res.plannedAction === 'OPEN').toBe(false);
+  });
+
+  it('does not open while insurance is active', async () => {
+    resetState('test-growth', 'case4');
+    const sleeves = arbitrateSleeves({
+      dislocationActive: false,
+      regimes: { equityRegime: { label: 'risk_on', confidence: 0.9, supports: { timeInRegimeWeeks: 3 } }, volRegime: { label: 'low' } } as any
+    });
+    const res = await planGrowthSleeve({
+      runId: 'g4',
+      asOf: '2025-01-04',
+      config: baseConfig,
+      arbitratorAllowed: sleeves.allowed.growthConvexity,
+      reserveBudget: 10000,
+      reservePoolUsd: 10000,
+      cashAvailable: 10000,
+      quotes: { IWM: 100 },
+      optionPositions: [
+        {
+          underlying: 'SPY',
+          optionSymbol: 'SPY:PUT:95:2025-04-01',
+          type: 'PUT',
+          strike: 95,
+          expiry: '2025-04-01',
+          contracts: 1,
+          multiplier: 100,
+          avgOpenPrice: 4,
+          openDate: '2025-01-01',
+          marketPrice: 4,
+          marketValueUsd: 400,
+          unrealizedPnlUsd: 0
+        }
+      ],
+      env: 'test-growth',
+      accountKey: 'case4'
+    });
+    expect(res.plannedAction).toBe('NONE');
+    expect(res.reason).toBe('Growth disabled while insurance is active');
   });
 });
 

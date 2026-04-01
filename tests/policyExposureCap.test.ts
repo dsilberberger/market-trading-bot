@@ -1,16 +1,23 @@
 import { mapPolicyExposureCap } from '../src/risk/policyExposureCap';
 
 describe('mapPolicyExposureCap', () => {
-  it('maps neutral low-vol low confidence to 0.50', () => {
-    expect(mapPolicyExposureCap(0.2, 'neutral', 'low')).toBe(0.5);
+  it('maps neutral low-vol low confidence to the smoothed floor', () => {
+    expect(mapPolicyExposureCap(0.2, 'neutral', 'low')).toBe(0.35);
   });
 
-  it('maps neutral low-vol mid confidence to 0.70', () => {
-    expect(mapPolicyExposureCap(0.5, 'neutral', 'low')).toBe(0.7);
+  it('ramps neutral low-vol exposure smoothly through the transition band', () => {
+    expect(mapPolicyExposureCap(0.5, 'neutral', 'low')).toBeCloseTo(0.35);
+    expect(mapPolicyExposureCap(0.65, 'neutral', 'low')).toBeCloseTo(0.675);
   });
 
-  it('maps neutral low-vol high confidence to 1.00', () => {
-    expect(mapPolicyExposureCap(0.6, 'neutral', 'low')).toBe(1);
+  it('reaches full neutral low-vol exposure at high confidence', () => {
+    expect(mapPolicyExposureCap(0.8, 'neutral', 'low')).toBe(1);
+  });
+
+  it('ramps risk-on exposure smoothly through the transition band', () => {
+    expect(mapPolicyExposureCap(0.5, 'risk_on', 'low')).toBeCloseTo(0.35);
+    expect(mapPolicyExposureCap(0.65, 'risk_on', 'low')).toBeCloseTo(0.675);
+    expect(mapPolicyExposureCap(0.8, 'risk_on', 'low')).toBe(1);
   });
 
   it('keeps non-neutral low-confidence cases at 0.35', () => {

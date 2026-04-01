@@ -1,0 +1,152 @@
+{
+  "metadata": {
+    "runPrefix": "growth-final-2020-2022-M4",
+    "dateRange": {
+      "start": "2020-01-07",
+      "end": "2022-12-27"
+    },
+    "barFrequency": "1w",
+    "warmup": {
+      "preRollBarsRequested": 0,
+      "warmupStepCount": 29,
+      "firstWarmupDate": "2020-01-07",
+      "lastWarmupDate": "2020-07-20",
+      "firstCompletedDate": "2020-07-27"
+    },
+    "benchmarkNames": [
+      "60/40 (VTI/BND)",
+      "80/20 (VTI/BND)",
+      "100% Equity (VTI/VXUS)"
+    ]
+  },
+  "portfolios": [
+    {
+      "runPrefix": "growth-final-2020-2022-M4",
+      "windowStart": "2020-01-07",
+      "windowEnd": "2022-12-27",
+      "portfolio": "Current Strategy",
+      "type": "strategy",
+      "totalReturnPct": 0.3105497463786644,
+      "maxDrawdownPct": 0.023693984751840872,
+      "endingValue": 458692.4112325325,
+      "startingValue": 350000,
+      "tradeCount": 193,
+      "grossTradedNotionalUsd": 6915002.067357113,
+      "annualizedReturnPct": 0.09531509659845883,
+      "annualizedVolatilityPct": 0.031012132153156638,
+      "turnoverPct": 17.018461466705077,
+      "peakDateBeforeMaxDrawdown": "2022-02-08",
+      "troughDate": "2022-05-30",
+      "recoveryDate": "2022-11-08",
+      "recoveryBars": 23
+    },
+    {
+      "runPrefix": "growth-final-2020-2022-M4",
+      "windowStart": "2020-01-07",
+      "windowEnd": "2022-12-27",
+      "portfolio": "60/40 (VTI/BND)",
+      "type": "benchmark",
+      "totalReturnPct": 0.24480997352979394,
+      "maxDrawdownPct": 0.19238518095808096,
+      "endingValue": 435683.4907354279,
+      "startingValue": 350000,
+      "tradeCount": 24,
+      "grossTradedNotionalUsd": 539860.0410693481,
+      "annualizedReturnPct": 0.07650266226263369,
+      "annualizedVolatilityPct": 0.08052621288494176,
+      "turnoverPct": 1.4117273741404532,
+      "peakDateBeforeMaxDrawdown": "2020-02-25",
+      "troughDate": "2020-03-30",
+      "recoveryDate": "2020-10-26",
+      "recoveryBars": 30
+    },
+    {
+      "runPrefix": "growth-final-2020-2022-M4",
+      "windowStart": "2020-01-07",
+      "windowEnd": "2022-12-27",
+      "portfolio": "80/20 (VTI/BND)",
+      "type": "benchmark",
+      "totalReturnPct": 0.2581489607079268,
+      "maxDrawdownPct": 0.26767994377190635,
+      "endingValue": 440352.13624777435,
+      "startingValue": 350000,
+      "tradeCount": 24,
+      "grossTradedNotionalUsd": 473706.4274339885,
+      "annualizedReturnPct": 0.08037219219293723,
+      "annualizedVolatilityPct": 0.11191139123136282,
+      "turnoverPct": 1.2520164393080828,
+      "peakDateBeforeMaxDrawdown": "2020-02-25",
+      "troughDate": "2020-03-30",
+      "recoveryDate": "2020-12-22",
+      "recoveryBars": 38
+    },
+    {
+      "runPrefix": "growth-final-2020-2022-M4",
+      "windowStart": "2020-01-07",
+      "windowEnd": "2022-12-27",
+      "portfolio": "100% Equity (VTI/VXUS)",
+      "type": "benchmark",
+      "totalReturnPct": 0.25902898349916503,
+      "maxDrawdownPct": 0.35649824794941565,
+      "endingValue": 440660.14422470774,
+      "startingValue": 350000,
+      "tradeCount": 24,
+      "grossTradedNotionalUsd": 370958.3100460037,
+      "annualizedReturnPct": 0.08062652068272835,
+      "annualizedVolatilityPct": 0.1512614333624705,
+      "turnoverPct": 1.0023063753024313,
+      "peakDateBeforeMaxDrawdown": "2020-02-25",
+      "troughDate": "2020-03-30",
+      "recoveryDate": "2021-03-02",
+      "recoveryBars": 48
+    }
+  ],
+  "strategy": {
+    "regimeOccupancy": {
+      "counts": {
+        "risk_on": 90,
+        "neutral": 34,
+        "risk_off": 32,
+        "unknown": 0
+      },
+      "percentages": {
+        "risk_on": 0.5769230769230769,
+        "neutral": 0.21794871794871795,
+        "risk_off": 0.20512820512820512,
+        "unknown": 0
+      }
+    },
+    "sleeveMetrics": {
+      "dislocationTriggerCount": 0,
+      "sleeveBuyExecutionCount": 0,
+      "totalReserveCapitalDeployedUsd": 0,
+      "peakReserveDeploymentUsd": 8924.346112500001,
+      "peakReserveDeploymentDate": "2021-04-19"
+    },
+    "coreLaneMetrics": {
+      "averageCoreCashUsd": 98397.89322394422,
+      "averageCoreCashPct": 0.25778625013764844,
+      "averageDislocationCoreUsageUsd": 0,
+      "peakDislocationCoreUsageUsd": 0
+    },
+    "reserveMetrics": {
+      "accountingScope": "executed_replay_only",
+      "averageReserveUsageUsd": 3116.123693004811,
+      "peakReserveUsageUsd": 8924.346112500001,
+      "peakReserveUsageDate": "2021-04-19",
+      "averageReservePct": 0.007523459120019085,
+      "minReservePct": 0,
+      "maxReservePct": 0.022170447088277728
+    },
+    "plannedOptionSleeveState": {
+      "accountingScope": "planned_non_executed_option_state",
+      "averagePlannedOptionReserveStateUsd": 0,
+      "peakPlannedOptionReserveStateUsd": 0,
+      "activeStepCount": 0,
+      "averageInsurancePremiumStateUsd": 0,
+      "averageGrowthPremiumStateUsd": 0,
+      "peakInsurancePremiumStateUsd": 0,
+      "peakGrowthPremiumStateUsd": 0
+    }
+  }
+}

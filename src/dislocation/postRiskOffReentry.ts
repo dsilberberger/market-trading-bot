@@ -133,19 +133,17 @@ export const evaluatePostRiskOffStabilization = ({
 
 export const computePostRiskOffReentryBudget = ({
   corePoolUsd,
-  reservePoolUsd,
-  reserveOnlyCashUsd,
+  coreCashUsd,
   config
 }: {
   corePoolUsd: number;
-  reservePoolUsd: number;
-  reserveOnlyCashUsd: number;
+  coreCashUsd: number;
   config: BotConfig;
 }): PostRiskOffReentryBudgetResult => {
   const cfg = config.dislocation?.earlyReentry || {};
   const requestedBudgetUSD = Math.max(0, corePoolUsd * (cfg.reserveDeployPctOfCore ?? 0.15));
   const budgetUSD = clamp(
-    Math.min(requestedBudgetUSD, reservePoolUsd, reserveOnlyCashUsd),
+    Math.min(requestedBudgetUSD, corePoolUsd, coreCashUsd),
     0,
     Number.POSITIVE_INFINITY
   );
@@ -154,7 +152,7 @@ export const computePostRiskOffReentryBudget = ({
       code: 'POST_RISK_OFF_REENTRY_BUDGET',
       severity: 'info',
       message: 'Post-risk-off re-entry budget computed',
-      observed: { requestedBudgetUSD, budgetUSD, reservePoolUsd, reserveOnlyCashUsd }
+      observed: { requestedBudgetUSD, budgetUSD, corePoolUsd, coreCashUsd }
     }
   ];
   if (budgetUSD <= 0) {
@@ -162,7 +160,7 @@ export const computePostRiskOffReentryBudget = ({
       code: 'POST_RISK_OFF_REENTRY_NO_RESERVE_CAPACITY',
       severity: 'warn',
       message: 'No reserve capacity available for post-risk-off re-entry',
-      observed: { requestedBudgetUSD, reservePoolUsd, reserveOnlyCashUsd }
+      observed: { requestedBudgetUSD, corePoolUsd, coreCashUsd }
     });
   }
   return { requestedBudgetUSD, budgetUSD, flags };

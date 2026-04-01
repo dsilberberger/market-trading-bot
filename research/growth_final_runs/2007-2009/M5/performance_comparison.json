@@ -1,0 +1,62 @@
+[
+  {
+    "label": "Current Strategy",
+    "type": "strategy",
+    "startEquity": 350000,
+    "endEquity": 339178.62045894034,
+    "totalReturnPct": -0.03091822726017046,
+    "maxDrawdownPct": 0.09702137851111195,
+    "annualizedVolatilityPct": 0.030345231779184835,
+    "annualizedReturnPct": -0.010449729248104833,
+    "peakDateBeforeMaxDrawdown": "2008-01-29",
+    "troughDate": "2008-05-20",
+    "recoveryDate": null,
+    "recoveryBars": null,
+    "turnoverPct": 37.99450826834602
+  },
+  {
+    "label": "60/40 (VTI/BND)",
+    "type": "benchmark",
+    "startEquity": 350000,
+    "endEquity": 346843.13963675796,
+    "totalReturnPct": -0.00901960103783439,
+    "maxDrawdownPct": 0.22359215362439894,
+    "annualizedVolatilityPct": 0.06942835309591269,
+    "annualizedReturnPct": -0.003025958641648341,
+    "peakDateBeforeMaxDrawdown": "2007-07-24",
+    "troughDate": "2008-05-06",
+    "recoveryDate": null,
+    "recoveryBars": null,
+    "turnoverPct": 1.4452646640602937
+  },
+  {
+    "label": "80/20 (VTI/BND)",
+    "type": "benchmark",
+    "startEquity": 350000,
+    "endEquity": 313083.55788770976,
+    "totalReturnPct": -0.10547554889225785,
+    "maxDrawdownPct": 0.3288623586227556,
+    "annualizedVolatilityPct": 0.10099846749137203,
+    "annualizedReturnPct": -0.036595522921474166,
+    "peakDateBeforeMaxDrawdown": "2007-07-24",
+    "troughDate": "2008-05-06",
+    "recoveryDate": null,
+    "recoveryBars": null,
+    "turnoverPct": 1.3998591478800115
+  },
+  {
+    "label": "100% Equity (VTI/VXUS)",
+    "type": "benchmark",
+    "startEquity": 350000,
+    "endEquity": 268427.270232619,
+    "totalReturnPct": -0.23306494219251706,
+    "maxDrawdownPct": 0.45317620355498,
+    "annualizedVolatilityPct": 0.14267509303285267,
+    "annualizedReturnPct": -0.08493007628960936,
+    "peakDateBeforeMaxDrawdown": "2007-07-24",
+    "troughDate": "2008-05-13",
+    "recoveryDate": null,
+    "recoveryBars": null,
+    "turnoverPct": 1.2981917902915447
+  }
+]

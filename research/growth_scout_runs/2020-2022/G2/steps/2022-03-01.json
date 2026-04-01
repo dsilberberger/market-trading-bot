@@ -1,0 +1,139 @@
+{
+  "date": "2022-03-01",
+  "asOf": "2022-03-01T16:00",
+  "runId": "growth-scout-2020-2022-G2-2022-03-01",
+  "runStatus": "completed",
+  "regime": "risk_off",
+  "confidence": 0.35162685337726535,
+  "exposureCap": 0.6,
+  "deployBudgetUsd": 91013.5492,
+  "targetAllocations": {
+    "IEF": 0.31918106937163526,
+    "TIP": 0.31918106937163526,
+    "SHY": 0.31918106937163526,
+    "VXUS": 0.007634862871412363,
+    "VTI": 0.007148586967822767,
+    "USMV": 0.027673342045859167
+  },
+  "achievedAllocations": {
+    "IEF": 0.31968594310035964,
+    "TIP": 0.3195705749002169,
+    "SHY": 0.3196918876450235,
+    "VXUS": 0.007233520098450466,
+    "VTI": 0.006629818562589284,
+    "USMV": 0.027188255693360128
+  },
+  "orders": [
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 52757.84107946028,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 7306.577979087,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (79.44) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    },
+    {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 2040.1293673413595,
+      "thesis": "Rebalance: exit non-target holding.",
+      "invalidation": "Invalidate if weekly close < MA200 (72.05) or drawdown > 4% from entry.",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 30,
+        "netExposureTarget": 0
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 332625.5243887381,
+    "holdings": [
+      {
+        "symbol": "VXUS",
+        "quantity": 8.986021435814873,
+        "avgPrice": 49.614795,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 20.96658753279246,
+        "avgPrice": 84.96246,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 30.95412179555896,
+        "avgPrice": 61.09053,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 498.7506246876563,
+        "avgPrice": 86.02299,
+        "holdSince": "2020-07-28T06:00:00.000Z"
+      }
+    ],
+    "equity": 391030.9752450042,
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  "optionCashEvents": [],
+  "capitalLanes": {
+    "coreCapitalUsd": 273721.68267150293,
+    "coreCashUsd": 215316.2318152368,
+    "coreHeadroomUsd": 215316.2318152368,
+    "executedDislocationCoreUsageUsd": 0,
+    "optionsReserveCapitalUsd": 117309.29257350127,
+    "optionsReserveCashUsd": 117309.29257350127,
+    "optionsReserveHeadroomUsd": 117309.29257350127
+  },
+  "executedOptionReserveUsageUsd": 0,
+  "executedReserveUsageUsd": 0,
+  "reserveUsageUsd": 0,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [
+    {
+      "code": "DISLOCATION_STATE_INVARIANT",
+      "message": "Lifecycle invariant violated; derived controls used",
+      "observed": {
+        "phase": "INACTIVE",
+        "allowAdd": false,
+        "protectFromSells": false,
+        "active": false
+      }
+    }
+  ],
+  "dislocationState": {
+    "active": false,
+    "phase": "INACTIVE",
+    "lastTier": 1,
+    "lastTierChangeISO": "2020-08-25T06:00:00.000Z",
+    "currentTier": 0,
+    "postRiskOffTriggerCount": 0,
+    "postRiskOffEpisodeStartISO": "2022-02-16T08:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-scout-2020-2022-G2-2022-03-01"
+}

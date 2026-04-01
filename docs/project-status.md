@@ -1,47 +1,116 @@
-# Project Status & Context — as of latest changes
+# Project Status & Context
 
-## Goals / Philosophy
-- Preserve capital in stress; participate in recoveries with guarded upside.
-- Enforce 70/30 wall: 70% core (base + dislocation), 30% reserve (options).
-- Role-based ETF selection (not “winner picking”): one ETF per role; targets driven by regime weights, not momentum ranks.
-- Deterministic, auditable outputs; proxies execution-only; confidence proxies only for calibration.
+Last updated: 2026-03-31
 
-## Current Config Highlights
-- Capital split: core 70%, reserve 30%.
-- Base caps: risk_off 0.35; neutral 0.70; risk_on 0.95; fallback 0.50.
-- Confidence scaling: threshold 0.50; scaleLow 0.95; ramp 0–1 week.
-- Confidence calibration: minHistoryDays 120; coverageFloorConfidence 0.55.
-- Universe (canonical): VTI, VXUS, VTV, USMV, SHY, IEF, TIP.
-- Execution proxies: VTI→ITOT; VXUS→IXUS; SHY→VGSH/SCHO/SHV; IEF→SCHR/VGIT; TIP→SCHP/VTIP; VTV/USMV optional proxies none.
-- Confidence proxies: VTI→ITOT, VXUS→IXUS, USMV→SPLV (calibration only).
-- Growth gating (tightened): allow only if risk_on, confidence ≥ 0.6, timeInRegimeWeeks ≥ 2, vol not stressed, no dislocation.
-- Planner: whole-share; remainder pass only in risk_on with timeInRegimeWeeks ≥ 1; always bounded by deployBudget and 70/30.
-- Options sleeves unchanged; insurance/growth spend only from reserve; reserve ledger isolated from core.
+## Current Validation Candidate
+- Core baseline:
+  - `85/15` capital lanes
+  - smoothed exposure-cap mapping
+  - current dislocation sleeve
+  - growth off by default
+- Secondary overlay candidate:
+  - same system plus the narrow `M4` growth sleeve
+- Insurance sleeve:
+  - replay plumbing exists
+  - currently not justified as part of the main architecture
+- Dislocation handoff:
+  - implemented safely
+  - not yet treated as a primary baseline differentiator
 
-## Recent Behavior Notes
-- GFC-style synthetic (bot): start $350k → end ~$319.9k; dominated by risk_off; remainder pass has minimal effect here.
-- Aggressive_robo comparison (GFC): end ~$242.9k; much deeper drawdown than bot.
-- COVID-style synthetic (bot): start $350k → end ~$224.0k; aggressive_robo end ~$243.9k. Both end below start due to built-in 2022 drawdown; bot more defensive in rebound.
-- Steady-bull synthetic is conservative (not a true bull); both bot and robo under-start due to scenario assumptions.
+## Key Architecture State
+- Capital lanes are now operationally separate:
+  - `85%` core capital for ETF activity, including dislocation ETF deployment
+  - `15%` options reserve for option sleeves only
+- Planner and replay use the same lane semantics:
+  - `coreCapitalUsd`, `coreCashUsd`
+  - `optionsReserveCapitalUsd`, `optionsReserveCashUsd`
+  - `executedOptionReserveUsageUsd`
+- Exposure cap is smoothed in `risk_on` and `neutral + low vol` states:
+  - `confidence <= 0.5 -> 0.35`
+  - `confidence >= 0.8 -> 1.0`
+  - linear ramp in between
+- Conservative rails remain unchanged in defensive states.
 
-## Key Invariants
-- Spend ≤ deployBudget; 70/30 wall enforced.
-- Proxies execution-only; confidence proxies do not affect targets.
-- Role weights, not momentum ranks; weights ≠ scores.
-- ConfidenceQuality = data adequacy; confidence = signal strength (can be low even when quality is full).
+## What Is Driving Results Now
+- Primary edge: ETF/dislocation system.
+- Biggest improvements came from:
+  - shrinking the oversized options reserve from `30%` to `15%`
+  - smoothing confidence cliffs in the exposure cap
+- Growth sleeve is additive in some recovery windows, but narrow and optional.
+- Insurance sleeve is not part of the recommended baseline.
 
-## Open Considerations / Next Steps
-- If more upside desired in recoveries: evaluate risk_on remainder fill (already on) and possibly adjust confidence penalty or add a small risk_on deploy floor; tread carefully to avoid false positives.
-- Historical replay: synthetic scenarios are not real price history; add historical price harness if needed.
-- Steady-bull scenario: retune to reflect true uptrend if you want a cleaner bull test.
-- Cash utilization: remainder pass only in risk_on to reduce leftover; no redistribution in neutral/risk_off.
+## Growth Sleeve Decision
+- Final status: keep only as a narrow, optional, research-only overlay.
+- Recommended retained config is `M4`:
+  - `confidenceMin: 0.70`
+  - `minTimeInRegimeWeeks: 3`
+  - `minMoneyness: 1.01`
+  - `maxMoneyness: 1.04`
+  - `minMonths: 5`
+  - `maxMonths: 7`
+  - `initialTranchePct: 0.05`
+  - `maxTotalPct: 0.12`
+- Keep it feature-flagged, not default-on.
 
-## How to Reproduce Key Runs
-- GFC synthetic (bot): see `sim-output-gfc.json`; command:
-  ```
-  npx ts-node --transpile-only -e "const { runSimulation } = require('./scripts/simPortfolio'); const { presetGFC2007to2010 } = require('./scripts/scenario'); runSimulation({ scenario: presetGFC2007to2010, scenarioName: presetGFC2007to2010.name, weeks: 156, startDate: '2007-01-02', startingCapitalUSD: 350000, strategy: 'bot' }).then((r)=>require('fs').writeFileSync('sim-output-gfc.json', JSON.stringify(r,null,2)));"
-  ```
-- GFC aggressive_robo: same but `strategy: 'aggressive_robo'` → `sim-output-gfc-robo.json`.
-- COVID synthetic (bot): `presetCovid2020to2022` → `sim-output-covid.json`; aggressive_robo → `sim-output-covid-robo.json`.
-- Live dry-run example: run `src/cli/run.ts` with `--mode live --dry-run --force` (see run `2026-01-06T20-36`).
+## Insurance Sleeve Decision
+- Trigger/lifecycle/capital-plumbing fixes were implemented in replay.
+- Result: the sleeve is now mechanically correct, but still not justified as part of the main system.
+- Current recommendation:
+  - do not include insurance in the primary validation candidate
+  - reconsider only later if broader validation points to a specific downside gap worth hedging
 
+## Re-Entry / Recovery Status
+- Major re-entry friction has been addressed through:
+  - `85/15` capital rebalance
+  - smoothed exposure-cap mapping
+- Current view:
+  - no further immediate re-entry tuning is justified
+  - if revisited later, dislocation handoff remains the narrowest residual area
+
+## Broader Validation Status
+- Grounded windows already exercised locally:
+  - `2007–2009`
+  - `2020–2022`
+- Requested next windows:
+  - `2010–2015`
+  - `1998–2003`
+  - `2016–2019`
+- Current blocker:
+  - no local real historical bar bundles or bar cache for those windows
+
+## New Historical Bundle Tooling
+- Real-history bundle converter:
+  - [scripts/buildHistoricalReplayBundle.ts](/Users/dsilberberger/trading-bot/scripts/buildHistoricalReplayBundle.ts)
+  - converts externally supplied normalized JSON bars into `HistoricalReplayInput`
+- Proxy-backed bundle converter:
+  - [scripts/buildProxyHistoricalReplayBundle.ts](/Users/dsilberberger/trading-bot/scripts/buildProxyHistoricalReplayBundle.ts)
+  - intended for approximate, non-canonical windows such as `2010–2015`
+  - stitches:
+    - `VEU -> VXUS` before real `VXUS`
+    - synthetic `75% VTV + 25% SHY -> USMV` before real `USMV`
+  - writes both:
+    - replay bundle JSON
+    - proxy metadata JSON marking the bundle as approximate
+
+## External Data Requirement
+- Broader validation is still blocked on real normalized bar data.
+- Minimum required external file shape:
+  - JSON array of rows with:
+    - `symbol`
+    - `date` in `YYYY-MM-DD`
+    - `adjustedClose` or `close`
+  - optional:
+    - `open`, `high`, `low`, `volume`
+- For proxy-backed `2010–2015`, the first supplied dataset should cover:
+  - `VTI`, `VTV`, `SHY`, `IEF`, `TIP`
+  - `VEU`
+  - real `VXUS`
+  - real `USMV`
+  - plus enough lead-in history before `2010-01-05`
+
+## Recommended Next Step
+- Highest-ROI next execution step is broader historical replay validation, starting with `2010–2015`, once external bars are available.
+- Validate:
+  - baseline `85/15` system with growth off
+  - baseline plus `M4` growth
+  - against `60/40`, `80/20`, and `100% equity`

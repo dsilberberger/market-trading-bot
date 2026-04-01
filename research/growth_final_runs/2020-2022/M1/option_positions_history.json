@@ -1,0 +1,1918 @@
+[
+  {
+    "date": "2020-01-07",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-01-14",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-01-21",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-01-28",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-02-04",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-02-11",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-02-18",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-02-25",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-03-03",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-03-09",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-03-16",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-03-23",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-03-30",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-04-06",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-04-13",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-04-20",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-04-27",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-05-04",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-05-11",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-05-18",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-05-25",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-06-01",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-06-08",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-06-15",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-06-22",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-06-29",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-07-06",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-07-13",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-07-20",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-07-27",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-08-03",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-08-10",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-08-17",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-08-24",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-08-31",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-09-07",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-09-14",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-09-21",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:90.2000:2020-12-14",
+        "type": "CALL",
+        "strike": 90.2,
+        "expiry": "2020-12-14",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 2.983365,
+        "openDate": "2020-09-21T16:00",
+        "costBasisUsd": 5370.057,
+        "marketPrice": 2.983365,
+        "marketValueUsd": 5370.057,
+        "unrealizedPnlUsd": 0
+      }
+    ],
+    "optionsMarketValueUsd": 5370.057
+  },
+  {
+    "date": "2020-09-28",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:90.2000:2020-12-14",
+        "type": "CALL",
+        "strike": 90.2,
+        "expiry": "2020-12-14",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 2.983365,
+        "openDate": "2020-09-21T16:00",
+        "costBasisUsd": 5370.057,
+        "marketPrice": 2.0065855970149213,
+        "marketValueUsd": 3611.8540746268586,
+        "unrealizedPnlUsd": -1758.2029253731412
+      }
+    ],
+    "optionsMarketValueUsd": 3611.8540746268586
+  },
+  {
+    "date": "2020-10-05",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:90.2000:2020-12-14",
+        "type": "CALL",
+        "strike": 90.2,
+        "expiry": "2020-12-14",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 2.983365,
+        "openDate": "2020-09-21T16:00",
+        "costBasisUsd": 5370.057,
+        "marketPrice": 2.207865472440937,
+        "marketValueUsd": 3974.157850393686,
+        "unrealizedPnlUsd": -1395.8991496063136
+      }
+    ],
+    "optionsMarketValueUsd": 3974.157850393686
+  },
+  {
+    "date": "2020-10-12",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:90.2000:2020-12-14",
+        "type": "CALL",
+        "strike": 90.2,
+        "expiry": "2020-12-14",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 2.983365,
+        "openDate": "2020-09-21T16:00",
+        "costBasisUsd": 5370.057,
+        "marketPrice": 5.311127999999999,
+        "marketValueUsd": 9560.030399999998,
+        "unrealizedPnlUsd": 4189.973399999998
+      }
+    ],
+    "optionsMarketValueUsd": 9560.030399999998
+  },
+  {
+    "date": "2020-10-19",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:90.2000:2020-12-14",
+        "type": "CALL",
+        "strike": 90.2,
+        "expiry": "2020-12-14",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 2.983365,
+        "openDate": "2020-09-21T16:00",
+        "costBasisUsd": 5370.057,
+        "marketPrice": 5.504883230088495,
+        "marketValueUsd": 9908.789814159292,
+        "unrealizedPnlUsd": 4538.7328141592925
+      }
+    ],
+    "optionsMarketValueUsd": 9908.789814159292
+  },
+  {
+    "date": "2020-10-26",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:90.2000:2020-12-14",
+        "type": "CALL",
+        "strike": 90.2,
+        "expiry": "2020-12-14",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 2.983365,
+        "openDate": "2020-09-21T16:00",
+        "costBasisUsd": 5370.057,
+        "marketPrice": 5.687247641509435,
+        "marketValueUsd": 10237.045754716983,
+        "unrealizedPnlUsd": 4866.988754716983
+      }
+    ],
+    "optionsMarketValueUsd": 10237.045754716983
+  },
+  {
+    "date": "2020-11-03",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:90.2000:2020-12-14",
+        "type": "CALL",
+        "strike": 90.2,
+        "expiry": "2020-12-14",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 2.983365,
+        "openDate": "2020-09-21T16:00",
+        "costBasisUsd": 5370.057,
+        "marketPrice": 5.821009948453611,
+        "marketValueUsd": 10477.817907216498,
+        "unrealizedPnlUsd": 5107.760907216499
+      }
+    ],
+    "optionsMarketValueUsd": 10477.817907216498
+  },
+  {
+    "date": "2020-11-10",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:90.2000:2020-12-14",
+        "type": "CALL",
+        "strike": 90.2,
+        "expiry": "2020-12-14",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 2.983365,
+        "openDate": "2020-09-21T16:00",
+        "costBasisUsd": 5370.057,
+        "marketPrice": 5.967049000000003,
+        "marketValueUsd": 10740.688200000006,
+        "unrealizedPnlUsd": 5370.631200000006
+      }
+    ],
+    "optionsMarketValueUsd": 10740.688200000006
+  },
+  {
+    "date": "2020-11-17",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:90.2000:2020-12-14",
+        "type": "CALL",
+        "strike": 90.2,
+        "expiry": "2020-12-14",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 2.983365,
+        "openDate": "2020-09-21T16:00",
+        "costBasisUsd": 5370.057,
+        "marketPrice": 6.100492228915658,
+        "marketValueUsd": 10980.886012048184,
+        "unrealizedPnlUsd": 5610.829012048184
+      }
+    ],
+    "optionsMarketValueUsd": 10980.886012048184
+  },
+  {
+    "date": "2020-11-24",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-12-01",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-12-08",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2020-12-15",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:96.4900:2021-03-10",
+        "type": "CALL",
+        "strike": 96.49,
+        "expiry": "2021-03-10",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.19140675,
+        "openDate": "2020-12-15T16:00",
+        "costBasisUsd": 5744.53215,
+        "marketPrice": 3.19140675,
+        "marketValueUsd": 5744.53215,
+        "unrealizedPnlUsd": 0
+      }
+    ],
+    "optionsMarketValueUsd": 5744.53215
+  },
+  {
+    "date": "2020-12-22",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:96.4900:2021-03-10",
+        "type": "CALL",
+        "strike": 96.49,
+        "expiry": "2021-03-10",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.19140675,
+        "openDate": "2020-12-15T16:00",
+        "costBasisUsd": 5744.53215,
+        "marketPrice": 4.747684526119404,
+        "marketValueUsd": 8545.832147014926,
+        "unrealizedPnlUsd": 2801.299997014926
+      }
+    ],
+    "optionsMarketValueUsd": 8545.832147014926
+  },
+  {
+    "date": "2020-12-29",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:96.4900:2021-03-10",
+        "type": "CALL",
+        "strike": 96.49,
+        "expiry": "2021-03-10",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.19140675,
+        "openDate": "2020-12-15T16:00",
+        "costBasisUsd": 5744.53215,
+        "marketPrice": 4.974172277559067,
+        "marketValueUsd": 8953.51009960632,
+        "unrealizedPnlUsd": 3208.9779496063193
+      }
+    ],
+    "optionsMarketValueUsd": 8953.51009960632
+  },
+  {
+    "date": "2021-01-05",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:96.4900:2021-03-10",
+        "type": "CALL",
+        "strike": 96.49,
+        "expiry": "2021-03-10",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.19140675,
+        "openDate": "2020-12-15T16:00",
+        "costBasisUsd": 5744.53215,
+        "marketPrice": 5.192083600000009,
+        "marketValueUsd": 9345.750480000017,
+        "unrealizedPnlUsd": 3601.218330000017
+      }
+    ],
+    "optionsMarketValueUsd": 9345.750480000017
+  },
+  {
+    "date": "2021-01-12",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:96.4900:2021-03-10",
+        "type": "CALL",
+        "strike": 96.49,
+        "expiry": "2021-03-10",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.19140675,
+        "openDate": "2020-12-15T16:00",
+        "costBasisUsd": 5744.53215,
+        "marketPrice": 5.399824643805316,
+        "marketValueUsd": 9719.68435884957,
+        "unrealizedPnlUsd": 3975.1522088495703
+      }
+    ],
+    "optionsMarketValueUsd": 9719.68435884957
+  },
+  {
+    "date": "2021-01-19",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:96.4900:2021-03-10",
+        "type": "CALL",
+        "strike": 96.49,
+        "expiry": "2021-03-10",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.19140675,
+        "openDate": "2020-12-15T16:00",
+        "costBasisUsd": 5744.53215,
+        "marketPrice": 5.595380542452833,
+        "marketValueUsd": 10071.6849764151,
+        "unrealizedPnlUsd": 4327.152826415099
+      }
+    ],
+    "optionsMarketValueUsd": 10071.6849764151
+  },
+  {
+    "date": "2021-01-26",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:96.4900:2021-03-10",
+        "type": "CALL",
+        "strike": 96.49,
+        "expiry": "2021-03-10",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.19140675,
+        "openDate": "2020-12-15T16:00",
+        "costBasisUsd": 5744.53215,
+        "marketPrice": 5.776166568181819,
+        "marketValueUsd": 10397.099822727274,
+        "unrealizedPnlUsd": 4652.567672727274
+      }
+    ],
+    "optionsMarketValueUsd": 10397.099822727274
+  },
+  {
+    "date": "2021-02-02",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:96.4900:2021-03-10",
+        "type": "CALL",
+        "strike": 96.49,
+        "expiry": "2021-03-10",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.19140675,
+        "openDate": "2020-12-15T16:00",
+        "costBasisUsd": 5744.53215,
+        "marketPrice": 5.938811336956534,
+        "marketValueUsd": 10689.86040652176,
+        "unrealizedPnlUsd": 4945.3282565217605
+      }
+    ],
+    "optionsMarketValueUsd": 10689.86040652176
+  },
+  {
+    "date": "2021-02-09",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:96.4900:2021-03-10",
+        "type": "CALL",
+        "strike": 96.49,
+        "expiry": "2021-03-10",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.19140675,
+        "openDate": "2020-12-15T16:00",
+        "costBasisUsd": 5744.53215,
+        "marketPrice": 6.07883289117648,
+        "marketValueUsd": 10941.899204117664,
+        "unrealizedPnlUsd": 5197.367054117664
+      }
+    ],
+    "optionsMarketValueUsd": 10941.899204117664
+  },
+  {
+    "date": "2021-02-16",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:101.7800:2021-05-12",
+        "type": "CALL",
+        "strike": 101.78,
+        "expiry": "2021-05-12",
+        "contracts": 25,
+        "multiplier": 100,
+        "avgOpenPrice": 3.3663735,
+        "openDate": "2021-02-16T16:00",
+        "costBasisUsd": 8415.93375,
+        "marketPrice": 3.3663735,
+        "marketValueUsd": 8415.93375,
+        "unrealizedPnlUsd": 0
+      }
+    ],
+    "optionsMarketValueUsd": 8415.93375
+  },
+  {
+    "date": "2021-02-23",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:101.7800:2021-05-12",
+        "type": "CALL",
+        "strike": 101.78,
+        "expiry": "2021-05-12",
+        "contracts": 25,
+        "multiplier": 100,
+        "avgOpenPrice": 3.3663735,
+        "openDate": "2021-02-16T16:00",
+        "costBasisUsd": 8415.93375,
+        "marketPrice": 2.2695308432835843,
+        "marketValueUsd": 5673.827108208961,
+        "unrealizedPnlUsd": -2742.106641791039
+      }
+    ],
+    "optionsMarketValueUsd": 5673.827108208961
+  },
+  {
+    "date": "2021-03-02",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:101.7800:2021-05-12",
+        "type": "CALL",
+        "strike": 101.78,
+        "expiry": "2021-05-12",
+        "contracts": 25,
+        "multiplier": 100,
+        "avgOpenPrice": 3.3663735,
+        "openDate": "2021-02-16T16:00",
+        "costBasisUsd": 8415.93375,
+        "marketPrice": 4.741988334645669,
+        "marketValueUsd": 11854.970836614171,
+        "unrealizedPnlUsd": 3439.037086614171
+      }
+    ],
+    "optionsMarketValueUsd": 11854.970836614171
+  },
+  {
+    "date": "2021-03-09",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:101.7800:2021-05-12",
+        "type": "CALL",
+        "strike": 101.78,
+        "expiry": "2021-05-12",
+        "contracts": 25,
+        "multiplier": 100,
+        "avgOpenPrice": 3.3663735,
+        "openDate": "2021-02-16T16:00",
+        "costBasisUsd": 8415.93375,
+        "marketPrice": 4.965399200000002,
+        "marketValueUsd": 12413.498000000005,
+        "unrealizedPnlUsd": 3997.564250000005
+      }
+    ],
+    "optionsMarketValueUsd": 12413.498000000005
+  },
+  {
+    "date": "2021-03-15",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:101.7800:2021-05-12",
+        "type": "CALL",
+        "strike": 101.78,
+        "expiry": "2021-05-12",
+        "contracts": 25,
+        "multiplier": 100,
+        "avgOpenPrice": 3.3663735,
+        "openDate": "2021-02-16T16:00",
+        "costBasisUsd": 8415.93375,
+        "marketPrice": 5.207095969565221,
+        "marketValueUsd": 13017.739923913052,
+        "unrealizedPnlUsd": 4601.806173913052
+      }
+    ],
+    "optionsMarketValueUsd": 13017.739923913052
+  },
+  {
+    "date": "2021-03-22",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:101.7800:2021-05-12",
+        "type": "CALL",
+        "strike": 101.78,
+        "expiry": "2021-05-12",
+        "contracts": 25,
+        "multiplier": 100,
+        "avgOpenPrice": 3.3663735,
+        "openDate": "2021-02-16T16:00",
+        "costBasisUsd": 8415.93375,
+        "marketPrice": 5.420846499999997,
+        "marketValueUsd": 13552.116249999992,
+        "unrealizedPnlUsd": 5136.182499999992
+      }
+    ],
+    "optionsMarketValueUsd": 13552.116249999992
+  },
+  {
+    "date": "2021-03-29",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:101.7800:2021-05-12",
+        "type": "CALL",
+        "strike": 101.78,
+        "expiry": "2021-05-12",
+        "contracts": 25,
+        "multiplier": 100,
+        "avgOpenPrice": 3.3663735,
+        "openDate": "2021-02-16T16:00",
+        "costBasisUsd": 8415.93375,
+        "marketPrice": 5.619869381188123,
+        "marketValueUsd": 14049.673452970308,
+        "unrealizedPnlUsd": 5633.739702970308
+      }
+    ],
+    "optionsMarketValueUsd": 14049.673452970308
+  },
+  {
+    "date": "2021-04-05",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:101.7800:2021-05-12",
+        "type": "CALL",
+        "strike": 101.78,
+        "expiry": "2021-05-12",
+        "contracts": 25,
+        "multiplier": 100,
+        "avgOpenPrice": 3.3663735,
+        "openDate": "2021-02-16T16:00",
+        "costBasisUsd": 8415.93375,
+        "marketPrice": 5.800874393617019,
+        "marketValueUsd": 14502.18598404255,
+        "unrealizedPnlUsd": 6086.252234042549
+      }
+    ],
+    "optionsMarketValueUsd": 14502.18598404255
+  },
+  {
+    "date": "2021-04-12",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:101.7800:2021-05-12",
+        "type": "CALL",
+        "strike": 101.78,
+        "expiry": "2021-05-12",
+        "contracts": 25,
+        "multiplier": 100,
+        "avgOpenPrice": 3.3663735,
+        "openDate": "2021-02-16T16:00",
+        "costBasisUsd": 8415.93375,
+        "marketPrice": 5.959512396551729,
+        "marketValueUsd": 14898.780991379323,
+        "unrealizedPnlUsd": 6482.847241379322
+      }
+    ],
+    "optionsMarketValueUsd": 14898.780991379323
+  },
+  {
+    "date": "2021-04-19",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:101.7800:2021-05-12",
+        "type": "CALL",
+        "strike": 101.78,
+        "expiry": "2021-05-12",
+        "contracts": 25,
+        "multiplier": 100,
+        "avgOpenPrice": 3.3663735,
+        "openDate": "2021-02-16T16:00",
+        "costBasisUsd": 8415.93375,
+        "marketPrice": 6.089912049999998,
+        "marketValueUsd": 15224.780124999996,
+        "unrealizedPnlUsd": 6808.8463749999955
+      }
+    ],
+    "optionsMarketValueUsd": 15224.780124999996
+  },
+  {
+    "date": "2021-04-26",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:107.1800:2021-07-19",
+        "type": "CALL",
+        "strike": 107.18,
+        "expiry": "2021-07-19",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.544978500000001,
+        "openDate": "2021-04-26T16:00",
+        "costBasisUsd": 6380.961300000001,
+        "marketPrice": 3.544978500000001,
+        "marketValueUsd": 6380.961300000001,
+        "unrealizedPnlUsd": 0
+      }
+    ],
+    "optionsMarketValueUsd": 6380.961300000001
+  },
+  {
+    "date": "2021-05-03",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:107.1800:2021-07-19",
+        "type": "CALL",
+        "strike": 107.18,
+        "expiry": "2021-07-19",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.544978500000001,
+        "openDate": "2021-04-26T16:00",
+        "costBasisUsd": 6380.961300000001,
+        "marketPrice": 2.383494947761188,
+        "marketValueUsd": 4290.290905970139,
+        "unrealizedPnlUsd": -2090.670394029862
+      }
+    ],
+    "optionsMarketValueUsd": 4290.290905970139
+  },
+  {
+    "date": "2021-05-10",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:107.1800:2021-07-19",
+        "type": "CALL",
+        "strike": 107.18,
+        "expiry": "2021-07-19",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.544978500000001,
+        "openDate": "2021-04-26T16:00",
+        "costBasisUsd": 6380.961300000001,
+        "marketPrice": 4.451838374015748,
+        "marketValueUsd": 8013.309073228346,
+        "unrealizedPnlUsd": 1632.3477732283454
+      }
+    ],
+    "optionsMarketValueUsd": 8013.309073228346
+  },
+  {
+    "date": "2021-05-17",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:107.1800:2021-07-19",
+        "type": "CALL",
+        "strike": 107.18,
+        "expiry": "2021-07-19",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.544978500000001,
+        "openDate": "2021-04-26T16:00",
+        "costBasisUsd": 6380.961300000001,
+        "marketPrice": 4.6906551999999975,
+        "marketValueUsd": 8443.179359999995,
+        "unrealizedPnlUsd": 2062.218059999994
+      }
+    ],
+    "optionsMarketValueUsd": 8443.179359999995
+  },
+  {
+    "date": "2021-05-24",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:107.1800:2021-07-19",
+        "type": "CALL",
+        "strike": 107.18,
+        "expiry": "2021-07-19",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.544978500000001,
+        "openDate": "2021-04-26T16:00",
+        "costBasisUsd": 6380.961300000001,
+        "marketPrice": 4.918174995575217,
+        "marketValueUsd": 8852.714992035391,
+        "unrealizedPnlUsd": 2471.7536920353905
+      }
+    ],
+    "optionsMarketValueUsd": 8852.714992035391
+  },
+  {
+    "date": "2021-05-31",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:107.1800:2021-07-19",
+        "type": "CALL",
+        "strike": 107.18,
+        "expiry": "2021-07-19",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.544978500000001,
+        "openDate": "2021-04-26T16:00",
+        "costBasisUsd": 6380.961300000001,
+        "marketPrice": 5.132159669811315,
+        "marketValueUsd": 9237.887405660367,
+        "unrealizedPnlUsd": 2856.9261056603664
+      }
+    ],
+    "optionsMarketValueUsd": 9237.887405660367
+  },
+  {
+    "date": "2021-06-07",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:107.1800:2021-07-19",
+        "type": "CALL",
+        "strike": 107.18,
+        "expiry": "2021-07-19",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.544978500000001,
+        "openDate": "2021-04-26T16:00",
+        "costBasisUsd": 6380.961300000001,
+        "marketPrice": 5.329738136363629,
+        "marketValueUsd": 9593.528645454531,
+        "unrealizedPnlUsd": 3212.5673454545304
+      }
+    ],
+    "optionsMarketValueUsd": 9593.528645454531
+  },
+  {
+    "date": "2021-06-14",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:107.1800:2021-07-19",
+        "type": "CALL",
+        "strike": 107.18,
+        "expiry": "2021-07-19",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.544978500000001,
+        "openDate": "2021-04-26T16:00",
+        "costBasisUsd": 6380.961300000001,
+        "marketPrice": 5.50716549999999,
+        "marketValueUsd": 9912.897899999984,
+        "unrealizedPnlUsd": 3531.9365999999827
+      }
+    ],
+    "optionsMarketValueUsd": 9912.897899999984
+  },
+  {
+    "date": "2021-06-21",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:107.1800:2021-07-19",
+        "type": "CALL",
+        "strike": 107.18,
+        "expiry": "2021-07-19",
+        "contracts": 18,
+        "multiplier": 100,
+        "avgOpenPrice": 3.544978500000001,
+        "openDate": "2021-04-26T16:00",
+        "costBasisUsd": 6380.961300000001,
+        "marketPrice": 5.6594632529411655,
+        "marketValueUsd": 10187.033855294098,
+        "unrealizedPnlUsd": 3806.0725552940967
+      }
+    ],
+    "optionsMarketValueUsd": 10187.033855294098
+  },
+  {
+    "date": "2021-06-28",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:111.9600:2021-09-20",
+        "type": "CALL",
+        "strike": 111.96,
+        "expiry": "2021-09-20",
+        "contracts": 24,
+        "multiplier": 100,
+        "avgOpenPrice": 3.703077,
+        "openDate": "2021-06-28T16:00",
+        "costBasisUsd": 8887.3848,
+        "marketPrice": 3.703077,
+        "marketValueUsd": 8887.3848,
+        "unrealizedPnlUsd": 0
+      }
+    ],
+    "optionsMarketValueUsd": 8887.3848
+  },
+  {
+    "date": "2021-07-05",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:111.9600:2021-09-20",
+        "type": "CALL",
+        "strike": 111.96,
+        "expiry": "2021-09-20",
+        "contracts": 24,
+        "multiplier": 100,
+        "avgOpenPrice": 3.703077,
+        "openDate": "2021-06-28T16:00",
+        "costBasisUsd": 8887.3848,
+        "marketPrice": 2.4955224328358243,
+        "marketValueUsd": 5989.253838805978,
+        "unrealizedPnlUsd": -2898.1309611940214
+      }
+    ],
+    "optionsMarketValueUsd": 5989.253838805978
+  },
+  {
+    "date": "2021-07-12",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:111.9600:2021-09-20",
+        "type": "CALL",
+        "strike": 111.96,
+        "expiry": "2021-09-20",
+        "contracts": 24,
+        "multiplier": 100,
+        "avgOpenPrice": 3.703077,
+        "openDate": "2021-06-28T16:00",
+        "costBasisUsd": 8887.3848,
+        "marketPrice": 2.7502241496063062,
+        "marketValueUsd": 6600.537959055135,
+        "unrealizedPnlUsd": -2286.846840944865
+      }
+    ],
+    "optionsMarketValueUsd": 6600.537959055135
+  },
+  {
+    "date": "2021-07-19",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:111.9600:2021-09-20",
+        "type": "CALL",
+        "strike": 111.96,
+        "expiry": "2021-09-20",
+        "contracts": 24,
+        "multiplier": 100,
+        "avgOpenPrice": 3.703077,
+        "openDate": "2021-06-28T16:00",
+        "costBasisUsd": 8887.3848,
+        "marketPrice": 3.784974400000002,
+        "marketValueUsd": 9083.938560000004,
+        "unrealizedPnlUsd": 196.55376000000433
+      }
+    ],
+    "optionsMarketValueUsd": 9083.938560000004
+  },
+  {
+    "date": "2021-07-26",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:111.9600:2021-09-20",
+        "type": "CALL",
+        "strike": 111.96,
+        "expiry": "2021-09-20",
+        "contracts": 24,
+        "multiplier": 100,
+        "avgOpenPrice": 3.703077,
+        "openDate": "2021-06-28T16:00",
+        "costBasisUsd": 8887.3848,
+        "marketPrice": 4.017923796460183,
+        "marketValueUsd": 9643.01711150444,
+        "unrealizedPnlUsd": 755.6323115044397
+      }
+    ],
+    "optionsMarketValueUsd": 9643.01711150444
+  },
+  {
+    "date": "2021-08-02",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:111.9600:2021-09-20",
+        "type": "CALL",
+        "strike": 111.96,
+        "expiry": "2021-09-20",
+        "contracts": 24,
+        "multiplier": 100,
+        "avgOpenPrice": 3.703077,
+        "openDate": "2021-06-28T16:00",
+        "costBasisUsd": 8887.3848,
+        "marketPrice": 4.2367344339622734,
+        "marketValueUsd": 10168.162641509458,
+        "unrealizedPnlUsd": 1280.777841509458
+      }
+    ],
+    "optionsMarketValueUsd": 10168.162641509458
+  },
+  {
+    "date": "2021-08-09",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:111.9600:2021-09-20",
+        "type": "CALL",
+        "strike": 111.96,
+        "expiry": "2021-09-20",
+        "contracts": 24,
+        "multiplier": 100,
+        "avgOpenPrice": 3.703077,
+        "openDate": "2021-06-28T16:00",
+        "costBasisUsd": 8887.3848,
+        "marketPrice": 4.438407181818194,
+        "marketValueUsd": 10652.177236363666,
+        "unrealizedPnlUsd": 1764.7924363636666
+      }
+    ],
+    "optionsMarketValueUsd": 10652.177236363666
+  },
+  {
+    "date": "2021-08-16",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:111.9600:2021-09-20",
+        "type": "CALL",
+        "strike": 111.96,
+        "expiry": "2021-09-20",
+        "contracts": 24,
+        "multiplier": 100,
+        "avgOpenPrice": 3.703077,
+        "openDate": "2021-06-28T16:00",
+        "costBasisUsd": 8887.3848,
+        "marketPrice": 4.619030130434784,
+        "marketValueUsd": 11085.672313043484,
+        "unrealizedPnlUsd": 2198.287513043484
+      }
+    ],
+    "optionsMarketValueUsd": 11085.672313043484
+  },
+  {
+    "date": "2021-08-23",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:111.9600:2021-09-20",
+        "type": "CALL",
+        "strike": 111.96,
+        "expiry": "2021-09-20",
+        "contracts": 24,
+        "multiplier": 100,
+        "avgOpenPrice": 3.703077,
+        "openDate": "2021-06-28T16:00",
+        "costBasisUsd": 8887.3848,
+        "marketPrice": 4.783402741176481,
+        "marketValueUsd": 11480.166578823553,
+        "unrealizedPnlUsd": 2592.7817788235534
+      }
+    ],
+    "optionsMarketValueUsd": 11480.166578823553
+  },
+  {
+    "date": "2021-08-30",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:115.8300:2021-11-22",
+        "type": "CALL",
+        "strike": 115.83,
+        "expiry": "2021-11-22",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.8310772500000003,
+        "openDate": "2021-08-30T16:00",
+        "costBasisUsd": 6512.831325,
+        "marketPrice": 3.8310772500000003,
+        "marketValueUsd": 6512.831325,
+        "unrealizedPnlUsd": 0
+      }
+    ],
+    "optionsMarketValueUsd": 6512.831325
+  },
+  {
+    "date": "2021-09-06",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:115.8300:2021-11-22",
+        "type": "CALL",
+        "strike": 115.83,
+        "expiry": "2021-11-22",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.8310772500000003,
+        "openDate": "2021-08-30T16:00",
+        "costBasisUsd": 6512.831325,
+        "marketPrice": 2.5800300410447847,
+        "marketValueUsd": 4386.051069776134,
+        "unrealizedPnlUsd": -2126.7802552238663
+      }
+    ],
+    "optionsMarketValueUsd": 4386.051069776134
+  },
+  {
+    "date": "2021-09-13",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:115.8300:2021-11-22",
+        "type": "CALL",
+        "strike": 115.83,
+        "expiry": "2021-11-22",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.8310772500000003,
+        "openDate": "2021-08-30T16:00",
+        "costBasisUsd": 6512.831325,
+        "marketPrice": 2.841783344488192,
+        "marketValueUsd": 4831.031685629927,
+        "unrealizedPnlUsd": -1681.7996393700732
+      }
+    ],
+    "optionsMarketValueUsd": 4831.031685629927
+  },
+  {
+    "date": "2021-09-20",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:115.8300:2021-11-22",
+        "type": "CALL",
+        "strike": 115.83,
+        "expiry": "2021-11-22",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.8310772500000003,
+        "openDate": "2021-08-30T16:00",
+        "costBasisUsd": 6512.831325,
+        "marketPrice": 3.0932411999999974,
+        "marketValueUsd": 5258.510039999996,
+        "unrealizedPnlUsd": -1254.3212850000045
+      }
+    ],
+    "optionsMarketValueUsd": 5258.510039999996
+  },
+  {
+    "date": "2021-09-27",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:115.8300:2021-11-22",
+        "type": "CALL",
+        "strike": 115.83,
+        "expiry": "2021-11-22",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.8310772500000003,
+        "openDate": "2021-08-30T16:00",
+        "costBasisUsd": 6512.831325,
+        "marketPrice": 3.9224902942477824,
+        "marketValueUsd": 6668.233500221229,
+        "unrealizedPnlUsd": 155.4021752212293
+      }
+    ],
+    "optionsMarketValueUsd": 6668.233500221229
+  },
+  {
+    "date": "2021-10-04",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:115.8300:2021-11-22",
+        "type": "CALL",
+        "strike": 115.83,
+        "expiry": "2021-11-22",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.8310772500000003,
+        "openDate": "2021-08-30T16:00",
+        "costBasisUsd": 6512.831325,
+        "marketPrice": 4.147111910377363,
+        "marketValueUsd": 7050.090247641517,
+        "unrealizedPnlUsd": 537.2589226415166
+      }
+    ],
+    "optionsMarketValueUsd": 7050.090247641517
+  },
+  {
+    "date": "2021-10-11",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:115.8300:2021-11-22",
+        "type": "CALL",
+        "strike": 115.83,
+        "expiry": "2021-11-22",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.8310772500000003,
+        "openDate": "2021-08-30T16:00",
+        "costBasisUsd": 6512.831325,
+        "marketPrice": 4.354003249999998,
+        "marketValueUsd": 7401.805524999998,
+        "unrealizedPnlUsd": 888.9741999999978
+      }
+    ],
+    "optionsMarketValueUsd": 7401.805524999998
+  },
+  {
+    "date": "2021-10-18",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:115.8300:2021-11-22",
+        "type": "CALL",
+        "strike": 115.83,
+        "expiry": "2021-11-22",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.8310772500000003,
+        "openDate": "2021-08-30T16:00",
+        "costBasisUsd": 6512.831325,
+        "marketPrice": 4.549117184782606,
+        "marketValueUsd": 7733.49921413043,
+        "unrealizedPnlUsd": 1220.66788913043
+      }
+    ],
+    "optionsMarketValueUsd": 7733.49921413043
+  },
+  {
+    "date": "2021-10-25",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:115.8300:2021-11-22",
+        "type": "CALL",
+        "strike": 115.83,
+        "expiry": "2021-11-22",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.8310772500000003,
+        "openDate": "2021-08-30T16:00",
+        "costBasisUsd": 6512.831325,
+        "marketPrice": 4.7170734147058795,
+        "marketValueUsd": 8019.0248049999955,
+        "unrealizedPnlUsd": 1506.1934799999954
+      }
+    ],
+    "optionsMarketValueUsd": 8019.0248049999955
+  },
+  {
+    "date": "2021-11-01",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2021-11-09",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2021-11-16",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2021-11-23",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:120.6800:2022-02-16",
+        "type": "CALL",
+        "strike": 120.68,
+        "expiry": "2022-02-16",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.9914910000000003,
+        "openDate": "2021-11-23T16:00",
+        "costBasisUsd": 6785.534700000001,
+        "marketPrice": 3.9914910000000003,
+        "marketValueUsd": 6785.534700000001,
+        "unrealizedPnlUsd": 0
+      }
+    ],
+    "optionsMarketValueUsd": 6785.534700000001
+  },
+  {
+    "date": "2021-11-30",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:120.6800:2022-02-16",
+        "type": "CALL",
+        "strike": 120.68,
+        "expiry": "2022-02-16",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.9914910000000003,
+        "openDate": "2021-11-23T16:00",
+        "costBasisUsd": 6785.534700000001,
+        "marketPrice": 2.6834052089552234,
+        "marketValueUsd": 4561.788855223879,
+        "unrealizedPnlUsd": -2223.745844776122
+      }
+    ],
+    "optionsMarketValueUsd": 4561.788855223879
+  },
+  {
+    "date": "2021-12-07",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:120.6800:2022-02-16",
+        "type": "CALL",
+        "strike": 120.68,
+        "expiry": "2022-02-16",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.9914910000000003,
+        "openDate": "2021-11-23T16:00",
+        "costBasisUsd": 6785.534700000001,
+        "marketPrice": 2.951463472440944,
+        "marketValueUsd": 5017.487903149605,
+        "unrealizedPnlUsd": -1768.0467968503963
+      }
+    ],
+    "optionsMarketValueUsd": 5017.487903149605
+  },
+  {
+    "date": "2021-12-14",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:120.6800:2022-02-16",
+        "type": "CALL",
+        "strike": 120.68,
+        "expiry": "2022-02-16",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.9914910000000003,
+        "openDate": "2021-11-23T16:00",
+        "costBasisUsd": 6785.534700000001,
+        "marketPrice": 3.2087951999999986,
+        "marketValueUsd": 5454.951839999998,
+        "unrealizedPnlUsd": -1330.5828600000032
+      }
+    ],
+    "optionsMarketValueUsd": 5454.951839999998
+  },
+  {
+    "date": "2021-12-21",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2021-12-28",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-01-04",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-01-11",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-01-18",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-01-25",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-02-01",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-02-08",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-02-15",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-02-22",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-03-01",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-03-08",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-03-14",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-03-21",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-03-28",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-04-04",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-04-11",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-04-18",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-04-25",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-05-02",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-05-09",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-05-16",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-05-23",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-05-30",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-06-06",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-06-13",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-06-20",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-06-27",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-07-04",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-07-11",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-07-18",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-07-25",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-08-01",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-08-08",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-08-15",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-08-22",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-08-29",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-09-05",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-09-12",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-09-19",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-09-26",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-10-03",
+    "optionPositions": [],
+    "optionsMarketValueUsd": 0
+  },
+  {
+    "date": "2022-10-10",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:120.0600:2023-01-02",
+        "type": "CALL",
+        "strike": 120.06,
+        "expiry": "2023-01-02",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.9709845000000006,
+        "openDate": "2022-10-10T16:00",
+        "costBasisUsd": 6750.6736500000015,
+        "marketPrice": 3.9709845000000006,
+        "marketValueUsd": 6750.6736500000015,
+        "unrealizedPnlUsd": 0
+      }
+    ],
+    "optionsMarketValueUsd": 6750.6736500000015
+  },
+  {
+    "date": "2022-10-17",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:120.0600:2023-01-02",
+        "type": "CALL",
+        "strike": 120.06,
+        "expiry": "2023-01-02",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.9709845000000006,
+        "openDate": "2022-10-10T16:00",
+        "costBasisUsd": 6750.6736500000015,
+        "marketPrice": 2.6714685895522385,
+        "marketValueUsd": 4541.496602238805,
+        "unrealizedPnlUsd": -2209.1770477611963
+      }
+    ],
+    "optionsMarketValueUsd": 4541.496602238805
+  },
+  {
+    "date": "2022-10-24",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:120.0600:2023-01-02",
+        "type": "CALL",
+        "strike": 120.06,
+        "expiry": "2023-01-02",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.9709845000000006,
+        "openDate": "2022-10-10T16:00",
+        "costBasisUsd": 6750.6736500000015,
+        "marketPrice": 2.9399992086614164,
+        "marketValueUsd": 4997.998654724408,
+        "unrealizedPnlUsd": -1752.6749952755936
+      }
+    ],
+    "optionsMarketValueUsd": 4997.998654724408
+  },
+  {
+    "date": "2022-10-31",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:120.0600:2023-01-02",
+        "type": "CALL",
+        "strike": 120.06,
+        "expiry": "2023-01-02",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.9709845000000006,
+        "openDate": "2022-10-10T16:00",
+        "costBasisUsd": 6750.6736500000015,
+        "marketPrice": 3.1978583999999985,
+        "marketValueUsd": 5436.359279999998,
+        "unrealizedPnlUsd": -1314.3143700000037
+      }
+    ],
+    "optionsMarketValueUsd": 5436.359279999998
+  },
+  {
+    "date": "2022-11-08",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:120.0600:2023-01-02",
+        "type": "CALL",
+        "strike": 120.06,
+        "expiry": "2023-01-02",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.9709845000000006,
+        "openDate": "2022-10-10T16:00",
+        "costBasisUsd": 6750.6736500000015,
+        "marketPrice": 3.40760493243243,
+        "marketValueUsd": 5792.928385135131,
+        "unrealizedPnlUsd": -957.7452648648705
+      }
+    ],
+    "optionsMarketValueUsd": 5792.928385135131
+  },
+  {
+    "date": "2022-11-15",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:120.0600:2023-01-02",
+        "type": "CALL",
+        "strike": 120.06,
+        "expiry": "2023-01-02",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.9709845000000006,
+        "openDate": "2022-10-10T16:00",
+        "costBasisUsd": 6750.6736500000015,
+        "marketPrice": 3.632762076923074,
+        "marketValueUsd": 6175.695530769226,
+        "unrealizedPnlUsd": -574.9781192307755
+      }
+    ],
+    "optionsMarketValueUsd": 6175.695530769226
+  },
+  {
+    "date": "2022-11-22",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:120.0600:2023-01-02",
+        "type": "CALL",
+        "strike": 120.06,
+        "expiry": "2023-01-02",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.9709845000000006,
+        "openDate": "2022-10-10T16:00",
+        "costBasisUsd": 6750.6736500000015,
+        "marketPrice": 5.308457365979377,
+        "marketValueUsd": 9024.377522164941,
+        "unrealizedPnlUsd": 2273.7038721649396
+      }
+    ],
+    "optionsMarketValueUsd": 9024.377522164941
+  },
+  {
+    "date": "2022-11-29",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:120.0600:2023-01-02",
+        "type": "CALL",
+        "strike": 120.06,
+        "expiry": "2023-01-02",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.9709845000000006,
+        "openDate": "2022-10-10T16:00",
+        "costBasisUsd": 6750.6736500000015,
+        "marketPrice": 5.5001497,
+        "marketValueUsd": 9350.25449,
+        "unrealizedPnlUsd": 2599.580839999998
+      }
+    ],
+    "optionsMarketValueUsd": 9350.25449
+  },
+  {
+    "date": "2022-12-06",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:120.0600:2023-01-02",
+        "type": "CALL",
+        "strike": 120.06,
+        "expiry": "2023-01-02",
+        "contracts": 17,
+        "multiplier": 100,
+        "avgOpenPrice": 3.9709845000000006,
+        "openDate": "2022-10-10T16:00",
+        "costBasisUsd": 6750.6736500000015,
+        "marketPrice": 5.661766042168679,
+        "marketValueUsd": 9625.002271686755,
+        "unrealizedPnlUsd": 2874.3286216867536
+      }
+    ],
+    "optionsMarketValueUsd": 9625.002271686755
+  },
+  {
+    "date": "2022-12-13",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:124.8000:2023-03-08",
+        "type": "CALL",
+        "strike": 124.8,
+        "expiry": "2023-03-08",
+        "contracts": 24,
+        "multiplier": 100,
+        "avgOpenPrice": 4.12776,
+        "openDate": "2022-12-13T16:00",
+        "costBasisUsd": 9906.624000000002,
+        "marketPrice": 4.12776,
+        "marketValueUsd": 9906.624000000002,
+        "unrealizedPnlUsd": 0
+      }
+    ],
+    "optionsMarketValueUsd": 9906.624000000002
+  },
+  {
+    "date": "2022-12-20",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:124.8000:2023-03-08",
+        "type": "CALL",
+        "strike": 124.8,
+        "expiry": "2023-03-08",
+        "contracts": 24,
+        "multiplier": 100,
+        "avgOpenPrice": 4.12776,
+        "openDate": "2022-12-13T16:00",
+        "costBasisUsd": 9906.624000000002,
+        "marketPrice": 2.7727259701492586,
+        "marketValueUsd": 6654.542328358221,
+        "unrealizedPnlUsd": -3252.0816716417803
+      }
+    ],
+    "optionsMarketValueUsd": 6654.542328358221
+  },
+  {
+    "date": "2022-12-27",
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:124.8000:2023-03-08",
+        "type": "CALL",
+        "strike": 124.8,
+        "expiry": "2023-03-08",
+        "contracts": 24,
+        "multiplier": 100,
+        "avgOpenPrice": 4.12776,
+        "openDate": "2022-12-13T16:00",
+        "costBasisUsd": 9906.624000000002,
+        "marketPrice": 3.0576453543307087,
+        "marketValueUsd": 7338.348850393701,
+        "unrealizedPnlUsd": -2568.275149606301
+      }
+    ],
+    "optionsMarketValueUsd": 7338.348850393701
+  }
+]

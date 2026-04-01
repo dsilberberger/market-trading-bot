@@ -1,0 +1,228 @@
+{
+  "startingCapitalUSD": 250,
+  "maxPositions": 4,
+  "rebalanceDay": "WEDNESDAY",
+  "maxTradesPerRun": 6,
+  "maxPositionPct": 0.35,
+  "maxWeeklyDrawdownPct": 0.1,
+  "minCashPct": 0,
+  "maxNotionalTradedPctPerRun": 1,
+  "minHoldHours": 0,
+  "rebalance": {
+    "enabled": true,
+    "portfolioDriftThreshold": 0.05,
+    "positionDriftThreshold": 0.05,
+    "minTradeNotionalUSD": 25,
+    "alwaysRebalanceOnRegimeChange": true,
+    "regimeChangeKeys": [
+      "equityRegime.label",
+      "equityRegime.confidence",
+      "volRegime.label",
+      "ratesRegime.label"
+    ],
+    "fullExitRemovedSymbols": true,
+    "rebalanceDustSharesThreshold": 0
+  },
+  "dislocation": {
+    "enabled": true,
+    "anchorSymbol": "VTI",
+    "barInterval": "1w",
+    "fastWindowWeeks": 1,
+    "slowWindowWeeks": 4,
+    "peakLookbackWeeks": 26,
+    "minActiveTier": 2,
+    "tiers": [
+      {
+        "tier": 0,
+        "name": "inactive",
+        "peakDrawdownGte": 0,
+        "overlayExtraExposurePct": 0
+      },
+      {
+        "tier": 1,
+        "name": "mild",
+        "peakDrawdownGte": 0.1,
+        "overlayExtraExposurePct": 0.15
+      },
+      {
+        "tier": 2,
+        "name": "dislocation",
+        "peakDrawdownGte": 0.2,
+        "overlayExtraExposurePct": 0.3
+      },
+      {
+        "tier": 3,
+        "name": "capitulation",
+        "peakDrawdownGte": 0.3,
+        "overlayExtraExposurePct": 0.4
+      }
+    ],
+    "fastDrawdownEscalation": {
+      "enabled": true,
+      "tier2FastDrawdownGte": 0.12,
+      "tier3FastDrawdownGte": 0.18
+    },
+    "slowDrawdownEscalation": {
+      "enabled": true,
+      "tier2SlowDrawdownGte": 0.15,
+      "tier3SlowDrawdownGte": 0.25
+    },
+    "tierHysteresisPct": 0.02,
+    "minWeeksBetweenTierChanges": 1,
+    "durationWeeksAdd": 3,
+    "durationWeeksHold": 10,
+    "cooldownWeeks": 2,
+    "maxTotalExposureCapPct": 0.7,
+    "pacing": {
+      "tierMaxDeployPctOfOverlayPerWeek": {
+        "1": 0.5,
+        "2": 0.75,
+        "3": 1
+      }
+    },
+    "overlayTargets": [
+      {
+        "symbol": "VTI",
+        "weight": 0.7
+      },
+      {
+        "symbol": "VTV",
+        "weight": 0.3
+      }
+    ],
+    "overlayAllowedSymbols": [
+      "VTI",
+      "VTV",
+      "USMV"
+    ],
+    "overlayExposureKeys": [
+      "US_TOTAL_EQUITY",
+      "US_VALUE_EQUITY"
+    ],
+    "deploymentTargets": [],
+    "proxyOnlyOverlay": true,
+    "overlayFundingPolicy": "cash_only",
+    "overlayMinBudgetUSD": 200,
+    "overlayMinBudgetPolicy": "gate",
+    "overlayMinOneShareRule": true,
+    "sleeveTag": "dislocation",
+    "reintegrationMode": "passive",
+    "freezeBaseRebalanceDuringAddHold": true,
+    "earlyReentry": {
+      "enabled": true,
+      "reserveDeployPctOfCore": 0.15,
+      "minRet3": 0.006,
+      "minRet5": 0.01,
+      "minNonNegativeShare5": 0.8,
+      "offBottomPct": 0.012,
+      "minDaysSinceLow": 3,
+      "volCoolingPctOfPeak": 0.75
+    },
+    "earlyExit": {
+      "enabled": true,
+      "riskOffConfidenceThreshold": 0.7,
+      "requiresRiskOffLabel": true,
+      "deepDrawdownFailsafePct": 0.3
+    }
+  },
+  "policyGateMode": "scale",
+  "cadence": "weekly",
+  "round0MacroLagPolicy": "flags_warn",
+  "macroLagWarnDays": 45,
+  "macroLagErrorDays": 120,
+  "minExecutableNotionalUSD": 1,
+  "fractionalSharesSupported": true,
+  "allowExecutionProxies": true,
+  "capital": {
+    "corePct": 0.85,
+    "reservePct": 0.15,
+    "baseDeployPct": {
+      "risk_off": 0.35,
+      "neutral": 0.7,
+      "risk_on": 0.95,
+      "fallback": 0.5
+    },
+    "deployConfThreshold": 0.5,
+    "deployConfScaleLow": 0.95
+  },
+  "proxiesFile": "src/config/proxies_small.json",
+  "proxySelectionMode": "first_executable",
+  "maxProxyTrackingErrorAbs": 0.1,
+  "enableExposureGrouping": true,
+  "exposureGroupsFile": "src/config/exposure_groups_small.json",
+  "canonicalizeExposureGroups": true,
+  "canonicalizeOnlyInPhase": [
+    "REINTEGRATE"
+  ],
+  "canonicalizeMaxNotionalPctPerRun": 0.1,
+  "canonicalizeMinDriftToAct": 0.05,
+  "canonicalizeOnlyIfAffordable": true,
+  "dataAdequacy": {
+    "minHistorySamples": 30,
+    "minUniqueCloses": 8,
+    "action": "block"
+  },
+  "universeFile": "src/config/universe_small.json",
+  "baselinesEnabled": true,
+  "slippageBps": 5,
+  "commissionPerTradeUSD": 0,
+  "useLLM": true,
+  "requireApproval": true,
+  "optionsUnderlyings": [
+    "VTI",
+    "IEF"
+  ],
+  "hedgeProxyPolicy": {
+    "hedgePreferred": [
+      "VTI",
+      "IEF",
+      "USMV"
+    ],
+    "growthPreferred": [
+      "VTI",
+      "VTV"
+    ]
+  },
+  "confidenceCalibration": {
+    "anchorSymbol": "VTI",
+    "minHistoryDays": 120,
+    "coverageFloorConfidence": 0.55,
+    "proxyMap": {
+      "VTI": "ITOT",
+      "VXUS": "IXUS",
+      "USMV": "SPLV"
+    },
+    "timeInRegimeRamp": {
+      "minWeeks": 0,
+      "maxWeeks": 1,
+      "startProgress": 0,
+      "endProgress": 1
+    }
+  },
+  "insurance": {
+    "spendPct": 0,
+    "minMonths": 3,
+    "maxMonths": 6,
+    "minMoneyness": 0.95,
+    "maxMoneyness": 1,
+    "limitPriceBufferPct": 0.05,
+    "closeWithinDays": 21,
+    "allowExpire": false
+  },
+  "growth": {
+    "spendPct": 0.2,
+    "confidenceMin": 0.7,
+    "minTimeInRegimeWeeks": 3,
+    "initialTranchePct": 0.05,
+    "maxTotalPct": 0.12,
+    "minMonths": 5,
+    "maxMonths": 7,
+    "minMoneyness": 1.01,
+    "maxMoneyness": 1.04,
+    "limitPriceBufferPct": 0.05,
+    "closeWithinDays": 21,
+    "allowExpire": false
+  },
+  "uiPort": 8787,
+  "uiBind": "127.0.0.1"
+}

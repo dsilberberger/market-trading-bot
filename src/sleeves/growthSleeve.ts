@@ -50,16 +50,21 @@ export interface OptionChainProvider {
 
 export interface GrowthPlanResult {
   state: GrowthSleeveState;
-  plannedAction: 'OPEN' | 'CLOSE' | 'HOLD' | 'NONE';
+  plannedAction: 'OPEN' | 'CLOSE' | 'HOLD' | 'NONE' | 'ROLL';
   order?: any;
+  rollOrder?: any;
   reason?: string;
   reserveContext?: { reservePoolUsd: number; sleeveBudgetUsd: number; consumedUsd: number; availableUsd: number };
   flags: Array<{ code: string; severity: 'info' | 'warn' | 'error'; message: string; observed?: any }>;
 }
 
 const defaultState: GrowthSleeveState = { status: 'INACTIVE' };
+const DEFAULT_INITIAL_GROWTH_TRANCHE_PCT = 0.08;
+const DEFAULT_MAX_TOTAL_GROWTH_PCT = 0.18;
 
 const statePathForEnv = (env?: string, accountKey?: string) => {
+  const override = process.env.GROWTH_STATE_PATH;
+  if (override) return path.resolve(process.cwd(), override);
   const fname = ['growth_state', env || 'default', accountKey || 'default'].join('.') + '.json';
   return path.resolve(process.cwd(), 'data_cache', fname);
 };
@@ -159,12 +164,22 @@ export const planGrowthSleeve = async (input: GrowthPlannerInput): Promise<Growt
   } = input;
   const flags: GrowthPlanResult['flags'] = [];
   const state = loadGrowthState(env, accountKey);
-  const spendPct = config.growth?.spendPct ?? 0.2;
+  const initialTranchePct = config.growth?.initialTranchePct ?? DEFAULT_INITIAL_GROWTH_TRANCHE_PCT;
+  const maxTotalPct = config.growth?.maxTotalPct ?? DEFAULT_MAX_TOTAL_GROWTH_PCT;
+  const spendPct = Math.min(config.growth?.spendPct ?? maxTotalPct, maxTotalPct);
   const reservePool = reservePoolUsd ?? reserveBudget ?? 0;
   const sleeveBudget = reservePool * spendPct;
   const relevantPositions = (optionPositions || []).filter((p) => p.type === 'CALL');
+  const activeInsurancePosition = (optionPositions || []).some((p) => p.type === 'PUT' && (p.contracts || 0) > 0);
   const premiumForPosition = (p: OptionPositionSnapshot) => {
     const px = p.avgOpenPrice ?? p.marketPrice ?? 0;
+    const mult = p.multiplier ?? 100;
+    const contracts = p.contracts ?? 0;
+    return px * mult * contracts;
+  };
+  const marketValueForPosition = (p: OptionPositionSnapshot) => {
+    if (typeof p.marketValueUsd === 'number') return Math.max(0, p.marketValueUsd);
+    const px = p.marketPrice ?? p.avgOpenPrice ?? 0;
     const mult = p.multiplier ?? 100;
     const contracts = p.contracts ?? 0;
     return px * mult * contracts;
@@ -205,14 +220,55 @@ export const planGrowthSleeve = async (input: GrowthPlannerInput): Promise<Growt
     reserveContext: { reservePoolUsd: reservePool, sleeveBudgetUsd: sleeveBudget, consumedUsd: consumedReserve, availableUsd: availableReserve }
   };
 
-  if (!arbitratorAllowed) {
+  const buildOpenOrder = async (targetSpendUsd: number) => {
+    const underlyingSel = selectOptionsUnderlying('GROWTH', config);
+    if (!underlyingSel.symbol) {
+      result.reason = 'No underlying available';
+      return null;
+    }
+    const px = quotes[underlyingSel.symbol];
+    if (!px || px <= 0) {
+      result.reason = 'Underlying price unavailable';
+      return null;
+    }
+
+    const contract = await selectGrowthContract(underlyingSel.symbol, asOf, px, config, chainProvider);
+    if (!contract) {
+      result.reason = 'No contract available';
+      return null;
+    }
+
+    const perContractUsd = contract.premium * 100;
+    const maxSpend = Math.max(
+      0,
+      Math.min(targetSpendUsd, availableReserve, cashAvailable !== undefined ? cashAvailable : targetSpendUsd)
+    );
+    const contracts = Math.floor(maxSpend / perContractUsd);
+    if (contracts < 1) {
+      result.reason = 'Budget insufficient for 1 contract';
+      return null;
+    }
+
+    return {
+      contract,
+      contracts,
+      notional: perContractUsd * contracts,
+      order: buildBuyToOpenCall(contract, contracts, config)
+    };
+  };
+
+  if (!arbitratorAllowed || activeInsurancePosition) {
     if (workingState.status === 'DEPLOYED' && !sameDay) {
       result.plannedAction = 'CLOSE';
       result.order = stateToCloseOrder(workingState, config);
-      flags.push({ code: 'GROWTH_UNWIND_DUE_TO_ARBITRATOR', severity: 'info', message: 'Regime weakened; unwind.' });
+      flags.push({
+        code: activeInsurancePosition ? 'GROWTH_UNWIND_DUE_TO_INSURANCE' : 'GROWTH_UNWIND_DUE_TO_ARBITRATOR',
+        severity: 'info',
+        message: activeInsurancePosition ? 'Insurance active; unwind growth convexity.' : 'Regime weakened; unwind.'
+      });
       workingState.status = 'UNWINDING';
     } else {
-      result.reason = 'Growth not allowed';
+      result.reason = activeInsurancePosition ? 'Growth disabled while insurance is active' : 'Growth not allowed';
     }
     saveGrowthState(workingState, env, accountKey);
     return result;
@@ -232,9 +288,34 @@ export const planGrowthSleeve = async (input: GrowthPlannerInput): Promise<Growt
           flags.push({ code: 'GROWTH_NEAR_EXPIRY', severity: 'info', message: 'Call near expiry; allow to expire.' });
           result.plannedAction = 'HOLD';
         } else {
-          result.plannedAction = 'CLOSE';
-          result.order = stateToCloseOrder(workingState, config);
-          workingState.status = 'UNWINDING';
+          const rollTargetSpendUsd = Math.min(
+            sleeveBudget,
+            Math.max(
+              relevantPositions.reduce((sum, position) => sum + marketValueForPosition(position), 0),
+              reservePool * initialTranchePct
+            )
+          );
+          const roll = await buildOpenOrder(rollTargetSpendUsd);
+          if (roll) {
+            result.plannedAction = 'ROLL';
+            result.order = stateToCloseOrder(workingState, config);
+            result.rollOrder = roll.order;
+            workingState.openedRunId = runId;
+            workingState.openedAsOf = asOf;
+            workingState.underlying = roll.contract.symbol;
+            workingState.expiry = roll.contract.expiry;
+            workingState.strike = roll.contract.strike;
+            workingState.contracts = roll.contracts;
+            workingState.premiumUSD = roll.notional;
+            flags.push({
+              code: 'GROWTH_ROLL_PLANNED',
+              severity: 'info',
+              message: 'Growth convexity rolled forward while robust risk_on persists.',
+              observed: { targetSpendUsd: rollTargetSpendUsd, contracts: roll.contracts }
+            });
+          } else {
+            result.plannedAction = 'HOLD';
+          }
         }
       }
     }
@@ -242,48 +323,42 @@ export const planGrowthSleeve = async (input: GrowthPlannerInput): Promise<Growt
     return result;
   }
 
-  // Plan open
-  const underlyingSel = selectOptionsUnderlying('GROWTH', config);
-  if (!underlyingSel.symbol) {
-    result.reason = 'No underlying available';
-    return result;
-  }
-  const px = quotes[underlyingSel.symbol];
-  if (!px || px <= 0) {
-    result.reason = 'Underlying price unavailable';
+  const entryTargetSpendUsd = Math.min(reservePool * initialTranchePct, sleeveBudget);
+  const open = await buildOpenOrder(entryTargetSpendUsd);
+  if (!open) {
+    saveGrowthState(workingState, env, accountKey);
     return result;
   }
 
-  const contract = await selectGrowthContract(underlyingSel.symbol, asOf, px, config, chainProvider);
-  if (!contract) {
-    result.reason = 'No contract available';
-    return result;
-  }
-  const perContract = contract.premium;
-  const maxSpend = cashAvailable !== undefined ? Math.min(availableReserve, cashAvailable) : availableReserve;
-  const contracts = Math.floor(maxSpend / perContract);
-  if (contracts < 1) {
-    result.reason = 'Budget insufficient for 1 contract';
-    return result;
-  }
-
-  const notional = perContract * contracts;
   workingState.status = 'DEPLOYED';
   workingState.openedRunId = runId;
   workingState.openedAsOf = asOf;
-  workingState.underlying = contract.symbol;
-  workingState.expiry = contract.expiry;
-  workingState.strike = contract.strike;
-  workingState.contracts = contracts;
-  workingState.premiumUSD = notional;
+  workingState.underlying = open.contract.symbol;
+  workingState.expiry = open.contract.expiry;
+  workingState.strike = open.contract.strike;
+  workingState.contracts = open.contracts;
+  workingState.premiumUSD = open.notional;
 
   result.plannedAction = 'OPEN';
-  result.order = buildBuyToOpenCall(contract, contracts, config);
+  result.order = open.order;
+  result.reserveContext = {
+    ...result.reserveContext,
+    reservePoolUsd: reservePool,
+    sleeveBudgetUsd: sleeveBudget,
+    consumedUsd: consumedReserve,
+    availableUsd: availableReserve
+  };
   result.flags.push({
     code: 'GROWTH_OPEN_PLANNED',
     severity: 'info',
     message: 'Growth convexity opening',
-    observed: { notional, contracts, underlying: contract.symbol, strike: contract.strike, expiry: contract.expiry }
+    observed: {
+      notional: open.notional,
+      contracts: open.contracts,
+      underlying: open.contract.symbol,
+      strike: open.contract.strike,
+      expiry: open.contract.expiry
+    }
   });
   saveGrowthState(workingState, env, accountKey);
   return result;

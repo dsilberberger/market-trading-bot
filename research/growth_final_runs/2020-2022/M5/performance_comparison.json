@@ -1,0 +1,62 @@
+[
+  {
+    "label": "Current Strategy",
+    "type": "strategy",
+    "startEquity": 350000,
+    "endEquity": 442780.6823339313,
+    "totalReturnPct": 0.2650876638112323,
+    "maxDrawdownPct": 0.029079003165022512,
+    "annualizedVolatilityPct": 0.03687261653306915,
+    "annualizedReturnPct": 0.08237429972111987,
+    "peakDateBeforeMaxDrawdown": "2022-02-08",
+    "troughDate": "2022-05-30",
+    "recoveryDate": "2022-11-22",
+    "recoveryBars": 25,
+    "turnoverPct": 19.13029498258558
+  },
+  {
+    "label": "60/40 (VTI/BND)",
+    "type": "benchmark",
+    "startEquity": 350000,
+    "endEquity": 435683.4907354279,
+    "totalReturnPct": 0.24480997352979394,
+    "maxDrawdownPct": 0.19238518095808096,
+    "annualizedVolatilityPct": 0.08052621288494176,
+    "annualizedReturnPct": 0.07650266226263369,
+    "peakDateBeforeMaxDrawdown": "2020-02-25",
+    "troughDate": "2020-03-30",
+    "recoveryDate": "2020-10-26",
+    "recoveryBars": 30,
+    "turnoverPct": 1.4117273741404532
+  },
+  {
+    "label": "80/20 (VTI/BND)",
+    "type": "benchmark",
+    "startEquity": 350000,
+    "endEquity": 440352.13624777435,
+    "totalReturnPct": 0.2581489607079268,
+    "maxDrawdownPct": 0.26767994377190635,
+    "annualizedVolatilityPct": 0.11191139123136282,
+    "annualizedReturnPct": 0.08037219219293723,
+    "peakDateBeforeMaxDrawdown": "2020-02-25",
+    "troughDate": "2020-03-30",
+    "recoveryDate": "2020-12-22",
+    "recoveryBars": 38,
+    "turnoverPct": 1.2520164393080828
+  },
+  {
+    "label": "100% Equity (VTI/VXUS)",
+    "type": "benchmark",
+    "startEquity": 350000,
+    "endEquity": 440660.14422470774,
+    "totalReturnPct": 0.25902898349916503,
+    "maxDrawdownPct": 0.35649824794941565,
+    "annualizedVolatilityPct": 0.1512614333624705,
+    "annualizedReturnPct": 0.08062652068272835,
+    "peakDateBeforeMaxDrawdown": "2020-02-25",
+    "troughDate": "2020-03-30",
+    "recoveryDate": "2021-03-02",
+    "recoveryBars": 48,
+    "turnoverPct": 1.0023063753024313
+  }
+]

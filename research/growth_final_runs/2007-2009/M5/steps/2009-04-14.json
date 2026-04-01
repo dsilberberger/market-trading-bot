@@ -1,0 +1,206 @@
+{
+  "date": "2009-04-14",
+  "asOf": "2009-04-14T16:00",
+  "runId": "growth-final-2007-2009-M5-2009-04-14",
+  "runStatus": "completed",
+  "regime": "risk_on",
+  "confidence": 0.6563812757755838,
+  "exposureCap": 0.7,
+  "deployBudgetUsd": 220639.21949999998,
+  "targetAllocations": {
+    "IEF": 0.33602140772597333,
+    "TIP": 0.32602920902498345,
+    "SHY": 0.33794938324904317
+  },
+  "achievedAllocations": {
+    "IEF": 0.3357936368811297,
+    "TIP": 0.3264058118066667,
+    "SHY": 0.33780055131220366
+  },
+  "orders": [
+    {
+      "symbol": "USMV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 43627.69225636129,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VTV",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 33518.189410960265,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VTI",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 28720.002139867218,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    },
+    {
+      "symbol": "VXUS",
+      "side": "SELL",
+      "orderType": "MARKET",
+      "notionalUSD": 19843.369340422825,
+      "thesis": "Rebalance trim to target weight.",
+      "invalidation": "",
+      "confidence": 0.7,
+      "portfolioLevel": {
+        "targetHoldDays": 0,
+        "netExposureTarget": 1
+      }
+    }
+  ],
+  "holdingsAfterExecution": {
+    "cash": 126905.8839196217,
+    "holdings": [
+      {
+        "symbol": "IEF",
+        "quantity": 244.87756121939034,
+        "avgPrice": 87.54357491249999,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "USMV",
+        "quantity": 765.9994999997505,
+        "avgPrice": 63.60932346554088,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "VTV",
+        "quantity": 371.9935087062311,
+        "avgPrice": 83.3462595391836,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "VXUS",
+        "quantity": 483.7586201905292,
+        "avgPrice": 50.32311348346574,
+        "holdSince": "2007-07-25T06:00:00.000Z"
+      },
+      {
+        "symbol": "TIP",
+        "quantity": 199.98752948662724,
+        "avgPrice": 110.5658362905,
+        "holdSince": "2008-01-23T08:00:00.000Z"
+      },
+      {
+        "symbol": "SHY",
+        "quantity": 465.9915724758821,
+        "avgPrice": 51.49651538999999,
+        "holdSince": "2008-01-23T08:00:00.000Z"
+      },
+      {
+        "symbol": "VTI",
+        "quantity": 385.99949999987524,
+        "avgPrice": 71.80878228528,
+        "holdSince": "2008-02-06T08:00:00.000Z"
+      }
+    ],
+    "equity": 331834.8395785075,
+    "optionPositions": [
+      {
+        "underlying": "VTI",
+        "optionSymbol": "VTI:CALL:74.4042:2009-07-07",
+        "type": "CALL",
+        "strike": 74.404247,
+        "expiry": "2009-07-07",
+        "contracts": 21,
+        "multiplier": 100,
+        "avgOpenPrice": 2.460920469525,
+        "openDate": "2009-04-14T16:00",
+        "costBasisUsd": 5167.9329860025,
+        "marketPrice": 2.460920469525,
+        "marketValueUsd": 5167.9329860025,
+        "unrealizedPnlUsd": 0
+      }
+    ],
+    "optionsMarketValueUsd": 5167.9329860025
+  },
+  "optionCashEvents": [
+    {
+      "date": "2009-04-14",
+      "asOf": "2009-04-14T16:00",
+      "type": "OPT_CLOSE_CREDIT",
+      "amount": 2890.346376440326,
+      "reason": "growth_roll_close",
+      "symbol": "VTI",
+      "sleeve": "growth",
+      "positionId": "VTI:CALL:73.7379:2009-05-06",
+      "contracts": 21,
+      "strike": 73.737946,
+      "expiry": "2009-05-06"
+    },
+    {
+      "date": "2009-04-14",
+      "asOf": "2009-04-14T16:00",
+      "type": "OPT_OPEN_DEBIT",
+      "amount": -5167.9329860025,
+      "reason": "growth_open",
+      "symbol": "VTI",
+      "sleeve": "growth",
+      "positionId": "VTI:CALL:74.4042:2009-07-07",
+      "contracts": 21,
+      "strike": 74.404247,
+      "expiry": "2009-07-07"
+    }
+  ],
+  "capitalLanes": {
+    "coreCapitalUsd": 232284.38770495524,
+    "coreCashUsd": 32523.365032071917,
+    "coreHeadroomUsd": 32523.365032071917,
+    "executedDislocationCoreUsageUsd": 44300.24415485972,
+    "optionsReserveCapitalUsd": 99550.45187355226,
+    "optionsReserveCashUsd": 94382.51888754976,
+    "optionsReserveHeadroomUsd": 94382.51888754976
+  },
+  "executedOptionReserveUsageUsd": 5167.9329860025,
+  "executedReserveUsageUsd": 5167.9329860025,
+  "reserveUsageUsd": 5167.9329860025,
+  "plannedOptionReserveStateUsd": 0,
+  "plannedOptionReserveStateBySleeve": {
+    "insurancePremiumStateUsd": 0,
+    "growthPremiumStateUsd": 0
+  },
+  "sleeveTriggerEvents": [],
+  "dislocationState": {
+    "active": false,
+    "phase": "REINTEGRATE",
+    "postRiskOffEpisodeStartISO": "2007-07-25T06:00:00.000Z",
+    "postRiskOffTriggerCount": 1,
+    "currentTier": 0,
+    "lastTier": 3,
+    "lastTierChangeISO": "2008-08-06T06:00:00.000Z",
+    "triggeredAtISO": "2008-07-23T06:00:00.000Z",
+    "addUntilISO": "2008-08-13T06:00:00.000Z",
+    "holdUntilISO": "2008-10-22T06:00:00.000Z",
+    "reintegrateAfterISO": "2008-10-22T06:00:00.000Z",
+    "triggerReason": "post_risk_off_reentry",
+    "entryAnchorPrice": 76.126195,
+    "troughAnchorPrice": 65.755834,
+    "troughDateISO": "2008-07-23T06:00:00.000Z",
+    "cooldownUntilISO": "2008-11-05T07:00:00.000Z",
+    "postRiskOffTriggeredAtISO": "2008-07-23T06:00:00.000Z"
+  },
+  "artifactDir": "/Users/dsilberberger/trading-bot/runs/growth-final-2007-2009-M5-2009-04-14"
+}

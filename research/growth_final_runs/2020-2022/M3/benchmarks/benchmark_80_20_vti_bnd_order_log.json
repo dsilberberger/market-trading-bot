@@ -1,0 +1,218 @@
+[
+  {
+    "date": "2020-01-07",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 280000,
+    "quantity": 2800,
+    "reason": "initial_allocation"
+  },
+  {
+    "date": "2020-01-07",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 70000,
+    "quantity": 823.5294117647059,
+    "reason": "initial_allocation"
+  },
+  {
+    "date": "2020-04-06",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 20608.658823529382,
+    "quantity": 306.0388895683009,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2020-04-06",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "SELL",
+    "notionalUSD": 20608.65882352941,
+    "quantity": 232.81358815555143,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2020-07-06",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 10473.829808642407,
+    "quantity": 124.43661409816332,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2020-07-06",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 10473.829808642387,
+    "quantity": 118.37511085716983,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2020-10-05",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 3628.51628870551,
+    "quantity": 39.98805696170939,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2020-10-05",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 3628.516288705498,
+    "quantity": 40.7744273368412,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-01-05",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 5106.162316610151,
+    "quantity": 51.07183753360823,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-01-05",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 5106.162316610191,
+    "quantity": 57.02660617165725,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-04-05",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 3220.0887468286364,
+    "quantity": 30.315277224897727,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-04-05",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 3220.0887468286646,
+    "quantity": 35.72319444007837,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-07-05",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 3073.5808802006836,
+    "quantity": 27.369375602855598,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-07-05",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 3073.58088020077,
+    "quantity": 33.87239233194589,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-10-04",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 2940.120448756029,
+    "quantity": 24.880430301735032,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2021-10-04",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 2940.12044875604,
+    "quantity": 32.20638020326476,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-01-04",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 2130.630056402545,
+    "quantity": 17.34052296250138,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-01-04",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 2130.6300564025655,
+    "quantity": 23.161539910887768,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-04-04",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 5051.150852168917,
+    "quantity": 43.61584364190412,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-04-04",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "SELL",
+    "notionalUSD": 5051.150852168864,
+    "quantity": 54.034561961583904,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-07-04",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 2399.4361835885293,
+    "quantity": 21.196432717213156,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-07-04",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "SELL",
+    "notionalUSD": 2399.4361835885024,
+    "quantity": 25.31317843220279,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-10-03",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 3221.0393115614074,
+    "quantity": 26.909267431590706,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2022-10-03",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 3221.03931156143,
+    "quantity": 33.724628955726416,
+    "reason": "quarterly_rebalance"
+  }
+]

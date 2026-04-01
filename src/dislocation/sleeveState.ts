@@ -26,10 +26,14 @@ export interface DislocationSleeveState {
   postRiskOffTriggerCount?: number;
 }
 
-const statePath = path.resolve(process.cwd(), 'data_cache', 'dislocation_sleeve_state.json');
+const resolveStatePath = () =>
+  process.env.DISLOCATION_SLEEVE_STATE_PATH
+    ? path.resolve(process.cwd(), process.env.DISLOCATION_SLEEVE_STATE_PATH)
+    : path.resolve(process.cwd(), 'data_cache', 'dislocation_sleeve_state.json');
 
 export const loadSleeveState = (): DislocationSleeveState => {
   try {
+    const statePath = resolveStatePath();
     if (!fs.existsSync(statePath)) return { active: false, phase: 'INACTIVE' };
     return JSON.parse(fs.readFileSync(statePath, 'utf-8')) as DislocationSleeveState;
   } catch {
@@ -38,6 +42,7 @@ export const loadSleeveState = (): DislocationSleeveState => {
 };
 
 export const saveSleeveState = (s: DislocationSleeveState) => {
+  const statePath = resolveStatePath();
   fs.mkdirSync(path.dirname(statePath), { recursive: true });
   fs.writeFileSync(statePath, JSON.stringify(s, null, 2));
 };

@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "bot:run": "ts-node src/cli/run.ts",
+    "bot:replay": "ts-node src/cli/replay.ts",
     "bot:trade": "ts-node src/cli/trade.ts",
     "bot:dump": "ts-node src/cli/botDump.ts",
     "bot:report": "ts-node src/cli/report.ts",

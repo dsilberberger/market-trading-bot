@@ -1,0 +1,218 @@
+[
+  {
+    "date": "2007-01-02",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 280000,
+    "quantity": 2800,
+    "reason": "initial_allocation"
+  },
+  {
+    "date": "2007-01-02",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 70000,
+    "quantity": 823.5294117647059,
+    "reason": "initial_allocation"
+  },
+  {
+    "date": "2007-04-03",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 0.0008894117546650581,
+    "quantity": 0.000008779299150774023,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2007-04-03",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 0.000889411768939014,
+    "quantity": 0.000010328587563890324,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2007-07-03",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 0.0018563378908070757,
+    "quantity": 0.0000180871861630294,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2007-07-03",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "SELL",
+    "notionalUSD": 0.001856337865655314,
+    "quantity": 0.00002127904190274421,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2007-10-02",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 2986.8970986120257,
+    "quantity": 30.280397714356695,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2007-10-02",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "SELL",
+    "notionalUSD": 2986.8970986120785,
+    "quantity": 33.79654524058299,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2008-01-01",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 113.02064699960869,
+    "quantity": 1.1321140368636406,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2008-01-01",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "SELL",
+    "notionalUSD": 113.02064699950782,
+    "quantity": 1.261052551308353,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2008-04-01",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 26771.89577993962,
+    "quantity": 444.857240846462,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2008-04-01",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "SELL",
+    "notionalUSD": 26771.895779939594,
+    "quantity": 277.51447215244724,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2008-07-01",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 1595.7443822056412,
+    "quantity": 27.036986018955304,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2008-07-01",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "SELL",
+    "notionalUSD": 1595.744382205615,
+    "quantity": 16.198070862153997,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2008-10-07",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 7768.092685098048,
+    "quantity": 109.2956453169295,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2008-10-07",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 7768.092685098046,
+    "quantity": 78.45976952210708,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2009-01-06",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 0.0007150036082438165,
+    "quantity": 0.000009930101441568695,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2009-01-06",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 0.0007150036555738076,
+    "quantity": 0.000007128495667529933,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2009-04-07",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 931.0222206210499,
+    "quantity": 12.525538278497606,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2009-04-07",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 931.0222206210894,
+    "quantity": 9.171508008481851,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2009-07-07",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "SELL",
+    "notionalUSD": 718.0003631389142,
+    "quantity": 9.403424315987195,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2009-07-07",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "BUY",
+    "notionalUSD": 718.0003631388935,
+    "quantity": 6.988700669983359,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2009-10-06",
+    "requestedSymbol": "VTI",
+    "resolvedSymbol": "VTI",
+    "side": "BUY",
+    "notionalUSD": 0.0007288011147596117,
+    "quantity": 0.00000942165934247896,
+    "reason": "quarterly_rebalance"
+  },
+  {
+    "date": "2009-10-06",
+    "requestedSymbol": "BND",
+    "resolvedSymbol": "IEF",
+    "side": "SELL",
+    "notionalUSD": 0.0007288011074609504,
+    "quantity": 0.000007002252914389828,
+    "reason": "quarterly_rebalance"
+  }
+]

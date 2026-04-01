@@ -69,6 +69,31 @@ describe('Risk Engine', () => {
     expect(res.blockedReasons.join(' ')).toMatch(/Drawdown limit/);
   });
 
+  it('allows dislocation sleeve buys during drawdown breach', () => {
+    const intent: TradeIntent = {
+      asOf: '2025-12-20T00:00',
+      universe: ['SPY'],
+      orders: [
+        {
+          symbol: 'SPY',
+          side: 'BUY',
+          orderType: 'MARKET',
+          notionalUSD: 80,
+          thesis: 'Reserve-funded dislocation sleeve buy',
+          invalidation: 'Breaks support',
+          confidence: 0.6,
+          portfolioLevel: { targetHoldDays: 7, netExposureTarget: 1 },
+          sleeve: 'dislocation'
+        }
+      ]
+    };
+
+    const res = evaluateRisk(intent, config, portfolio, { drawdown: 0.2 });
+    expect(res.approved).toBe(true);
+    expect(res.approvedOrders).toHaveLength(1);
+    expect(res.approvedOrders[0].sleeve).toBe('dislocation');
+  });
+
   it('blocks when turnover cap exceeded', () => {
     const intent: TradeIntent = {
       asOf: '2025-12-20T00:00',

@@ -40,10 +40,14 @@ interface DislocationState {
   cooldownUntilISO?: string;
 }
 
-const statePath = path.resolve(process.cwd(), 'data_cache', 'dislocation_state.json');
+const resolveStatePath = () =>
+  process.env.DISLOCATION_STATE_PATH
+    ? path.resolve(process.cwd(), process.env.DISLOCATION_STATE_PATH)
+    : path.resolve(process.cwd(), 'data_cache', 'dislocation_state.json');
 
 const loadState = (): DislocationState => {
   try {
+    const statePath = resolveStatePath();
     if (!fs.existsSync(statePath)) return {};
     return JSON.parse(fs.readFileSync(statePath, 'utf-8'));
   } catch {
@@ -52,6 +56,7 @@ const loadState = (): DislocationState => {
 };
 
 const saveState = (s: DislocationState) => {
+  const statePath = resolveStatePath();
   fs.mkdirSync(path.dirname(statePath), { recursive: true });
   fs.writeFileSync(statePath, JSON.stringify(s, null, 2));
 };

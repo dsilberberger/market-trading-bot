@@ -14,6 +14,7 @@ import { ensureDir, loadUniverse, writeJSONFile, loadConfig } from '../core/util
 import { MarketDataProvider, PriceBar } from '../data/marketData.types';
 import { getMarketDataProvider } from '../data/marketData';
 import { getBroker } from '../broker/broker';
+import { Broker } from '../broker/broker.types';
 import { ETradeBroker } from '../broker/etrade/etradeBroker';
 import { ETradeClient } from '../integrations/etradeClient';
 import { getStatus } from '../broker/etrade/authService';
@@ -44,6 +45,8 @@ export interface ContextOptions {
   lookbackDays?: number;
   mode?: string;
   useExistingInputs?: boolean;
+  macroSeries?: MacroSeries[];
+  priorRegimeState?: { label?: string; timeInRegimeWeeks?: number };
 }
 
 const pctChange = (a: number, b: number) => {
@@ -843,7 +846,7 @@ export const generateBaseArtifacts = async (
   universe: string[],
   marketData: MarketDataProvider,
   options: ContextOptions = {},
-  brokerOverride?: ReturnType<typeof getBroker>
+  brokerOverride?: Broker
 ) => {
   const broker = brokerOverride ?? getBroker(config, marketData);
   const runDir = path.resolve(process.cwd(), 'runs', runId);
@@ -852,8 +855,10 @@ export const generateBaseArtifacts = async (
   let portfolio;
   let quotes: Record<string, number>;
   let history: Record<string, PriceBar[]>;
-  let fredSeries: MacroSeries[] | undefined;
-  const poolPolicy = { corePct: config.capital?.corePct ?? 0.7, reservePct: config.capital?.reservePct ?? 0.3 };
+  let fredSeries: MacroSeries[] | undefined = options.macroSeries
+    ? trimMacroSeries(options.macroSeries, asOf, MACRO_MONTHS_LIMIT)
+    : undefined;
+  const poolPolicy = { corePct: config.capital?.corePct ?? 0.85, reservePct: config.capital?.reservePct ?? 0.15 };
   const rounding = { mode: 'cents', method: 'round' };
   const providerTags = {
     marketDataProvider:
@@ -883,7 +888,7 @@ export const generateBaseArtifacts = async (
     portfolio = existing.portfolio;
     quotes = existing.quotes;
     history = existing.history || {};
-    fredSeries = existing.macro;
+    fredSeries = fredSeries ?? existing.macro;
   } else {
     let portfolioBroker = broker;
     const wantLivePortfolio =
@@ -1003,7 +1008,12 @@ export const generateBaseArtifacts = async (
   }
 
   // Capital pools artifact (round 0)
-  const nav = computeNav(portfolio.holdings || [], portfolio.cash || 0, quotes || {}).nav;
+  const nav = computeNav(
+    portfolio.holdings || [],
+    portfolio.cash || 0,
+    quotes || {},
+    portfolio.optionsMarketValueUsd || 0
+  ).nav;
   const corePoolUsd = Math.round(nav * poolPolicy.corePct * 100) / 100;
   const reservePoolUsd = Math.round(nav * poolPolicy.reservePct * 100) / 100;
   const capitalPools = {
@@ -1140,7 +1150,8 @@ export const generateBaseArtifacts = async (
     regimes: round2.regimes,
     features,
     config,
-    proxiesMap
+    proxiesMap,
+    prior: options.priorRegimeState
   });
   if (round2.regimes?.equityRegime) {
     round2.regimes.equityRegime.confidence = calibration.confidence;
