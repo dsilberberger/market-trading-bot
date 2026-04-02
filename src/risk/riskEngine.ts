@@ -24,6 +24,7 @@ export const evaluateRisk = (
   context: RiskContext
 ): RiskReport => {
   const blockedReasons: string[] = [];
+  const adjustments: NonNullable<RiskReport['adjustments']> = [];
   let effectiveOrders = intent.orders;
 
   if (context.drawdown >= config.maxWeeklyDrawdownPct) {
@@ -47,6 +48,53 @@ export const evaluateRisk = (
   const positionCount = countFuturePositions(effectiveOrders, portfolio);
   if (positionCount > config.maxPositions) {
     blockedReasons.push(`Max positions exceeded: ${positionCount} > ${config.maxPositions}`);
+  }
+
+  const positionSizeMode = config.postPlanRisk?.positionSize?.mode || 'block';
+  const requireFractionalSharesSupport = config.postPlanRisk?.positionSize?.requireFractionalSharesSupport ?? true;
+  if (
+    positionSizeMode === 'scale_to_limit' &&
+    (!requireFractionalSharesSupport || config.fractionalSharesSupported !== false)
+  ) {
+    const maxPositionNotional = portfolio.equity * config.maxPositionPct;
+    const heldNotionalBySymbol = new Map(
+      portfolio.holdings.map((holding) => [holding.symbol, holding.quantity * (holding.avgPrice || 0)])
+    );
+    const sellNotionalBySymbol = new Map<string, number>();
+    for (const order of effectiveOrders) {
+      if (order.side !== 'SELL') continue;
+      sellNotionalBySymbol.set(order.symbol, (sellNotionalBySymbol.get(order.symbol) || 0) + (order.notionalUSD || 0));
+    }
+
+    effectiveOrders = effectiveOrders
+      .map((order) => {
+        if (order.side !== 'BUY') return order;
+        const heldNotional = heldNotionalBySymbol.get(order.symbol) || 0;
+        const plannedSellNotional = sellNotionalBySymbol.get(order.symbol) || 0;
+        const notionalBeforeBuy = Math.max(0, heldNotional - plannedSellNotional);
+        const remainingRoom = Math.max(0, maxPositionNotional - notionalBeforeBuy);
+        if ((order.notionalUSD || 0) <= remainingRoom + 1e-9) return order;
+        if (remainingRoom <= 0) {
+          adjustments.push({
+            rule: 'POSITION_SIZE',
+            symbol: order.symbol,
+            beforeNotionalUSD: order.notionalUSD || 0,
+            afterNotionalUSD: 0
+          });
+          return null;
+        }
+        adjustments.push({
+          rule: 'POSITION_SIZE',
+          symbol: order.symbol,
+          beforeNotionalUSD: order.notionalUSD || 0,
+          afterNotionalUSD: remainingRoom
+        });
+        return {
+          ...order,
+          notionalUSD: remainingRoom
+        };
+      })
+      .filter((order): order is NonNullable<typeof order> => order !== null && (order.notionalUSD || 0) > 1e-9);
   }
 
   const sizeViolations = violatesPositionSize(effectiveOrders, portfolio.equity, config.maxPositionPct);
@@ -91,6 +139,9 @@ export const evaluateRisk = (
     approvedOrders: approved ? effectiveOrders : [],
     exposureSummary
   };
+  if (adjustments.length) {
+    riskReport.adjustments = adjustments;
+  }
 
   return riskReport;
 };

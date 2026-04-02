@@ -1,0 +1,84 @@
+{
+  "source": "nasdaq_quote_historical",
+  "sourceUrlTemplate": "https://api.nasdaq.com/api/quote/{symbol}/historical?assetclass=etf&fromdate=2016-01-01&limit=500&offset={offset}",
+  "fetchedAt": "2026-04-01T05:27:10.024Z",
+  "fromdate": "2016-01-01",
+  "outputFrequency": "1w",
+  "weeklyAnchor": "TUESDAY",
+  "adjusted": false,
+  "note": "Nasdaq historical quote API provided real external OHLC data, but not adjusted closes. close values are raw closes.",
+  "symbols": [
+    {
+      "symbol": "VTI",
+      "source": "nasdaq_quote_historical",
+      "adjusted": false,
+      "dailyRowsFetched": 2515,
+      "outputRowsWritten": 522,
+      "firstFetchedDate": "2016-03-31",
+      "lastFetchedDate": "2026-03-31"
+    },
+    {
+      "symbol": "VXUS",
+      "source": "nasdaq_quote_historical",
+      "adjusted": false,
+      "dailyRowsFetched": 2515,
+      "outputRowsWritten": 522,
+      "firstFetchedDate": "2016-03-31",
+      "lastFetchedDate": "2026-03-31"
+    },
+    {
+      "symbol": "VTV",
+      "source": "nasdaq_quote_historical",
+      "adjusted": false,
+      "dailyRowsFetched": 2515,
+      "outputRowsWritten": 522,
+      "firstFetchedDate": "2016-03-31",
+      "lastFetchedDate": "2026-03-31"
+    },
+    {
+      "symbol": "USMV",
+      "source": "nasdaq_quote_historical",
+      "adjusted": false,
+      "dailyRowsFetched": 2515,
+      "outputRowsWritten": 522,
+      "firstFetchedDate": "2016-03-31",
+      "lastFetchedDate": "2026-03-31"
+    },
+    {
+      "symbol": "SHY",
+      "source": "nasdaq_quote_historical",
+      "adjusted": false,
+      "dailyRowsFetched": 2515,
+      "outputRowsWritten": 522,
+      "firstFetchedDate": "2016-03-31",
+      "lastFetchedDate": "2026-03-31"
+    },
+    {
+      "symbol": "IEF",
+      "source": "nasdaq_quote_historical",
+      "adjusted": false,
+      "dailyRowsFetched": 2515,
+      "outputRowsWritten": 522,
+      "firstFetchedDate": "2016-03-31",
+      "lastFetchedDate": "2026-03-31"
+    },
+    {
+      "symbol": "TIP",
+      "source": "nasdaq_quote_historical",
+      "adjusted": false,
+      "dailyRowsFetched": 2515,
+      "outputRowsWritten": 522,
+      "firstFetchedDate": "2016-03-31",
+      "lastFetchedDate": "2026-03-31"
+    },
+    {
+      "symbol": "VEU",
+      "source": "nasdaq_quote_historical",
+      "adjusted": false,
+      "dailyRowsFetched": 2515,
+      "outputRowsWritten": 522,
+      "firstFetchedDate": "2016-03-31",
+      "lastFetchedDate": "2026-03-31"
+    }
+  ]
+}

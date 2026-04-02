@@ -93,10 +93,14 @@
     }
   },
   "policyGateMode": "scale",
-  "postPlanRisk": {
-    "positionSize": {
-      "mode": "scale_to_limit",
-      "requireFractionalSharesSupport": true
+  "policyExposureCap": {
+    "coarsePercentiles": {
+      "mode": "conditioned_risk_on",
+      "weakContextCapPct": 0.70,
+      "strongRiskOnCapPct": 0.85,
+      "strongRiskOnMinConfidence": 0.80,
+      "strongRiskOnRequireLowVol": true,
+      "strongRiskOnRequireLowTransitionRisk": true
     }
   },
   "cadence": "weekly",

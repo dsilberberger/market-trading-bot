@@ -93,6 +93,9 @@
     }
   },
   "policyGateMode": "scale",
+  "wholeSharePlanner": {
+    "mode": "subset_optimized_refined"
+  },
   "postPlanRisk": {
     "positionSize": {
       "mode": "scale_to_limit",

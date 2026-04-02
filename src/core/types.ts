@@ -131,6 +131,58 @@ export interface BotConfig {
     };
   };
   cadence: 'weekly' | 'hourly';
+  policyExposureCap?: {
+    coarsePercentiles?: {
+      mode?: 'hard_cap' | 'conditioned_risk_on';
+      weakContextCapPct?: number;
+      strongRiskOnCapPct?: number;
+      strongRiskOnMinConfidence?: number;
+      strongRiskOnRequireLowVol?: boolean;
+      strongRiskOnRequireLowTransitionRisk?: boolean;
+    };
+  };
+  regimeClassification?: {
+    equity?: {
+      mode?: 'baseline' | 'recovery_friendly';
+      riskOnMinAgreementScore?: number;
+      riskOnMinStabilityScore?: number;
+      allowHighVolRiskOnOverride?: boolean;
+      highVolRiskOnMinAgreementScore?: number;
+      highVolRiskOnMinStabilityScore?: number;
+      highVolRiskOnMinRet12w?: number;
+      highVolRiskOnMinRet24w?: number;
+      highVolRiskOnMinConfidence?: number;
+    };
+  };
+  wholeSharePlanner?: {
+    mode?: 'baseline' | 'subset_optimized' | 'subset_optimized_refined' | 'subset_optimized_composition';
+  };
+  postPlanRisk?: {
+    positionSize?: {
+      mode?: 'block' | 'scale_to_limit';
+      requireFractionalSharesSupport?: boolean;
+    };
+  };
+  reRiskAcceleration?: {
+    mode?: 'off' | 'risk_on_sequence_catchup';
+    minRiskOnWeeks?: number;
+    lowEquityAllocationThresholdPct?: number;
+    reserveSupplementPctPerWeek?: number;
+    maxReserveSupplementPct?: number;
+  };
+  coreCapacityFormation?: {
+    mode?: 'baseline' | 'risk_on_headroom_expansion';
+    minRiskOnWeeks?: number;
+    lowEquityAllocationThresholdPct?: number;
+    reserveHeadroomPctPerWeek?: number;
+    maxReserveHeadroomPct?: number;
+  };
+  favorableStatePersistence?: {
+    mode?: 'baseline' | 'risk_on_trim_buffer';
+    minRiskOnWeeks?: number;
+    lowEquityAllocationThresholdPct?: number;
+    maxPersistentOverweightPct?: number;
+  };
   policyGateMode?: 'scale' | 'block';
   round0MacroLagPolicy?: 'flags_warn' | 'summary_only';
   macroLagWarnDays?: number;
@@ -312,6 +364,12 @@ export interface RiskReport {
   approvedOrders: TradeOrder[];
   exposureSummary: RiskExposureSummary;
   policyApplied?: Record<string, unknown>;
+  adjustments?: Array<{
+    rule: 'POSITION_SIZE';
+    symbol: string;
+    beforeNotionalUSD: number;
+    afterNotionalUSD: number;
+  }>;
 }
 
 export interface ProposalResult {

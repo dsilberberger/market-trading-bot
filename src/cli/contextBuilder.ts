@@ -551,11 +551,35 @@ export const buildRegimes = (
   }
   const agreementScore = anchor?.agreementScore ?? 0;
   const stabilityScore = anchor?.stabilityScore ?? 0;
+  const regimeEquityCfg = cfg.regimeClassification?.equity;
+  const recoveryFriendlyRiskOn = regimeEquityCfg?.mode === 'recovery_friendly';
+  const riskOnMinAgreementScore = regimeEquityCfg?.riskOnMinAgreementScore ?? 2 / 3;
+  const riskOnMinStabilityScore = regimeEquityCfg?.riskOnMinStabilityScore ?? 0.58;
+  const allowHighVolRiskOnOverride = regimeEquityCfg?.allowHighVolRiskOnOverride ?? false;
+  const highVolRiskOnMinAgreementScore = regimeEquityCfg?.highVolRiskOnMinAgreementScore ?? 1;
+  const highVolRiskOnMinStabilityScore = regimeEquityCfg?.highVolRiskOnMinStabilityScore ?? 0.7;
+  const highVolRiskOnMinRet12w = regimeEquityCfg?.highVolRiskOnMinRet12w ?? 0.01;
+  const highVolRiskOnMinRet24w = regimeEquityCfg?.highVolRiskOnMinRet24w ?? 0.005;
+  const highVolRiskOnMinConfidence = regimeEquityCfg?.highVolRiskOnMinConfidence ?? 0.75;
+  const favorableUpside = ret12w > 0.005 && ret24w > 0;
+  const favorableDownside = ret12w < -0.005 && ret24w <= 0;
+  const highVolRiskOnOverride =
+    recoveryFriendlyRiskOn &&
+    allowHighVolRiskOnOverride &&
+    volScore > 0.7 &&
+    agreementScore >= highVolRiskOnMinAgreementScore &&
+    stabilityScore >= highVolRiskOnMinStabilityScore &&
+    ret12w > highVolRiskOnMinRet12w &&
+    ret24w > highVolRiskOnMinRet24w &&
+    equityConf >= highVolRiskOnMinConfidence;
   let equityLabel: 'risk_on' | 'risk_off' | 'neutral' = 'neutral';
-  if (volScore > 0.7) equityLabel = 'risk_off';
-  else if (agreementScore >= 2 / 3 && stabilityScore >= 0.58) {
-    if (ret12w > 0.005 && ret24w > 0) equityLabel = 'risk_on';
-    else if (ret12w < -0.005 && ret24w <= 0) equityLabel = 'risk_off';
+  if (volScore > 0.7 && !highVolRiskOnOverride) equityLabel = 'risk_off';
+  else if (agreementScore >= riskOnMinAgreementScore && stabilityScore >= riskOnMinStabilityScore && favorableUpside) {
+    equityLabel = 'risk_on';
+  } else if (highVolRiskOnOverride) {
+    equityLabel = 'risk_on';
+  } else if (agreementScore >= 2 / 3 && stabilityScore >= 0.58 && favorableDownside) {
+    equityLabel = 'risk_off';
   }
   const equityTransition = volBucket === 'unknown' || volScore > 0.7 ? 'elevated' : 'low';
 

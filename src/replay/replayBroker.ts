@@ -43,6 +43,7 @@ const cloneState = (state: ReplayBrokerState): ReplayBrokerState => ({
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const CONTRACT_MULTIPLIER = 100;
+const SELL_QUANTITY_TOLERANCE = 1e-6;
 
 const derivePositionId = (underlying: string, type: 'PUT' | 'CALL', strike: number, expiry: string) =>
   `${underlying}:${type}:${strike.toFixed(4)}:${expiry}`;
@@ -292,11 +293,29 @@ export class ReplayBroker implements Broker {
     return this.state.optionPositions.reduce((sum, position) => sum + position.costBasisUsd, 0);
   }
 
+  private reconcileReplaySellQuantity(order: TradeOrder, quotePrice: number, previewQuantity: number) {
+    if (order.side !== 'SELL') return previewQuantity;
+    const currentQty = this.state.holdings[order.symbol]?.quantity || 0;
+    if (currentQty <= 0 || quotePrice <= 0) return previewQuantity;
+    const quantityAtQuote = (order.notionalUSD || 0) / quotePrice;
+
+    // Rebalance sells are sized from current holdings at the unslipped quote.
+    // When replay applies sell-side slippage, the implied quantity can drift just
+    // above the held size even though the unslipped intent was valid. Clamp only
+    // in that narrow case; true oversells still fail downstream.
+    if (quantityAtQuote <= currentQty + SELL_QUANTITY_TOLERANCE && previewQuantity > currentQty) {
+      return currentQty;
+    }
+
+    return previewQuantity;
+  }
+
   async previewOrder(order: TradeOrder, asOf: string): Promise<OrderPreview> {
     const quote = await this.marketData.getQuote(order.symbol, asOf);
     const slip = order.side === 'BUY' ? 1 + this.config.slippageBps / 10000 : 1 - this.config.slippageBps / 10000;
     const price = quote.price * slip;
-    const quantity = price > 0 ? order.notionalUSD / price : 0;
+    const rawQuantity = price > 0 ? order.notionalUSD / price : 0;
+    const quantity = this.reconcileReplaySellQuantity(order, quote.price, rawQuantity);
     return {
       symbol: order.symbol,
       quantity,

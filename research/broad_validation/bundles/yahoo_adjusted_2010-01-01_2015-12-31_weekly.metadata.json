@@ -1,0 +1,58 @@
+{
+  "canonical": false,
+  "approximate": true,
+  "adjustedData": true,
+  "sourceName": "yahoo_chart",
+  "symbolsRequested": [
+    "VTI",
+    "VXUS",
+    "VTV",
+    "USMV",
+    "SHY",
+    "IEF",
+    "TIP"
+  ],
+  "symbolsActuallyUsed": [
+    "75% VTV + 25% SHY",
+    "IEF",
+    "SHY",
+    "TIP",
+    "USMV",
+    "VEU",
+    "VTI",
+    "VTV",
+    "VXUS"
+  ],
+  "substitutionsUsed": [
+    {
+      "symbol": "VXUS",
+      "sourceKind": "proxy_rebased",
+      "sourceSymbol": "VEU",
+      "proxyStartDate": "2009-05-07",
+      "proxyEndDate": "2011-01-20",
+      "cutoverDate": "2011-01-24",
+      "approximate": true,
+      "notes": "VEU history is rebased into VXUS until the first real VXUS bar in the bundle."
+    },
+    {
+      "symbol": "USMV",
+      "sourceKind": "synthetic_weighted_returns",
+      "sourceSymbol": "75% VTV + 25% SHY",
+      "proxyStartDate": "2009-05-07",
+      "proxyEndDate": "2011-10-13",
+      "cutoverDate": "2011-10-17",
+      "approximate": true,
+      "notes": "Synthetic weighted-return history is used for USMV until the first real USMV bar in the bundle."
+    }
+  ],
+  "coverageStart": "2009-05-07",
+  "coverageEnd": "2015-12-31",
+  "windowStart": "2010-01-01",
+  "windowEnd": "2015-12-31",
+  "preRollBars": 35,
+  "interval": "1wk",
+  "notes": [
+    "Bundle uses adjusted close for replay quotes and history.",
+    "Bundle is approximate because it includes explicit proxy/synthetic history for missing pre-inception symbols."
+  ]
+}

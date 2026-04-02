@@ -58,6 +58,37 @@ const buildSeries = (anchorReturns: number[]) => {
   return { dates, series };
 };
 
+const buildSeriesFromSymbolReturns = (returnsBySymbol: Record<string, number[]>) => {
+  const symbols = UNIVERSE.filter((symbol) => returnsBySymbol[symbol]);
+  const lengths = new Set(symbols.map((symbol) => returnsBySymbol[symbol].length));
+  if (symbols.length !== UNIVERSE.length || lengths.size !== 1) {
+    throw new Error('buildSeriesFromSymbolReturns requires one equal-length return series per universe symbol');
+  }
+
+  const dates = weeklyDates(returnsBySymbol[symbols[0]].length + 1);
+  const prices: Record<string, number> = {
+    VTI: 100,
+    VXUS: 60,
+    VTV: 80,
+    USMV: 70,
+    SHY: 82,
+    IEF: 95,
+    TIP: 110
+  };
+  const series = Object.fromEntries(
+    UNIVERSE.map((symbol) => [symbol, [{ date: dates[0], close: prices[symbol] }]])
+  ) as HistoricalReplayInput['series'];
+
+  for (let i = 1; i < dates.length; i++) {
+    for (const symbol of UNIVERSE) {
+      prices[symbol] = prices[symbol] * (1 + returnsBySymbol[symbol][i - 1]);
+      series[symbol].push({ date: dates[i], close: Number(prices[symbol].toFixed(6)) });
+    }
+  }
+
+  return { dates, series };
+};
+
 const makeOutputDir = (name: string) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), `${name}-`));
   tmpDirs.push(dir);
@@ -76,6 +107,26 @@ const buildInput = (anchorReturns: number[], startIndex: number, endIndex: numbe
       end: dates[endIndex]
     },
     startingCash: 5000
+  };
+};
+
+const buildInputFromSymbolReturns = (
+  returnsBySymbol: Record<string, number[]>,
+  startIndex: number,
+  endIndex: number,
+  startingCash = 5000
+): HistoricalReplayInput => {
+  const { dates, series } = buildSeriesFromSymbolReturns(returnsBySymbol);
+  return {
+    series,
+    universe: UNIVERSE,
+    calendarSymbol: 'VTI',
+    barFrequency: '1w',
+    dateRange: {
+      start: dates[startIndex],
+      end: dates[endIndex]
+    },
+    startingCash
   };
 };
 
@@ -154,6 +205,22 @@ const insurancePosition = (positions: OptionPosition[] | undefined) =>
 
 const growthPosition = (positions: OptionPosition[] | undefined) =>
   (positions || []).find((position) => position.type === 'CALL');
+
+const isBaseOrder = (order: { sleeve?: string | null }) => !order.sleeve || order.sleeve === 'base';
+
+const buildCoreRotationReturns = () => {
+  const warm = 36;
+  const shift = 12;
+  return {
+    VTI: Array(warm).fill(0.01).concat(Array(shift).fill(0.01)),
+    VXUS: Array(warm).fill(0.009).concat(Array(shift).fill(-0.02)),
+    VTV: Array(warm).fill(0.008).concat(Array(shift).fill(-0.01)),
+    USMV: Array(warm).fill(0.007).concat(Array(shift).fill(0)),
+    SHY: Array(warm).fill(0.00005).concat(Array(shift).fill(0.015)),
+    IEF: Array(warm).fill(-0.0002).concat(Array(shift).fill(0.02)),
+    TIP: Array(warm).fill(0.003).concat(Array(shift).fill(0.018))
+  };
+};
 
 describe('historical replay harness', () => {
   afterAll(() => {
@@ -320,6 +387,97 @@ describe('historical replay harness', () => {
       expect(result.steps[0].holdingsAfterExecution.holdings.length).toBeGreaterThan(0);
       expect(result.steps[1].orders).toHaveLength(0);
       expect(result.steps[1].holdingsAfterExecution.holdings).toEqual(result.steps[0].holdingsAfterExecution.holdings);
+    },
+    60000
+  );
+
+  it(
+    'records executed core rebalance sells and buys when targets change over time',
+    async () => {
+      const result = await runHistoricalReplay({
+        input: buildInputFromSymbolReturns(buildCoreRotationReturns(), 35, 47, 50000),
+        configPath: writeReplayConfig('replay-core-rebalance-executed-config', (config) => {
+          config.maxWeeklyDrawdownPct = 1;
+          config.requireApproval = false;
+          config.dislocation = {
+            ...(config.dislocation || {}),
+            enabled: false
+          };
+        }),
+        outputDir: makeOutputDir('replay-core-rebalance-executed'),
+        runPrefix: 'replay-core-rebalance-executed'
+      });
+
+      collectRunDirs(result);
+
+      const baselineIndex = result.steps.findIndex((step) => Object.keys(step.targetAllocations).length > 0);
+      const rebalanceIndex = result.steps.findIndex(
+        (step, index) =>
+          index > 0 &&
+          step.orders.some((order) => order.side === 'SELL' && isBaseOrder(order)) &&
+          step.orders.some((order) => order.side === 'BUY' && isBaseOrder(order))
+      );
+
+      expect(baselineIndex).toBeGreaterThanOrEqual(0);
+      expect(rebalanceIndex).toBeGreaterThan(baselineIndex);
+      if (baselineIndex < 0 || rebalanceIndex <= baselineIndex) return;
+
+      const baselineStep = result.steps[baselineIndex];
+      const rebalanceStep = result.steps[rebalanceIndex];
+      const rebalanceOrderLog = result.orderLog.filter((entry) => entry.runId === rebalanceStep.runId);
+
+      expect(rebalanceStep.targetAllocations).not.toEqual(baselineStep.targetAllocations);
+      expect(rebalanceStep.orders.some((order) => order.side === 'SELL' && isBaseOrder(order))).toBe(true);
+      expect(rebalanceStep.orders.some((order) => order.side === 'BUY' && isBaseOrder(order))).toBe(true);
+      expect(rebalanceStep.holdingsAfterExecution.holdings).not.toEqual(baselineStep.holdingsAfterExecution.holdings);
+      expect(rebalanceOrderLog.some((entry) => entry.order.side === 'SELL' && isBaseOrder(entry.order))).toBe(true);
+      expect(rebalanceOrderLog.some((entry) => entry.order.side === 'BUY' && isBaseOrder(entry.order))).toBe(true);
+    },
+    60000
+  );
+
+  it(
+    'rotates ETFs in replay holdings and achieved allocations when the target mix changes',
+    async () => {
+      const result = await runHistoricalReplay({
+        input: buildInputFromSymbolReturns(buildCoreRotationReturns(), 35, 47, 50000),
+        configPath: writeReplayConfig('replay-core-rotation-config', (config) => {
+          config.maxWeeklyDrawdownPct = 1;
+          config.requireApproval = false;
+          config.dislocation = {
+            ...(config.dislocation || {}),
+            enabled: false
+          };
+        }),
+        outputDir: makeOutputDir('replay-core-rotation'),
+        runPrefix: 'replay-core-rotation'
+      });
+
+      collectRunDirs(result);
+
+      const rotationIndex = result.steps.findIndex(
+        (step, index) =>
+          index > 0 &&
+          step.orders.some((order) => order.symbol === 'TIP' && order.side === 'BUY' && isBaseOrder(order))
+      );
+
+      expect(rotationIndex).toBeGreaterThan(0);
+      if (rotationIndex <= 0) return;
+
+      const priorStep = result.steps[rotationIndex - 1];
+      const rotationStep = result.steps[rotationIndex];
+      const priorHoldings = new Map(
+        priorStep.holdingsAfterExecution.holdings.map((holding) => [holding.symbol, holding.quantity])
+      );
+      const rotationHoldings = new Map(
+        rotationStep.holdingsAfterExecution.holdings.map((holding) => [holding.symbol, holding.quantity])
+      );
+
+      expect(priorHoldings.has('TIP')).toBe(false);
+      expect((rotationHoldings.get('TIP') || 0)).toBeGreaterThan(0);
+      expect((rotationHoldings.get('VXUS') || 0)).toBeLessThan(priorHoldings.get('VXUS') || 0);
+      expect(rotationStep.targetAllocations.TIP || 0).toBeGreaterThan(0);
+      expect(rotationStep.achievedAllocations.TIP || 0).toBeGreaterThan(0);
     },
     60000
   );

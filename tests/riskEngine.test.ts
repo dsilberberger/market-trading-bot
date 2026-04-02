@@ -126,6 +126,130 @@ describe('Risk Engine', () => {
     expect(res.blockedReasons.join(' ')).toMatch(/Turnover/);
   });
 
+  it('scales borderline-valid buys to the max position limit under the experimental variant', () => {
+    const scaledConfig: BotConfig = {
+      ...config,
+      fractionalSharesSupported: true,
+      postPlanRisk: {
+        positionSize: {
+          mode: 'scale_to_limit',
+          requireFractionalSharesSupport: true
+        }
+      }
+    };
+    const intent: TradeIntent = {
+      asOf: '2025-12-20T00:00',
+      universe: ['SPY', 'QQQ'],
+      orders: [
+        {
+          symbol: 'SPY',
+          side: 'BUY',
+          orderType: 'MARKET',
+          notionalUSD: 90,
+          thesis: 'Borderline',
+          invalidation: 'Test',
+          confidence: 0.6,
+          portfolioLevel: { targetHoldDays: 7, netExposureTarget: 1 }
+        },
+        {
+          symbol: 'QQQ',
+          side: 'BUY',
+          orderType: 'MARKET',
+          notionalUSD: 30,
+          thesis: 'Companion',
+          invalidation: 'Test',
+          confidence: 0.6,
+          portfolioLevel: { targetHoldDays: 7, netExposureTarget: 1 }
+        }
+      ]
+    };
+
+    const baseline = evaluateRisk(intent, config, portfolio, { drawdown: 0 });
+    const scaled = evaluateRisk(intent, scaledConfig, portfolio, { drawdown: 0 });
+
+    expect(baseline.approved).toBe(false);
+    expect(baseline.blockedReasons.join(' ')).toMatch(/Position size too large/);
+    expect(scaled.approved).toBe(true);
+    expect(scaled.approvedOrders.find((order) => order.symbol === 'SPY')?.notionalUSD).toBeCloseTo(87.5, 6);
+    expect(scaled.approvedOrders.find((order) => order.symbol === 'QQQ')?.notionalUSD).toBe(30);
+    expect(scaled.adjustments).toEqual([
+      {
+        rule: 'POSITION_SIZE',
+        symbol: 'SPY',
+        beforeNotionalUSD: 90,
+        afterNotionalUSD: 87.5
+      }
+    ]);
+  });
+
+  it('applies deterministic position-size scaling for repeated evaluations', () => {
+    const scaledConfig: BotConfig = {
+      ...config,
+      fractionalSharesSupported: true,
+      postPlanRisk: {
+        positionSize: {
+          mode: 'scale_to_limit',
+          requireFractionalSharesSupport: true
+        }
+      }
+    };
+    const intent: TradeIntent = {
+      asOf: '2025-12-20T00:00',
+      universe: ['SPY'],
+      orders: [
+        {
+          symbol: 'SPY',
+          side: 'BUY',
+          orderType: 'MARKET',
+          notionalUSD: 90,
+          thesis: 'Borderline',
+          invalidation: 'Test',
+          confidence: 0.6,
+          portfolioLevel: { targetHoldDays: 7, netExposureTarget: 1 }
+        }
+      ]
+    };
+
+    const first = evaluateRisk(intent, scaledConfig, portfolio, { drawdown: 0 });
+    const second = evaluateRisk(intent, scaledConfig, portfolio, { drawdown: 0 });
+
+    expect(second).toEqual(first);
+  });
+
+  it('still blocks clearly unsafe contexts like drawdown breaches under the experimental variant', () => {
+    const scaledConfig: BotConfig = {
+      ...config,
+      fractionalSharesSupported: true,
+      postPlanRisk: {
+        positionSize: {
+          mode: 'scale_to_limit',
+          requireFractionalSharesSupport: true
+        }
+      }
+    };
+    const intent: TradeIntent = {
+      asOf: '2025-12-20T00:00',
+      universe: ['SPY'],
+      orders: [
+        {
+          symbol: 'SPY',
+          side: 'BUY',
+          orderType: 'MARKET',
+          notionalUSD: 10,
+          thesis: 'Add',
+          invalidation: 'Test',
+          confidence: 0.6,
+          portfolioLevel: { targetHoldDays: 7, netExposureTarget: 1 }
+        }
+      ]
+    };
+
+    const res = evaluateRisk(intent, scaledConfig, portfolio, { drawdown: 0.2 });
+
+    expect(res.approved).toBe(false);
+    expect(res.blockedReasons.join(' ')).toMatch(/Drawdown limit/);
+  });
+
   it('blocks when min hold hours not satisfied', () => {
     const recent = new Date('2025-12-19T12:00:00Z').toISOString();
     const heldPortfolio: PortfolioState = {

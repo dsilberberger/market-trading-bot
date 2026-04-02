@@ -32,10 +32,10 @@
     "peakLookbackWeeks": 26,
     "minActiveTier": 2,
     "tiers": [
-      { "tier": 0, "name": "inactive",     "peakDrawdownGte": 0.00, "overlayExtraExposurePct": 0.00 },
-      { "tier": 1, "name": "mild",         "peakDrawdownGte": 0.10, "overlayExtraExposurePct": 0.15 },
-      { "tier": 2, "name": "dislocation",  "peakDrawdownGte": 0.20, "overlayExtraExposurePct": 0.30 },
-      { "tier": 3, "name": "capitulation", "peakDrawdownGte": 0.30, "overlayExtraExposurePct": 0.40 }
+      { "tier": 0, "name": "inactive", "peakDrawdownGte": 0.0, "overlayExtraExposurePct": 0.0 },
+      { "tier": 1, "name": "mild", "peakDrawdownGte": 0.1, "overlayExtraExposurePct": 0.15 },
+      { "tier": 2, "name": "dislocation", "peakDrawdownGte": 0.2, "overlayExtraExposurePct": 0.3 },
+      { "tier": 3, "name": "capitulation", "peakDrawdownGte": 0.3, "overlayExtraExposurePct": 0.4 }
     ],
     "fastDrawdownEscalation": {
       "enabled": true,
@@ -52,17 +52,17 @@
     "durationWeeksAdd": 3,
     "durationWeeksHold": 10,
     "cooldownWeeks": 2,
-    "maxTotalExposureCapPct": 0.70,
+    "maxTotalExposureCapPct": 0.7,
     "pacing": {
       "tierMaxDeployPctOfOverlayPerWeek": {
-        "1": 0.50,
+        "1": 0.5,
         "2": 0.75,
-        "3": 1.00
+        "3": 1.0
       }
     },
     "overlayTargets": [
-      { "symbol": "VTI", "weight": 0.70 },
-      { "symbol": "VTV", "weight": 0.30 }
+      { "symbol": "VTI", "weight": 0.7 },
+      { "symbol": "VTV", "weight": 0.3 }
     ],
     "overlayAllowedSymbols": ["VTI", "VTV", "USMV"],
     "overlayExposureKeys": ["US_TOTAL_EQUITY", "US_VALUE_EQUITY"],
@@ -79,17 +79,17 @@
       "enabled": true,
       "reserveDeployPctOfCore": 0.15,
       "minRet3": 0.006,
-      "minRet5": 0.010,
-      "minNonNegativeShare5": 0.80,
+      "minRet5": 0.01,
+      "minNonNegativeShare5": 0.8,
       "offBottomPct": 0.012,
       "minDaysSinceLow": 3,
       "volCoolingPctOfPeak": 0.75
     },
     "earlyExit": {
       "enabled": true,
-      "riskOffConfidenceThreshold": 0.70,
+      "riskOffConfidenceThreshold": 0.7,
       "requiresRiskOffLabel": true,
-      "deepDrawdownFailsafePct": 0.30
+      "deepDrawdownFailsafePct": 0.3
     }
   },
   "policyGateMode": "scale",
@@ -97,6 +97,19 @@
     "positionSize": {
       "mode": "scale_to_limit",
       "requireFractionalSharesSupport": true
+    }
+  },
+  "regimeClassification": {
+    "equity": {
+      "mode": "recovery_friendly",
+      "riskOnMinAgreementScore": 0.6666666666666666,
+      "riskOnMinStabilityScore": 0.52,
+      "allowHighVolRiskOnOverride": true,
+      "highVolRiskOnMinAgreementScore": 1,
+      "highVolRiskOnMinStabilityScore": 0.7,
+      "highVolRiskOnMinRet12w": 0.01,
+      "highVolRiskOnMinRet24w": 0.005,
+      "highVolRiskOnMinConfidence": 0.75
     }
   },
   "cadence": "weekly",
@@ -109,12 +122,12 @@
   "capital": {
     "corePct": 0.85,
     "reservePct": 0.15,
-  "baseDeployPct": {
-    "risk_off": 0.35,
-    "neutral": 0.7,
-    "risk_on": 0.95,
-    "fallback": 0.5
-  },
+    "baseDeployPct": {
+      "risk_off": 0.35,
+      "neutral": 0.7,
+      "risk_on": 0.95,
+      "fallback": 0.5
+    },
     "deployConfThreshold": 0.5,
     "deployConfScaleLow": 0.95
   },
@@ -125,7 +138,7 @@
   "exposureGroupsFile": "src/config/exposure_groups_small.json",
   "canonicalizeExposureGroups": true,
   "canonicalizeOnlyInPhase": ["REINTEGRATE"],
-  "canonicalizeMaxNotionalPctPerRun": 0.10,
+  "canonicalizeMaxNotionalPctPerRun": 0.1,
   "canonicalizeMinDriftToAct": 0.05,
   "canonicalizeOnlyIfAffordable": true,
   "dataAdequacy": {
@@ -171,7 +184,7 @@
     "allowExpire": false
   },
   "growth": {
-    "spendPct": 0.20,
+    "spendPct": 0.2,
     "confidenceMin": 0.6,
     "minTimeInRegimeWeeks": 2,
     "initialTranchePct": 0.08,
@@ -179,7 +192,7 @@
     "minMonths": 3,
     "maxMonths": 6,
     "minMoneyness": 1.03,
-    "maxMoneyness": 1.10,
+    "maxMoneyness": 1.1,
     "limitPriceBufferPct": 0.05,
     "closeWithinDays": 21,
     "allowExpire": false

@@ -1,0 +1,138 @@
+{
+  "sourceName": "yahoo_chart",
+  "sourceUrlTemplate": "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?period1={period1}&period2={period2}&interval={interval}&events=div%2Csplits&includeAdjustedClose=true",
+  "fetchedAt": "2026-04-01T05:50:42.643Z",
+  "requestedSymbols": [
+    "IEF",
+    "SHY",
+    "TIP",
+    "USMV",
+    "VEU",
+    "VTI",
+    "VTV",
+    "VXUS"
+  ],
+  "symbolsFetched": [
+    "IEF",
+    "SHY",
+    "TIP",
+    "USMV",
+    "VEU",
+    "VTI",
+    "VTV",
+    "VXUS"
+  ],
+  "interval": "1wk",
+  "requestDateRange": {
+    "start": "2009-01-01",
+    "end": "2015-12-31"
+  },
+  "coverageStart": "2009-01-01",
+  "coverageEnd": "2015-12-31",
+  "symbolSubstitutions": [
+    {
+      "requestedSymbol": "VXUS",
+      "sourceSymbol": "VEU",
+      "reason": "Needed as an explicit pre-inception real proxy for early VXUS history."
+    },
+    {
+      "requestedSymbol": "USMV",
+      "sourceSymbol": "75% VTV + 25% SHY",
+      "reason": "Needed as an explicit synthetic weighted-return fallback before USMV inception."
+    }
+  ],
+  "symbols": [
+    {
+      "symbol": "IEF",
+      "sourceSymbol": "IEF",
+      "sourceName": "yahoo_chart",
+      "interval": "1wk",
+      "rowCount": 366,
+      "coverageStart": "2009-01-01",
+      "coverageEnd": "2015-12-31",
+      "dividendEventCount": 84,
+      "splitEventCount": 0
+    },
+    {
+      "symbol": "SHY",
+      "sourceSymbol": "SHY",
+      "sourceName": "yahoo_chart",
+      "interval": "1wk",
+      "rowCount": 366,
+      "coverageStart": "2009-01-01",
+      "coverageEnd": "2015-12-31",
+      "dividendEventCount": 83,
+      "splitEventCount": 0
+    },
+    {
+      "symbol": "TIP",
+      "sourceSymbol": "TIP",
+      "sourceName": "yahoo_chart",
+      "interval": "1wk",
+      "rowCount": 366,
+      "coverageStart": "2009-01-01",
+      "coverageEnd": "2015-12-31",
+      "dividendEventCount": 57,
+      "splitEventCount": 0
+    },
+    {
+      "symbol": "USMV",
+      "sourceSymbol": "USMV",
+      "sourceName": "yahoo_chart",
+      "interval": "1wk",
+      "rowCount": 220,
+      "coverageStart": "2011-10-17",
+      "coverageEnd": "2015-12-28",
+      "dividendEventCount": 18,
+      "splitEventCount": 0
+    },
+    {
+      "symbol": "VEU",
+      "sourceSymbol": "VEU",
+      "sourceName": "yahoo_chart",
+      "interval": "1wk",
+      "rowCount": 366,
+      "coverageStart": "2009-01-01",
+      "coverageEnd": "2015-12-31",
+      "dividendEventCount": 17,
+      "splitEventCount": 0
+    },
+    {
+      "symbol": "VTI",
+      "sourceSymbol": "VTI",
+      "sourceName": "yahoo_chart",
+      "interval": "1wk",
+      "rowCount": 366,
+      "coverageStart": "2009-01-01",
+      "coverageEnd": "2015-12-31",
+      "dividendEventCount": 28,
+      "splitEventCount": 0
+    },
+    {
+      "symbol": "VTV",
+      "sourceSymbol": "VTV",
+      "sourceName": "yahoo_chart",
+      "interval": "1wk",
+      "rowCount": 366,
+      "coverageStart": "2009-01-01",
+      "coverageEnd": "2015-12-31",
+      "dividendEventCount": 28,
+      "splitEventCount": 0
+    },
+    {
+      "symbol": "VXUS",
+      "sourceSymbol": "VXUS",
+      "sourceName": "yahoo_chart",
+      "interval": "1wk",
+      "rowCount": 258,
+      "coverageStart": "2011-01-24",
+      "coverageEnd": "2015-12-28",
+      "dividendEventCount": 15,
+      "splitEventCount": 0
+    }
+  ],
+  "notes": [
+    "Yahoo chart data includes raw close and adjusted close. Adjusted close is preserved explicitly for replay-ready bundle construction.",
+    "Open/high/low values are source OHLC values and remain raw source fields in the raw bars artifact."
+  ]
+}

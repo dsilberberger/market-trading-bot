@@ -1,4 +1,4 @@
-import { mapPolicyExposureCap } from '../src/risk/policyExposureCap';
+import { derivePolicyExposureCap, mapPolicyExposureCap } from '../src/risk/policyExposureCap';
 
 describe('mapPolicyExposureCap', () => {
   it('maps neutral low-vol low confidence to the smoothed floor', () => {
@@ -31,5 +31,94 @@ describe('mapPolicyExposureCap', () => {
   it('keeps live and sim regime labels in parity', () => {
     expect(mapPolicyExposureCap(0.2, 'neutral', 'low')).toBe(mapPolicyExposureCap(0.2, 'NEUTRAL', 'low'));
     expect(mapPolicyExposureCap(0.5, 'risk_off', 'stressed')).toBe(mapPolicyExposureCap(0.5, 'RISK_OFF', 'stressed'));
+  });
+});
+
+describe('derivePolicyExposureCap coarse-percentile experimental variant', () => {
+  it('preserves baseline hard-cap behavior by default in coarse contexts', () => {
+    expect(
+      derivePolicyExposureCap({
+        equityConfidence: 0.95,
+        regimeLabel: 'risk_on',
+        volLabel: 'low',
+        hasCoarsePercentiles: true,
+        transitionRisk: 'low'
+      })
+    ).toBe(0.7);
+  });
+
+  it('keeps the protective coarse cap in weaker experimental contexts', () => {
+    expect(
+      derivePolicyExposureCap({
+        equityConfidence: 0.75,
+        regimeLabel: 'risk_on',
+        volLabel: 'low',
+        hasCoarsePercentiles: true,
+        transitionRisk: 'low',
+        coarsePercentilesPolicy: {
+          mode: 'conditioned_risk_on',
+          weakContextCapPct: 0.7,
+          strongRiskOnCapPct: 0.85,
+          strongRiskOnMinConfidence: 0.8,
+          strongRiskOnRequireLowVol: true,
+          strongRiskOnRequireLowTransitionRisk: true
+        }
+      })
+    ).toBe(0.7);
+
+    expect(
+      derivePolicyExposureCap({
+        equityConfidence: 0.95,
+        regimeLabel: 'neutral',
+        volLabel: 'low',
+        hasCoarsePercentiles: true,
+        transitionRisk: 'low',
+        coarsePercentilesPolicy: {
+          mode: 'conditioned_risk_on',
+          weakContextCapPct: 0.7,
+          strongRiskOnCapPct: 0.85
+        }
+      })
+    ).toBe(0.7);
+  });
+
+  it('allows strong risk-on contexts to exceed 0.7 under the experimental variant', () => {
+    expect(
+      derivePolicyExposureCap({
+        equityConfidence: 0.95,
+        regimeLabel: 'risk_on',
+        volLabel: 'low',
+        hasCoarsePercentiles: true,
+        transitionRisk: 'low',
+        coarsePercentilesPolicy: {
+          mode: 'conditioned_risk_on',
+          weakContextCapPct: 0.7,
+          strongRiskOnCapPct: 0.85,
+          strongRiskOnMinConfidence: 0.8,
+          strongRiskOnRequireLowVol: true,
+          strongRiskOnRequireLowTransitionRisk: true
+        }
+      })
+    ).toBe(0.85);
+  });
+
+  it('keeps high-transition-risk favorable contexts bounded even under the experimental variant', () => {
+    expect(
+      derivePolicyExposureCap({
+        equityConfidence: 0.95,
+        regimeLabel: 'risk_on',
+        volLabel: 'low',
+        hasCoarsePercentiles: true,
+        transitionRisk: 'high',
+        coarsePercentilesPolicy: {
+          mode: 'conditioned_risk_on',
+          weakContextCapPct: 0.7,
+          strongRiskOnCapPct: 0.85,
+          strongRiskOnMinConfidence: 0.8,
+          strongRiskOnRequireLowVol: true,
+          strongRiskOnRequireLowTransitionRisk: true
+        }
+      })
+    ).toBe(0.35);
   });
 });

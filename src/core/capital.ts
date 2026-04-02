@@ -20,6 +20,69 @@ export interface CapitalLaneSnapshot {
   unassignedCashUsd: number;
 }
 
+export interface ReRiskSequenceCatchUpInput {
+  config: BotConfig;
+  regimeLabel?: string | null;
+  timeInRegimeWeeks?: number;
+  currentEquityAllocationPct: number;
+  optionsReserveCashUsd: number;
+}
+
+export interface ReRiskSequenceCatchUpResult {
+  active: boolean;
+  supplementUsd: number;
+  supplementPct: number;
+  favorableSequenceWeeks: number;
+  reason:
+    | 'disabled'
+    | 'not_risk_on'
+    | 'insufficient_sequence'
+    | 'not_underinvested'
+    | 'no_reserve_cash'
+    | 'active';
+}
+
+export interface CoreCapacityHeadroomExpansionInput {
+  config: BotConfig;
+  regimeLabel?: string | null;
+  timeInRegimeWeeks?: number;
+  currentEquityAllocationPct: number;
+  optionsReserveCashUsd: number;
+}
+
+export interface CoreCapacityHeadroomExpansionResult {
+  active: boolean;
+  supplementUsd: number;
+  supplementPct: number;
+  favorableSequenceWeeks: number;
+  reason:
+    | 'disabled'
+    | 'not_risk_on'
+    | 'insufficient_sequence'
+    | 'not_underinvested'
+    | 'no_reserve_cash'
+    | 'active';
+}
+
+export interface FavorableStatePersistenceInput {
+  config: BotConfig;
+  regimeLabel?: string | null;
+  timeInRegimeWeeks?: number;
+  currentEquityAllocationPct: number;
+}
+
+export interface FavorableStatePersistenceResult {
+  active: boolean;
+  favorableSequenceWeeks: number;
+  maxPersistentOverweightPct: number;
+  reason:
+    | 'disabled'
+    | 'not_risk_on'
+    | 'insufficient_sequence'
+    | 'not_underinvested'
+    | 'active';
+}
+
 export const computeOptionReserveUsageUsd = (
   positions: Array<{
     costBasisUsd?: number;
@@ -103,6 +166,25 @@ export const clampBuyOrdersToBudget = (orders: TradeOrder[], maxBuyNotional: num
   });
 };
 
+export const computeCoreBuyCapacityUsd = ({
+  coreCashUsd,
+  coreHeadroomUsd,
+  estimatedSellProceedsUsd,
+  supplementalCapacityUsd = 0
+}: {
+  coreCashUsd: number;
+  coreHeadroomUsd: number;
+  estimatedSellProceedsUsd: number;
+  supplementalCapacityUsd?: number;
+}) =>
+  Math.max(
+    0,
+    Math.min(
+      coreCashUsd + estimatedSellProceedsUsd + supplementalCapacityUsd,
+      coreHeadroomUsd + estimatedSellProceedsUsd + supplementalCapacityUsd
+    )
+  );
+
 export const computeCoreDeployPct = (
   regimes: any,
   config: BotConfig
@@ -120,4 +202,216 @@ export const computeCoreDeployPct = (
   const confidenceScale = confidence < confThreshold ? scaleLow : 1;
   const deployPct = Math.min(1, Math.max(0, basePct * confidenceScale));
   return { deployPct, confidenceScale };
+};
+
+export const computeReRiskSequenceCatchUp = ({
+  config,
+  regimeLabel,
+  timeInRegimeWeeks,
+  currentEquityAllocationPct,
+  optionsReserveCashUsd
+}: ReRiskSequenceCatchUpInput): ReRiskSequenceCatchUpResult => {
+  const policy = config.reRiskAcceleration;
+  if (!policy || policy.mode !== 'risk_on_sequence_catchup') {
+    return {
+      active: false,
+      supplementUsd: 0,
+      supplementPct: 0,
+      favorableSequenceWeeks: Math.max(0, timeInRegimeWeeks ?? 0),
+      reason: 'disabled'
+    };
+  }
+
+  if (regimeLabel !== 'risk_on') {
+    return {
+      active: false,
+      supplementUsd: 0,
+      supplementPct: 0,
+      favorableSequenceWeeks: Math.max(0, timeInRegimeWeeks ?? 0),
+      reason: 'not_risk_on'
+    };
+  }
+
+  const favorableSequenceWeeks = Math.max(0, timeInRegimeWeeks ?? 0);
+  const minRiskOnWeeks = Math.max(1, policy.minRiskOnWeeks ?? 2);
+  if (favorableSequenceWeeks < minRiskOnWeeks) {
+    return {
+      active: false,
+      supplementUsd: 0,
+      supplementPct: 0,
+      favorableSequenceWeeks,
+      reason: 'insufficient_sequence'
+    };
+  }
+
+  const lowEquityThreshold = Math.max(0, Math.min(1, policy.lowEquityAllocationThresholdPct ?? 0.4));
+  if (currentEquityAllocationPct >= lowEquityThreshold) {
+    return {
+      active: false,
+      supplementUsd: 0,
+      supplementPct: 0,
+      favorableSequenceWeeks,
+      reason: 'not_underinvested'
+    };
+  }
+
+  if (optionsReserveCashUsd <= 0) {
+    return {
+      active: false,
+      supplementUsd: 0,
+      supplementPct: 0,
+      favorableSequenceWeeks,
+      reason: 'no_reserve_cash'
+    };
+  }
+
+  const reserveSupplementPctPerWeek = Math.max(0, policy.reserveSupplementPctPerWeek ?? 0.2);
+  const maxReserveSupplementPct = Math.max(
+    reserveSupplementPctPerWeek,
+    policy.maxReserveSupplementPct ?? 0.6
+  );
+  const activeWeeks = favorableSequenceWeeks - minRiskOnWeeks + 1;
+  const supplementPct = Math.min(maxReserveSupplementPct, reserveSupplementPctPerWeek * activeWeeks);
+  const supplementUsd = Math.max(0, optionsReserveCashUsd * supplementPct);
+
+  return {
+    active: supplementUsd > 0,
+    supplementUsd,
+    supplementPct,
+    favorableSequenceWeeks,
+    reason: supplementUsd > 0 ? 'active' : 'no_reserve_cash'
+  };
+};
+
+export const computeCoreCapacityHeadroomExpansion = ({
+  config,
+  regimeLabel,
+  timeInRegimeWeeks,
+  currentEquityAllocationPct,
+  optionsReserveCashUsd
+}: CoreCapacityHeadroomExpansionInput): CoreCapacityHeadroomExpansionResult => {
+  const policy = config.coreCapacityFormation;
+  if (!policy || policy.mode !== 'risk_on_headroom_expansion') {
+    return {
+      active: false,
+      supplementUsd: 0,
+      supplementPct: 0,
+      favorableSequenceWeeks: Math.max(0, timeInRegimeWeeks ?? 0),
+      reason: 'disabled'
+    };
+  }
+
+  if (regimeLabel !== 'risk_on') {
+    return {
+      active: false,
+      supplementUsd: 0,
+      supplementPct: 0,
+      favorableSequenceWeeks: Math.max(0, timeInRegimeWeeks ?? 0),
+      reason: 'not_risk_on'
+    };
+  }
+
+  const favorableSequenceWeeks = Math.max(0, timeInRegimeWeeks ?? 0);
+  const minRiskOnWeeks = Math.max(1, policy.minRiskOnWeeks ?? 2);
+  if (favorableSequenceWeeks < minRiskOnWeeks) {
+    return {
+      active: false,
+      supplementUsd: 0,
+      supplementPct: 0,
+      favorableSequenceWeeks,
+      reason: 'insufficient_sequence'
+    };
+  }
+
+  const lowEquityThreshold = Math.max(0, Math.min(1, policy.lowEquityAllocationThresholdPct ?? 0.4));
+  if (currentEquityAllocationPct >= lowEquityThreshold) {
+    return {
+      active: false,
+      supplementUsd: 0,
+      supplementPct: 0,
+      favorableSequenceWeeks,
+      reason: 'not_underinvested'
+    };
+  }
+
+  if (optionsReserveCashUsd <= 0) {
+    return {
+      active: false,
+      supplementUsd: 0,
+      supplementPct: 0,
+      favorableSequenceWeeks,
+      reason: 'no_reserve_cash'
+    };
+  }
+
+  const reserveHeadroomPctPerWeek = Math.max(0, policy.reserveHeadroomPctPerWeek ?? 0.2);
+  const maxReserveHeadroomPct = Math.max(
+    reserveHeadroomPctPerWeek,
+    policy.maxReserveHeadroomPct ?? 0.6
+  );
+  const activeWeeks = favorableSequenceWeeks - minRiskOnWeeks + 1;
+  const supplementPct = Math.min(maxReserveHeadroomPct, reserveHeadroomPctPerWeek * activeWeeks);
+  const supplementUsd = Math.max(0, optionsReserveCashUsd * supplementPct);
+
+  return {
+    active: supplementUsd > 0,
+    supplementUsd,
+    supplementPct,
+    favorableSequenceWeeks,
+    reason: supplementUsd > 0 ? 'active' : 'no_reserve_cash'
+  };
+};
+
+export const computeFavorableStatePersistence = ({
+  config,
+  regimeLabel,
+  timeInRegimeWeeks,
+  currentEquityAllocationPct
+}: FavorableStatePersistenceInput): FavorableStatePersistenceResult => {
+  const policy = config.favorableStatePersistence;
+  if (!policy || policy.mode !== 'risk_on_trim_buffer') {
+    return {
+      active: false,
+      favorableSequenceWeeks: Math.max(0, timeInRegimeWeeks ?? 0),
+      maxPersistentOverweightPct: 0,
+      reason: 'disabled'
+    };
+  }
+
+  if (regimeLabel !== 'risk_on') {
+    return {
+      active: false,
+      favorableSequenceWeeks: Math.max(0, timeInRegimeWeeks ?? 0),
+      maxPersistentOverweightPct: 0,
+      reason: 'not_risk_on'
+    };
+  }
+
+  const favorableSequenceWeeks = Math.max(0, timeInRegimeWeeks ?? 0);
+  const minRiskOnWeeks = Math.max(1, policy.minRiskOnWeeks ?? 2);
+  if (favorableSequenceWeeks < minRiskOnWeeks) {
+    return {
+      active: false,
+      favorableSequenceWeeks,
+      maxPersistentOverweightPct: 0,
+      reason: 'insufficient_sequence'
+    };
+  }
+
+  const lowEquityThreshold = Math.max(0, Math.min(1, policy.lowEquityAllocationThresholdPct ?? 0.4));
+  if (currentEquityAllocationPct >= lowEquityThreshold) {
+    return {
+      active: false,
+      favorableSequenceWeeks,
+      maxPersistentOverweightPct: 0,
+      reason: 'not_underinvested'
+    };
+  }
+
+  return {
+    active: true,
+    favorableSequenceWeeks,
+    maxPersistentOverweightPct: Math.max(0, policy.maxPersistentOverweightPct ?? 0.08),
+    reason: 'active'
+  };
 };

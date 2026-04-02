@@ -53,7 +53,8 @@ export const applyDecisionPolicyGate = (
     volLabel,
     hasMacroLag,
     hasCoarsePercentiles,
-    transitionRisk
+    transitionRisk,
+    coarsePercentilesPolicy: config.policyExposureCap?.coarsePercentiles
   });
 
   const baseExposureCap = exposureCap;

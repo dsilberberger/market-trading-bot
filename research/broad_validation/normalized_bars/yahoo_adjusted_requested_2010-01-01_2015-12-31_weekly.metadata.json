@@ -1,0 +1,98 @@
+{
+  "sourceName": "yahoo_chart",
+  "interval": "1wk",
+  "adjustedData": true,
+  "requestedSymbols": [
+    "VTI",
+    "VXUS",
+    "VTV",
+    "USMV",
+    "SHY",
+    "IEF",
+    "TIP"
+  ],
+  "actualSourceSymbols": [
+    "75% VTV + 25% SHY",
+    "IEF",
+    "SHY",
+    "TIP",
+    "USMV",
+    "VEU",
+    "VTI",
+    "VTV",
+    "VXUS"
+  ],
+  "coverageStart": "2009-01-01",
+  "coverageEnd": "2015-12-31",
+  "substitutions": [
+    {
+      "symbol": "VXUS",
+      "sourceKind": "proxy_rebased",
+      "sourceSymbol": "VEU",
+      "proxyStartDate": "2009-01-01",
+      "proxyEndDate": "2011-01-20",
+      "cutoverDate": "2011-01-24",
+      "approximate": true,
+      "notes": "VEU history is rebased to the first real VXUS close and adjusted close at cutover."
+    },
+    {
+      "symbol": "USMV",
+      "sourceKind": "synthetic_weighted_returns",
+      "sourceSymbol": "75% VTV + 25% SHY",
+      "proxyStartDate": "2009-01-01",
+      "proxyEndDate": "2011-10-13",
+      "cutoverDate": "2011-10-17",
+      "approximate": true,
+      "notes": "Synthetic adjusted-return history is rebased to the first real USMV close and adjusted close at cutover."
+    }
+  ],
+  "symbols": [
+    {
+      "symbol": "VTI",
+      "rowCount": 366,
+      "coverageStart": "2009-01-01",
+      "coverageEnd": "2015-12-31"
+    },
+    {
+      "symbol": "VXUS",
+      "rowCount": 366,
+      "coverageStart": "2009-01-01",
+      "coverageEnd": "2015-12-28"
+    },
+    {
+      "symbol": "VTV",
+      "rowCount": 366,
+      "coverageStart": "2009-01-01",
+      "coverageEnd": "2015-12-31"
+    },
+    {
+      "symbol": "USMV",
+      "rowCount": 366,
+      "coverageStart": "2009-01-01",
+      "coverageEnd": "2015-12-28"
+    },
+    {
+      "symbol": "SHY",
+      "rowCount": 366,
+      "coverageStart": "2009-01-01",
+      "coverageEnd": "2015-12-31"
+    },
+    {
+      "symbol": "IEF",
+      "rowCount": 366,
+      "coverageStart": "2009-01-01",
+      "coverageEnd": "2015-12-31"
+    },
+    {
+      "symbol": "TIP",
+      "rowCount": 366,
+      "coverageStart": "2009-01-01",
+      "coverageEnd": "2015-12-31"
+    }
+  ],
+  "notes": [
+    "Normalized rows preserve raw close and adjusted close for direct symbols.",
+    "VXUS uses rebased adjusted VEU history before the first real VXUS bar.",
+    "USMV uses a synthetic adjusted-return history from 75% VTV and 25% SHY before the first real USMV bar."
+  ]
+}

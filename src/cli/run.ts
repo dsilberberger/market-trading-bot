@@ -44,10 +44,14 @@ import {
 import {
   computeBudgets,
   computeCapitalLanes,
+  computeCoreBuyCapacityUsd,
+  computeCoreCapacityHeadroomExpansion,
   computeCoreDeployPct,
+  computeFavorableStatePersistence,
   computeNav,
   computeOptionReserveUsageUsd,
-  clampBuyOrdersToBudget
+  clampBuyOrdersToBudget,
+  computeReRiskSequenceCatchUp
 } from '../core/capital';
 import { spawnSync } from 'child_process';
 import { arbitrateSleeves } from '../sleeves/sleeveArbitration';
@@ -215,6 +219,9 @@ export const runBot = async (options: RunOptions) => {
   });
   const reservePoolUsd = capitalPools?.reservePoolUsd ?? budgets.reserveBudget;
   const corePoolUsd = capitalPools?.corePoolUsd ?? budgets.coreBudget;
+  const exposureGroups = config.enableExposureGrouping
+    ? loadExposureGroups(config.exposureGroupsFile)
+    : {};
   const capitalLanes = computeCapitalLanes({
     navUsd: navResult.nav,
     etfInvestedUsd: navResult.invested,
@@ -349,22 +356,60 @@ export const runBot = async (options: RunOptions) => {
   const volLabel = (llmContext as any)?.regimes?.volRegime?.label;
   const equityConf = (llmContext as any)?.regimes?.equityRegime?.confidence ?? 0.5;
   const transitionRisk = (llmContext as any)?.regimes?.equityRegime?.transitionRisk ?? 'low';
+  const timeInRegimeWeeks =
+    (llmContext as any)?.regimes?.equityRegime?.supports?.timeInRegimeWeeks ??
+    (llmContext as any)?.regimes?.equityRegime?.timeInRegimeWeeks ??
+    regimesArtifact?.equityRegime?.supports?.timeInRegimeWeeks ??
+    regimesArtifact?.equityRegime?.timeInRegimeWeeks ??
+    0;
+  const currentNavUsd = inputs?.portfolio?.equity ?? rawBudget;
+  const currentEquityMarketValueUsd = (inputs.portfolio.holdings || []).reduce((sum, holding) => {
+    const mark = quotes?.[holding.symbol] ?? 0;
+    const marketValue = (holding.quantity || 0) * mark;
+    const exposureKey = symbolToExposureKey(exposureGroups, holding.symbol);
+    if (!exposureKey || !exposureKey.includes('EQUITY')) return sum;
+    return sum + marketValue;
+  }, 0);
+  const currentEquityAllocationPct = currentNavUsd > 0 ? currentEquityMarketValueUsd / currentNavUsd : 0;
   const exposureCap = derivePolicyExposureCap({
     equityConfidence: equityConf,
     regimeLabel: equityLabel,
     volLabel,
     hasMacroLag,
     hasCoarsePercentiles,
-    transitionRisk
+    transitionRisk,
+    coarsePercentilesPolicy: config.policyExposureCap?.coarsePercentiles
   });
   const baseExposureCap = exposureCap;
   const proposalEstimatedSellProceedsUsd = (proposal?.intent?.orders || [])
     .filter((order) => order.side === 'SELL')
     .reduce((sum, order) => sum + Math.abs(order.notionalUSD || 0), 0);
-  const coreBuyCapacityUsd = Math.max(
-    0,
-    Math.min(capitalLanes.coreCashUsd + proposalEstimatedSellProceedsUsd, capitalLanes.coreHeadroomUsd + proposalEstimatedSellProceedsUsd)
-  );
+  const reRiskCatchUp = computeReRiskSequenceCatchUp({
+    config,
+    regimeLabel: equityLabel,
+    timeInRegimeWeeks,
+    currentEquityAllocationPct,
+    optionsReserveCashUsd: capitalLanes.optionsReserveCashUsd
+  });
+  const coreCapacityHeadroomExpansion = computeCoreCapacityHeadroomExpansion({
+    config,
+    regimeLabel: equityLabel,
+    timeInRegimeWeeks,
+    currentEquityAllocationPct,
+    optionsReserveCashUsd: capitalLanes.optionsReserveCashUsd
+  });
+  const favorableStatePersistence = computeFavorableStatePersistence({
+    config,
+    regimeLabel: equityLabel,
+    timeInRegimeWeeks,
+    currentEquityAllocationPct
+  });
+  const coreBuyCapacityUsd = computeCoreBuyCapacityUsd({
+    coreCashUsd: capitalLanes.coreCashUsd,
+    coreHeadroomUsd: capitalLanes.coreHeadroomUsd,
+    estimatedSellProceedsUsd: proposalEstimatedSellProceedsUsd,
+    supplementalCapacityUsd: coreCapacityHeadroomExpansion.supplementUsd + reRiskCatchUp.supplementUsd
+  });
   const capBudget = Math.min(deployBudgetUsd, (inputs?.portfolio?.equity ?? rawBudget) * exposureCap);
   const buyBudgetUSD = Math.max(0, Math.min(deployBudgetUsd, coreBuyCapacityUsd, capBudget));
   writeRunArtifact(runId, 'capital_deployment.json', {
@@ -376,8 +421,36 @@ export const runBot = async (options: RunOptions) => {
     coreDeployPct,
     deployBudgetUsd,
     exposureCap,
+    baseExposureCap,
     capBudgetUsd: capBudget,
+    currentEquityAllocationPct,
+    timeInRegimeWeeks,
+    proposalEstimatedSellProceedsUsd,
+    coreBuyCapacityUsd,
     buyBudgetUSD,
+    reRiskAcceleration: {
+      mode: config.reRiskAcceleration?.mode ?? 'off',
+      active: reRiskCatchUp.active,
+      reason: reRiskCatchUp.reason,
+      favorableSequenceWeeks: reRiskCatchUp.favorableSequenceWeeks,
+      supplementPct: reRiskCatchUp.supplementPct,
+      supplementUsd: reRiskCatchUp.supplementUsd
+    },
+    coreCapacityFormation: {
+      mode: config.coreCapacityFormation?.mode ?? 'baseline',
+      active: coreCapacityHeadroomExpansion.active,
+      reason: coreCapacityHeadroomExpansion.reason,
+      favorableSequenceWeeks: coreCapacityHeadroomExpansion.favorableSequenceWeeks,
+      supplementPct: coreCapacityHeadroomExpansion.supplementPct,
+      supplementUsd: coreCapacityHeadroomExpansion.supplementUsd
+    },
+    favorableStatePersistence: {
+      mode: config.favorableStatePersistence?.mode ?? 'baseline',
+      active: favorableStatePersistence.active,
+      reason: favorableStatePersistence.reason,
+      favorableSequenceWeeks: favorableStatePersistence.favorableSequenceWeeks,
+      maxPersistentOverweightPct: favorableStatePersistence.maxPersistentOverweightPct
+    },
     basis: {
       equityRegimeLabel: regimesArtifact?.equityRegime?.label ?? null,
       equityRegimeConfidence: regimesArtifact?.equityRegime?.confidence ?? null,
@@ -389,9 +462,6 @@ export const runBot = async (options: RunOptions) => {
     config.allowExecutionProxies && config.proxiesFile
       ? readJSONFile<Record<string, string[]>>(path.resolve(process.cwd(), config.proxiesFile))
       : {};
-  const exposureGroups = config.enableExposureGrouping
-    ? loadExposureGroups(config.exposureGroupsFile)
-    : {};
   const round0FlagsPath = path.join(runDir, 'round0_flags.json');
   const round0Flags = fs.existsSync(round0FlagsPath) ? JSON.parse(fs.readFileSync(round0FlagsPath, 'utf-8')) : [];
   if (config.allowExecutionProxies) {
@@ -469,7 +539,7 @@ export const runBot = async (options: RunOptions) => {
   });
 
   const eqRegime = (llmContext as any)?.regimes?.equityRegime;
-  const timeInRegimeWeeks = eqRegime?.supports?.timeInRegimeWeeks ?? 0;
+  const plannerTimeInRegimeWeeks = eqRegime?.supports?.timeInRegimeWeeks ?? 0;
   const planner = planBaseEtfExecution({
     targets: proposal.intent.orders.map((o) => ({ symbol: o.symbol, notionalUSD: o.notionalUSD, priority: o.confidence })),
     prices: quotes,
@@ -482,8 +552,9 @@ export const runBot = async (options: RunOptions) => {
     allowProxies: config.allowExecutionProxies,
     maxProxyTrackingErrorAbs: config.maxProxyTrackingErrorAbs,
     exposureGroups,
+    mode: config.wholeSharePlanner?.mode,
     regimeLabel: eqRegime?.label,
-    timeInRegimeWeeks
+    timeInRegimeWeeks: plannerTimeInRegimeWeeks
   });
   writeRunArtifact(runId, 'execution_plan.json', planner);
   writeRunArtifact(runId, 'execution_substitutions.json', planner.substitutions || []);
@@ -609,7 +680,13 @@ export const runBot = async (options: RunOptions) => {
     sleevePositions,
     freezeBaseRebalance: freezeBase,
     riskOffExit,
-    exposureGroups
+    exposureGroups,
+    favorableStatePersistence: favorableStatePersistence.active
+      ? {
+          active: true,
+          maxPersistentOverweightPct: favorableStatePersistence.maxPersistentOverweightPct
+        }
+      : undefined
   });
   writeRunArtifact(runId, 'rebalance.json', rebalance);
 

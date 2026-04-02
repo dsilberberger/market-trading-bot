@@ -93,10 +93,17 @@
     }
   },
   "policyGateMode": "scale",
-  "postPlanRisk": {
-    "positionSize": {
-      "mode": "scale_to_limit",
-      "requireFractionalSharesSupport": true
+  "regimeClassification": {
+    "equity": {
+      "mode": "recovery_friendly",
+      "riskOnMinAgreementScore": 0.6666666666666666,
+      "riskOnMinStabilityScore": 0.52,
+      "allowHighVolRiskOnOverride": true,
+      "highVolRiskOnMinAgreementScore": 1.0,
+      "highVolRiskOnMinStabilityScore": 0.70,
+      "highVolRiskOnMinRet12w": 0.01,
+      "highVolRiskOnMinRet24w": 0.005,
+      "highVolRiskOnMinConfidence": 0.75
     }
   },
   "cadence": "weekly",

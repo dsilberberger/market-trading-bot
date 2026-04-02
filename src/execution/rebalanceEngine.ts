@@ -17,6 +17,10 @@ export interface RebalanceInput {
   freezeBaseRebalance?: boolean;
   riskOffExit?: boolean;
   exposureGroups?: ExposureGroups;
+  favorableStatePersistence?: {
+    active: boolean;
+    maxPersistentOverweightPct: number;
+  };
 }
 
 export interface RebalanceResult {
@@ -55,7 +59,8 @@ export const rebalancePortfolio = ({
   sleevePositions,
   freezeBaseRebalance = false,
   riskOffExit = false,
-  exposureGroups
+  exposureGroups,
+  favorableStatePersistence
 }: RebalanceInput): RebalanceResult => {
   const flags: RebalanceResult['flags'] = [];
   const skipped: RebalanceResult['skipped'] = [];
@@ -180,6 +185,28 @@ export const rebalancePortfolio = ({
     const targetQty = targetQtyByParent[p] || 0;
     if (targetQty < currQty) {
       const delta = currQty - targetQty;
+      const positionDrift = positions[p];
+      const isEquityExposure = p.includes('EQUITY');
+      const persistentSellBufferActive =
+        favorableStatePersistence?.active &&
+        isEquityExposure &&
+        positionDrift &&
+        positionDrift.currentWeight <= positionDrift.targetWeight + favorableStatePersistence.maxPersistentOverweightPct;
+      if (persistentSellBufferActive) {
+        skipped.push({ symbol: p, reason: 'FAVORABLE_STATE_TRIM_BUFFER', absDiff: delta });
+        flags.push({
+          code: 'FAVORABLE_STATE_SELL_SUPPRESSED',
+          severity: 'info',
+          message: `Sell suppressed for ${p} during underinvested risk_on persistence`,
+          observed: {
+            symbol: p,
+            currentWeight: positionDrift.currentWeight,
+            targetWeight: positionDrift.targetWeight,
+            maxPersistentOverweightPct: favorableStatePersistence.maxPersistentOverweightPct
+          }
+        });
+        continue;
+      }
       let sellQty = delta;
       if (freezeBaseRebalance && !riskOffExit) {
         flags.push({

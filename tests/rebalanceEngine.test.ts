@@ -67,6 +67,31 @@ describe('rebalancePortfolio', () => {
     expect(res.combinedOrders[0].side === 'SELL' || res.combinedOrders[0].side === 'BUY').toBe(true);
   });
 
+  it('sells a removed ETF and buys a replacement ETF', () => {
+    const res = rebalancePortfolio({
+      asOf: '2025-01-01',
+      portfolio: {
+        cash: 0,
+        equity: 1000,
+        holdings: [{ symbol: 'QQQM', quantity: 4, avgPrice: 250 }]
+      },
+      prices: { QQQM: 250, SPYM: 80 },
+      targetPlan: {
+        ...targetPlan,
+        selectedSymbols: ['SPYM'],
+        orders: [{ symbol: 'SPYM', side: 'BUY', quantity: 5, estNotionalUSD: 400, estPrice: 80 }]
+      },
+      regimes: { equityRegime: { label: 'neutral', confidence: 0.5 } },
+      priorRegimes: { equityRegime: { label: 'neutral', confidence: 0.5 } },
+      proxyParentMap: {},
+      config: baseConfig
+    });
+
+    expect(res.status).toBe('OK');
+    expect(res.sellOrders.some((order) => order.symbol === 'QQQM')).toBe(true);
+    expect(res.buyOrders.some((order) => order.symbol === 'SPYM')).toBe(true);
+  });
+
   it('caps sells to base sleeve when protection enabled', () => {
     const res = rebalancePortfolio({
       asOf: '2025-01-01',

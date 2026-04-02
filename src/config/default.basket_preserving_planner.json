@@ -93,11 +93,8 @@
     }
   },
   "policyGateMode": "scale",
-  "postPlanRisk": {
-    "positionSize": {
-      "mode": "scale_to_limit",
-      "requireFractionalSharesSupport": true
-    }
+  "wholeSharePlanner": {
+    "mode": "subset_optimized"
   },
   "cadence": "weekly",
   "round0MacroLagPolicy": "flags_warn",
@@ -109,12 +106,12 @@
   "capital": {
     "corePct": 0.85,
     "reservePct": 0.15,
-  "baseDeployPct": {
-    "risk_off": 0.35,
-    "neutral": 0.7,
-    "risk_on": 0.95,
-    "fallback": 0.5
-  },
+    "baseDeployPct": {
+      "risk_off": 0.35,
+      "neutral": 0.7,
+      "risk_on": 0.95,
+      "fallback": 0.5
+    },
     "deployConfThreshold": 0.5,
     "deployConfScaleLow": 0.95
   },

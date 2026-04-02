@@ -18,6 +18,8 @@ interface Candidate {
   weight?: number;
 }
 
+export type WholeSharePlannerMode = 'baseline' | 'subset_optimized' | 'subset_optimized_refined' | 'subset_optimized_composition';
+
 export interface ExecutionPlanOrder {
   symbol: string;
   originalSymbol?: string;
@@ -68,6 +70,7 @@ interface PlannerParams {
   proxyCascade?: boolean;
   exposureGroups?: ExposureGroups;
   allowRemainder?: boolean; // optional gate for largest-remainder pass
+  mode?: WholeSharePlannerMode;
 }
 
 interface BaseEtfPlannerParams extends PlannerParams {
@@ -91,6 +94,273 @@ const normalizeWeights = (targets: TargetInput[]) => {
   return weights;
 };
 
+interface CandidateAllocationResult {
+  status: ExecutionPlan['status'];
+  selectedSymbols: string[];
+  orders: ExecutionPlanOrder[];
+  achievedWeights: Record<string, number>;
+  targetWeights: Record<string, number>;
+  leftoverCashUSD: number;
+  error: { maxAbsError: number; l1Error: number };
+  flags: ExecutionPlan['flags'];
+}
+
+interface CandidatePlanScore {
+  fullTargetL1Error: number;
+  fullTargetMaxAbsError: number;
+  leftoverCashUSD: number;
+  investedUsd: number;
+  fundedSymbolCount: number;
+  maxAchievedWeight: number;
+  omittedEquityCount: number;
+  omittedEquityTargetWeight: number;
+  selectedKey: string;
+}
+
+const REFINED_SUBSET_L1_FIT_BAND = 0.05;
+const COMPOSITION_SUBSET_L1_FIT_BAND = 0.05;
+const COMPOSITION_SUBSET_INVESTED_BAND_USD = 20;
+
+const isEquityExposureKey = (key?: string) => Boolean(key && key.includes('EQUITY'));
+
+const allocateCandidatePlan = ({
+  candidates: inputCandidates,
+  budget,
+  allowPartial,
+  minViablePositions,
+  maxAbsWeightError,
+  allowRemainder
+}: {
+  candidates: Candidate[];
+  budget: number;
+  allowPartial: boolean;
+  minViablePositions: number;
+  maxAbsWeightError: number;
+  allowRemainder?: boolean;
+}): CandidateAllocationResult | null => {
+  if (!inputCandidates.length || inputCandidates.length < minViablePositions) return null;
+
+  let candidates = [...inputCandidates];
+  const weightSum = candidates.reduce((acc, t) => acc + (t.targetWeight || 0), 0);
+  candidates = candidates.map((c) => ({ ...c, weight: weightSum ? (c.targetWeight || 0) / weightSum : 0 }));
+
+  const calcCost = (list: Candidate[], shareArr: number[]) =>
+    shareArr.reduce((acc, s, i) => acc + s * (list[i]?.price || 0), 0);
+
+  let shares = candidates.map((c) => {
+    const targetUSD = (c.weight || 0) * budget;
+    return Math.max(0, Math.floor(targetUSD / c.price));
+  });
+
+  const ensureMinPositions = () => {
+    let active = shares.filter((s) => s > 0).length;
+    if (active >= minViablePositions) return;
+    const sortedByPrice = candidates
+      .map((c, i) => ({ ...c, idx: i }))
+      .sort((a, b) => (a.price || 0) - (b.price || 0));
+    for (const c of sortedByPrice) {
+      if (active >= minViablePositions) break;
+      if (shares[c.idx] > 0) continue;
+      const newCost = calcCost(candidates, shares.map((s, i) => (i === c.idx ? 1 : s)));
+      if (newCost <= budget) {
+        shares[c.idx] = 1;
+        active += 1;
+      }
+    }
+  };
+  ensureMinPositions();
+
+  let currentCost = calcCost(candidates, shares);
+  if (currentCost > budget) {
+    while (currentCost > budget) {
+      const reducible = shares
+        .map((s, i) => ({
+          idx: i,
+          shares: s,
+          price: candidates[i]?.price || 0,
+          overTarget: s * (candidates[i]?.price || 0) - (candidates[i]?.weight || 0) * budget
+        }))
+        .filter((x) => x.shares > 1)
+        .sort((a, b) => (b.overTarget || 0) - (a.overTarget || 0))[0];
+      if (!reducible) break;
+      shares[reducible.idx] -= 1;
+      currentCost = calcCost(candidates, shares);
+    }
+    if (currentCost > budget) {
+      const sorted = candidates
+        .map((c, i) => ({ ...c, idx: i }))
+        .sort((a, b) => (a.weight || 0) - (b.weight || 0));
+      let kept = [...candidates];
+      for (const drop of sorted) {
+        kept = kept.filter((_, i) => i !== drop.idx);
+        if (kept.length < minViablePositions) break;
+        const keptWeightTotal = kept.reduce((acc, t) => acc + (t.weight || 0), 0);
+        shares = kept.map((c) => Math.max(1, Math.floor(((c.weight || 0) / keptWeightTotal) * budget / c.price)));
+        currentCost = calcCost(kept, shares);
+        if (currentCost <= budget && kept.length >= minViablePositions) {
+          candidates = kept;
+          break;
+        }
+      }
+    }
+  }
+
+  let spent = calcCost(candidates, shares);
+  let leftover = budget - spent;
+  if (allowRemainder !== false && candidates.length) {
+    const remainderFor = (i: number, shareArr: number[]) =>
+      (candidates[i].weight || 0) * budget - shareArr[i] * (candidates[i].price || 0);
+    const minAffordablePrice = () =>
+      Math.min(
+        ...candidates
+          .map((c) => c.price || Infinity)
+          .filter((p) => Number.isFinite(p) && p > 0)
+      );
+
+    while (leftover >= minAffordablePrice() - 1e-9) {
+      const ranked = candidates
+        .map((c, i) => ({ idx: i, remainderUSD: remainderFor(i, shares), price: c.price || 0, symbol: c.symbol }))
+        .filter((x) => x.price > 0 && x.remainderUSD > 0 && x.price <= leftover + 1e-9)
+        .sort((a, b) => (b.remainderUSD === a.remainderUSD ? a.symbol.localeCompare(b.symbol) : b.remainderUSD - a.remainderUSD));
+      if (!ranked.length) break;
+      const pick = ranked[0];
+      shares[pick.idx] += 1;
+      spent += pick.price;
+      leftover = budget - spent;
+    }
+  }
+
+  const orders: ExecutionPlanOrder[] = candidates.map((c, i) => ({
+    symbol: c.symbol,
+    side: 'BUY',
+    quantity: shares[i],
+    estNotionalUSD: shares[i] * (c.price || 0),
+    estPrice: c.price || 0
+  }));
+  const invested = orders.reduce((acc, o) => acc + o.estNotionalUSD, 0);
+  const achievedWeights: Record<string, number> = {};
+  orders.forEach((o) => {
+    achievedWeights[o.symbol] = invested > 0 ? o.estNotionalUSD / invested : 0;
+  });
+  const targetWts = candidates.reduce((acc, c) => ({ ...acc, [c.symbol]: c.weight || 0 }), {} as Record<string, number>);
+  const errors = candidates.map((c) => Math.abs((achievedWeights[c.symbol] || 0) - (c.weight || 0)));
+  const maxAbsError = errors.length ? Math.max(...errors) : 0;
+  const l1Error = errors.reduce((acc, e) => acc + e, 0);
+
+  let status: ExecutionPlan['status'] = 'OK';
+  const flags: ExecutionPlan['flags'] = [];
+  if (maxAbsError > maxAbsWeightError) {
+    status = allowPartial ? 'PARTIAL' : 'UNEXECUTABLE';
+    flags.push({
+      code: 'WEIGHT_TRACKING_ERROR_HIGH',
+      severity: status === 'PARTIAL' ? 'warn' : 'error',
+      message: `Max abs weight error ${maxAbsError.toFixed(4)} exceeds ${maxAbsWeightError.toFixed(4)}`,
+      observed: { maxAbsError, l1Error }
+    });
+  }
+
+  return {
+    status,
+    selectedSymbols: candidates.map((c) => c.symbol),
+    orders,
+    achievedWeights,
+    targetWeights: targetWts,
+    leftoverCashUSD: leftover,
+    error: { maxAbsError, l1Error },
+    flags
+  };
+};
+
+const buildFullTargetScore = ({
+  plan,
+  originalTargetWeights,
+  exposureGroups
+}: {
+  plan: CandidateAllocationResult;
+  originalTargetWeights: Record<string, number>;
+  exposureGroups?: ExposureGroups;
+}): CandidatePlanScore => {
+  const symbols = Array.from(new Set([...Object.keys(originalTargetWeights), ...Object.keys(plan.achievedWeights)])).sort();
+  const absErrors = symbols.map((symbol) => Math.abs((plan.achievedWeights[symbol] || 0) - (originalTargetWeights[symbol] || 0)));
+  const investedUsd = plan.orders.reduce((sum, order) => sum + (order.estNotionalUSD || 0), 0);
+  const fundedSymbolCount = plan.orders.filter((order) => (order.quantity || 0) > 0).length;
+  const selectedSymbols = new Set(plan.selectedSymbols);
+  const omittedEquitySymbols = symbols.filter((symbol) => {
+    if (selectedSymbols.has(symbol) || (originalTargetWeights[symbol] || 0) <= 0) return false;
+    return isEquityExposureKey(symbolToExposureKey(exposureGroups || {}, symbol));
+  });
+
+  return {
+    fullTargetL1Error: absErrors.reduce((sum, value) => sum + value, 0),
+    fullTargetMaxAbsError: absErrors.length ? Math.max(...absErrors) : 0,
+    leftoverCashUSD: plan.leftoverCashUSD,
+    investedUsd,
+    fundedSymbolCount,
+    maxAchievedWeight: plan.selectedSymbols.reduce((maxWeight, symbol) => Math.max(maxWeight, plan.achievedWeights[symbol] || 0), 0),
+    omittedEquityCount: omittedEquitySymbols.length,
+    omittedEquityTargetWeight: omittedEquitySymbols.reduce((sum, symbol) => sum + (originalTargetWeights[symbol] || 0), 0),
+    selectedKey: plan.selectedSymbols.join('|')
+  };
+};
+
+const comparePlanScores = (
+  left: CandidatePlanScore,
+  right: CandidatePlanScore,
+  mode: WholeSharePlannerMode = 'subset_optimized'
+) => {
+  if (mode === 'subset_optimized_composition') {
+    const l1Gap = Math.abs(left.fullTargetL1Error - right.fullTargetL1Error);
+    if (l1Gap > COMPOSITION_SUBSET_L1_FIT_BAND) return left.fullTargetL1Error - right.fullTargetL1Error;
+
+    const investedGap = Math.abs(left.investedUsd - right.investedUsd);
+    if (investedGap > COMPOSITION_SUBSET_INVESTED_BAND_USD) {
+      if (left.leftoverCashUSD !== right.leftoverCashUSD) return left.leftoverCashUSD - right.leftoverCashUSD;
+      if (left.investedUsd !== right.investedUsd) return right.investedUsd - left.investedUsd;
+    }
+
+    if (left.fundedSymbolCount !== right.fundedSymbolCount) return right.fundedSymbolCount - left.fundedSymbolCount;
+    if ((left.fundedSymbolCount === 1) !== (right.fundedSymbolCount === 1)) {
+      return left.fundedSymbolCount === 1 ? 1 : -1;
+    }
+    if (left.maxAchievedWeight !== right.maxAchievedWeight) return left.maxAchievedWeight - right.maxAchievedWeight;
+    if (left.omittedEquityCount !== right.omittedEquityCount) return left.omittedEquityCount - right.omittedEquityCount;
+    if (left.omittedEquityTargetWeight !== right.omittedEquityTargetWeight) {
+      return left.omittedEquityTargetWeight - right.omittedEquityTargetWeight;
+    }
+    if (left.leftoverCashUSD !== right.leftoverCashUSD) return left.leftoverCashUSD - right.leftoverCashUSD;
+    if (left.investedUsd !== right.investedUsd) return right.investedUsd - left.investedUsd;
+    if (left.fullTargetMaxAbsError !== right.fullTargetMaxAbsError) {
+      return left.fullTargetMaxAbsError - right.fullTargetMaxAbsError;
+    }
+    if (left.fullTargetL1Error !== right.fullTargetL1Error) return left.fullTargetL1Error - right.fullTargetL1Error;
+    return left.selectedKey.localeCompare(right.selectedKey);
+  }
+
+  if (mode === 'subset_optimized_refined') {
+    const l1Gap = Math.abs(left.fullTargetL1Error - right.fullTargetL1Error);
+    if (l1Gap > REFINED_SUBSET_L1_FIT_BAND) return left.fullTargetL1Error - right.fullTargetL1Error;
+    if (left.leftoverCashUSD !== right.leftoverCashUSD) return left.leftoverCashUSD - right.leftoverCashUSD;
+    if (left.investedUsd !== right.investedUsd) return right.investedUsd - left.investedUsd;
+    if (left.omittedEquityCount !== right.omittedEquityCount) return left.omittedEquityCount - right.omittedEquityCount;
+    if (left.omittedEquityTargetWeight !== right.omittedEquityTargetWeight) {
+      return left.omittedEquityTargetWeight - right.omittedEquityTargetWeight;
+    }
+    if (left.fullTargetMaxAbsError !== right.fullTargetMaxAbsError) {
+      return left.fullTargetMaxAbsError - right.fullTargetMaxAbsError;
+    }
+    if (left.fullTargetL1Error !== right.fullTargetL1Error) return left.fullTargetL1Error - right.fullTargetL1Error;
+    if (left.fundedSymbolCount !== right.fundedSymbolCount) return right.fundedSymbolCount - left.fundedSymbolCount;
+    return left.selectedKey.localeCompare(right.selectedKey);
+  }
+
+  if (left.fullTargetL1Error !== right.fullTargetL1Error) return left.fullTargetL1Error - right.fullTargetL1Error;
+  if (left.fullTargetMaxAbsError !== right.fullTargetMaxAbsError) return left.fullTargetMaxAbsError - right.fullTargetMaxAbsError;
+  if (left.leftoverCashUSD !== right.leftoverCashUSD) return left.leftoverCashUSD - right.leftoverCashUSD;
+  if (left.investedUsd !== right.investedUsd) return right.investedUsd - left.investedUsd;
+  if (left.fundedSymbolCount !== right.fundedSymbolCount) return right.fundedSymbolCount - left.fundedSymbolCount;
+  return left.selectedKey.localeCompare(right.selectedKey);
+};
+
 export const planWholeShareExecution = ({
   targets,
   prices,
@@ -104,7 +374,8 @@ export const planWholeShareExecution = ({
   maxProxyTrackingErrorAbs,
   proxyCascade,
   exposureGroups,
-  allowRemainder
+  allowRemainder,
+  mode = 'baseline'
 }: PlannerParams): ExecutionPlan => {
   const flags: ExecutionPlan['flags'] = [];
   const skipped: ExecutionPlan['skipped'] = [];
@@ -171,17 +442,18 @@ export const planWholeShareExecution = ({
     };
   });
 
-  const dropUnaffordable = (list: any[]) => {
+  const dropUnaffordable = (list: Candidate[]) => {
     let sorted = [...list].sort((a, b) => (b.priority ?? b.weight ?? 0) - (a.priority ?? a.weight ?? 0));
     while (sorted.length) {
       const minCost = sorted.reduce((acc, t) => acc + (t.price || 0), 0);
       if (minCost <= budget) break;
       const dropped = sorted.pop();
+      if (!dropped) break;
       skipped.push({
         symbol: dropped.symbol,
         reason: 'DROPPED_FOR_AFFORDABILITY',
         price: dropped.price,
-        targetWeight: targetWeights[dropped.symbol]
+        targetWeight: dropped.targetWeight
       });
       flags.push({
         code: 'DROPPED_FOR_AFFORDABILITY',
@@ -258,7 +530,69 @@ export const planWholeShareExecution = ({
   attemptProxyAffordability();
 
   candidates = candidates.filter((c) => c.price && c.price > 0);
-  candidates = dropUnaffordable(candidates);
+  const initialMinCost = candidates.reduce((acc, t) => acc + (t.price || 0), 0);
+  if ((mode === 'subset_optimized' || mode === 'subset_optimized_refined' || mode === 'subset_optimized_composition') && initialMinCost > budget && candidates.length) {
+    let best:
+      | {
+          candidates: Candidate[];
+          plan: CandidateAllocationResult;
+          score: CandidatePlanScore;
+        }
+      | undefined;
+
+    const totalMasks = 1 << candidates.length;
+    for (let mask = 1; mask < totalMasks; mask++) {
+      const subset = candidates.filter((_, idx) => ((mask >> idx) & 1) === 1);
+      if (subset.length < minViablePositions) continue;
+      const subsetMinCost = subset.reduce((acc, item) => acc + (item.price || 0), 0);
+      if (subsetMinCost > budget + 1e-9) continue;
+      const candidatePlan = allocateCandidatePlan({
+        candidates: subset,
+        budget,
+        allowPartial,
+        minViablePositions,
+        maxAbsWeightError,
+        allowRemainder
+      });
+      if (!candidatePlan) continue;
+      if (candidatePlan.orders.every((order) => (order.quantity || 0) <= 0)) continue;
+      const score = buildFullTargetScore({ plan: candidatePlan, originalTargetWeights: targetWeights, exposureGroups });
+      if (!best || comparePlanScores(score, best.score, mode) < 0) {
+        best = { candidates: subset, plan: candidatePlan, score };
+      }
+    }
+
+    if (best) {
+      const selectedSymbols = new Set(best.candidates.map((candidate) => candidate.symbol));
+      candidates
+        .filter((candidate) => !selectedSymbols.has(candidate.symbol))
+        .forEach((candidate) => {
+          skipped.push({
+            symbol: candidate.symbol,
+            reason: 'DROPPED_FOR_AFFORDABILITY_OPTIMIZED_SUBSET',
+            price: candidate.price,
+            targetWeight: candidate.targetWeight
+          });
+        });
+      flags.push({
+        code: 'AFFORDABLE_SUBSET_OPTIMIZED',
+        severity: 'info',
+        message: 'Selected an affordable whole-share subset that best fits the original target basket',
+        observed: {
+          originalSymbolCount: candidates.length,
+          selectedSymbolCount: best.candidates.length,
+          fullTargetL1Error: best.score.fullTargetL1Error,
+          fullTargetMaxAbsError: best.score.fullTargetMaxAbsError,
+          leftoverCashUSD: best.score.leftoverCashUSD
+        }
+      });
+      candidates = best.candidates;
+    } else {
+      candidates = [];
+    }
+  } else {
+    candidates = dropUnaffordable(candidates);
+  }
 
   if (!candidates.length || candidates.length < minViablePositions) {
     return {
@@ -310,139 +644,52 @@ export const planWholeShareExecution = ({
     };
   }
 
-  // normalize weights for remaining based on targetWeight carried forward
-  const weightSum = candidates.reduce((acc, t) => acc + (t.targetWeight || 0), 0);
-  candidates = candidates.map((c) => ({ ...c, weight: weightSum ? (c.targetWeight || 0) / weightSum : 0 }));
-
-  const calcCost = (list: Candidate[], shareArr: number[]) =>
-    shareArr.reduce((acc, s, i) => acc + s * (list[i]?.price || 0), 0);
-
-  // Initial allocation: floor target USD per symbol, do not force a share that blows past target.
-  let shares = candidates.map((c) => {
-    const targetUSD = (c.weight || 0) * budget;
-    return Math.max(0, Math.floor(targetUSD / c.price));
+  const allocation = allocateCandidatePlan({
+    candidates,
+    budget,
+    allowPartial,
+    minViablePositions,
+    maxAbsWeightError,
+    allowRemainder
   });
-
-  // If we cannot meet minimum viable positions, bump cheapest symbols up to 1 share while budget allows.
-  const ensureMinPositions = () => {
-    let active = shares.filter((s) => s > 0).length;
-    if (active >= minViablePositions) return;
-    const sortedByPrice = candidates
-      .map((c, i) => ({ ...c, idx: i }))
-      .sort((a, b) => (a.price || 0) - (b.price || 0));
-    for (const c of sortedByPrice) {
-      if (active >= minViablePositions) break;
-      if (shares[c.idx] > 0) continue;
-      const newCost = calcCost(candidates, shares.map((s, i) => (i === c.idx ? 1 : s)));
-      if (newCost <= budget) {
-        shares[c.idx] = 1;
-        active += 1;
-      }
-    }
-  };
-  ensureMinPositions();
-
-  let currentCost = calcCost(candidates, shares);
-  if (currentCost > budget) {
-    // First, reduce excess shares (while keeping at least 1 of each) before dropping symbols.
-    while (currentCost > budget) {
-      const reducible = shares
-        .map((s, i) => ({
-          idx: i,
-          shares: s,
-          price: candidates[i]?.price || 0,
-          overTarget: s * (candidates[i]?.price || 0) - (candidates[i]?.weight || 0) * budget
-        }))
-        .filter((x) => x.shares > 1)
-        .sort((a, b) => (b.overTarget || 0) - (a.overTarget || 0))[0];
-      if (!reducible) break;
-      shares[reducible.idx] -= 1;
-      currentCost = calcCost(candidates, shares);
-    }
-    // If still above budget, fall back to dropping lowest-weight symbols.
-    if (currentCost > budget) {
-      const sorted = candidates
-        .map((c, i) => ({ ...c, idx: i }))
-        .sort((a, b) => (a.weight || 0) - (b.weight || 0));
-      let kept = [...candidates];
-      for (const drop of sorted) {
-        kept = kept.filter((_, i) => i !== drop.idx);
-        const weightTotal = kept.reduce((acc, t) => acc + (t.weight || 0), 0);
-        shares = kept.map((c) => Math.max(1, Math.floor(((c.weight || 0) / weightTotal) * budget / c.price)));
-        currentCost = calcCost(kept, shares);
-        if (currentCost <= budget && kept.length >= minViablePositions) {
-          candidates = kept;
-          break;
+  if (!allocation) {
+    return {
+      status: 'UNEXECUTABLE',
+      selectedSymbols: [],
+      orders: [],
+      achievedWeights: {},
+      targetWeights,
+      leftoverCashUSD: buyBudgetUSD,
+      error: { maxAbsError: 1, l1Error: 1 },
+      skipped,
+      flags: [
+        ...flags,
+        {
+          code: 'CANNOT_ALLOCATE_AFFORDABLE_BASKET',
+          severity: 'error',
+          message: 'Planner could not allocate a valid whole-share basket under the current budget',
+          observed: { budget, candidateCount: candidates.length }
         }
-      }
-    }
+      ],
+      substitutions
+    };
   }
 
-  // largest remainder allocation (optional)
-  let spent = calcCost(candidates, shares);
-  let leftover = budget - spent;
-  if (allowRemainder !== false) {
-    const remainderFor = (i: number, shareArr: number[]) =>
-      (candidates[i].weight || 0) * budget - shareArr[i] * (candidates[i].price || 0);
-    const minAffordablePrice = () =>
-      Math.min(
-        ...candidates
-          .map((c) => c.price || Infinity)
-          .filter((p) => Number.isFinite(p) && p > 0)
-      );
-
-    while (leftover >= minAffordablePrice() - 1e-9) {
-      const ranked = candidates
-        .map((c, i) => ({ idx: i, remainderUSD: remainderFor(i, shares), price: c.price || 0, symbol: c.symbol }))
-        .filter((x) => x.price > 0 && x.remainderUSD > 0 && x.price <= leftover + 1e-9)
-        .sort((a, b) => (b.remainderUSD === a.remainderUSD ? a.symbol.localeCompare(b.symbol) : b.remainderUSD - a.remainderUSD));
-      if (!ranked.length) break;
-      const pick = ranked[0];
-      shares[pick.idx] += 1;
-      spent += pick.price;
-      leftover = budget - spent;
-    }
-  }
-
-  const orders: ExecutionPlanOrder[] = candidates.map((c, i) => ({
-    symbol: c.symbol,
-    side: 'BUY',
-    quantity: shares[i],
-    estNotionalUSD: shares[i] * (c.price || 0),
-    estPrice: c.price || 0,
-    exposureKey: exposureGroups ? symbolToExposureKey(exposureGroups, c.symbol) : undefined
+  const orders = allocation.orders.map((order) => ({
+    ...order,
+    exposureKey: exposureGroups ? symbolToExposureKey(exposureGroups, order.symbol) : undefined
   }));
-  const invested = orders.reduce((acc, o) => acc + o.estNotionalUSD, 0);
-  const achievedWeights: Record<string, number> = {};
-  orders.forEach((o) => {
-    achievedWeights[o.symbol] = invested > 0 ? o.estNotionalUSD / invested : 0;
-  });
-  const targetWts = candidates.reduce((acc, c) => ({ ...acc, [c.symbol]: c.weight || 0 }), {} as Record<string, number>);
-  const errors = candidates.map((c) => Math.abs((achievedWeights[c.symbol] || 0) - (c.weight || 0)));
-  const maxAbsError = errors.length ? Math.max(...errors) : 0;
-  const l1Error = errors.reduce((acc, e) => acc + e, 0);
-
-  let status: ExecutionPlan['status'] = 'OK';
-  if (maxAbsError > maxAbsWeightError) {
-    status = allowPartial ? 'PARTIAL' : 'UNEXECUTABLE';
-    flags.push({
-      code: 'WEIGHT_TRACKING_ERROR_HIGH',
-      severity: status === 'PARTIAL' ? 'warn' : 'error',
-      message: `Max abs weight error ${maxAbsError.toFixed(4)} exceeds ${maxAbsWeightError.toFixed(4)}`,
-      observed: { maxAbsError, l1Error }
-    });
-  }
 
   return {
-    status,
-    selectedSymbols: candidates.map((c) => c.symbol),
+    status: allocation.status,
+    selectedSymbols: allocation.selectedSymbols,
     orders,
-    achievedWeights,
-    targetWeights: targetWts,
-    leftoverCashUSD: leftover,
-    error: { maxAbsError, l1Error },
+    achievedWeights: allocation.achievedWeights,
+    targetWeights: allocation.targetWeights,
+    leftoverCashUSD: allocation.leftoverCashUSD,
+    error: allocation.error,
     skipped,
-    flags,
+    flags: [...flags, ...allocation.flags],
     substitutions
   };
 };

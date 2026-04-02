@@ -32,9 +32,9 @@
     "peakLookbackWeeks": 26,
     "minActiveTier": 2,
     "tiers": [
-      { "tier": 0, "name": "inactive",     "peakDrawdownGte": 0.00, "overlayExtraExposurePct": 0.00 },
-      { "tier": 1, "name": "mild",         "peakDrawdownGte": 0.10, "overlayExtraExposurePct": 0.15 },
-      { "tier": 2, "name": "dislocation",  "peakDrawdownGte": 0.20, "overlayExtraExposurePct": 0.30 },
+      { "tier": 0, "name": "inactive", "peakDrawdownGte": 0.00, "overlayExtraExposurePct": 0.00 },
+      { "tier": 1, "name": "mild", "peakDrawdownGte": 0.10, "overlayExtraExposurePct": 0.15 },
+      { "tier": 2, "name": "dislocation", "peakDrawdownGte": 0.20, "overlayExtraExposurePct": 0.30 },
       { "tier": 3, "name": "capitulation", "peakDrawdownGte": 0.30, "overlayExtraExposurePct": 0.40 }
     ],
     "fastDrawdownEscalation": {
@@ -99,6 +99,13 @@
       "requireFractionalSharesSupport": true
     }
   },
+  "reRiskAcceleration": {
+    "mode": "risk_on_sequence_catchup",
+    "minRiskOnWeeks": 2,
+    "lowEquityAllocationThresholdPct": 0.40,
+    "reserveSupplementPctPerWeek": 0.20,
+    "maxReserveSupplementPct": 0.60
+  },
   "cadence": "weekly",
   "round0MacroLagPolicy": "flags_warn",
   "macroLagWarnDays": 45,
@@ -109,12 +116,12 @@
   "capital": {
     "corePct": 0.85,
     "reservePct": 0.15,
-  "baseDeployPct": {
-    "risk_off": 0.35,
-    "neutral": 0.7,
-    "risk_on": 0.95,
-    "fallback": 0.5
-  },
+    "baseDeployPct": {
+      "risk_off": 0.35,
+      "neutral": 0.7,
+      "risk_on": 0.95,
+      "fallback": 0.5
+    },
     "deployConfThreshold": 0.5,
     "deployConfScaleLow": 0.95
   },
