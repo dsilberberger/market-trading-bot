@@ -510,6 +510,8 @@ export const runHistoricalReplay = async (options: HistoricalReplayOptions): Pro
   const stepRunIds: string[] = [];
   let priorRegimes: any;
   let priorRegimeState: { label?: string; timeInRegimeWeeks?: number } | undefined;
+  let priorReRiskCorridorState: any;
+  let priorExposureStateControllerState: any;
 
   await withReplayEnv(outputDir, async () => {
     for (const date of executionDates) {
@@ -539,6 +541,8 @@ export const runHistoricalReplay = async (options: HistoricalReplayOptions): Pro
         brokerOverride: broker,
         priorRegimes,
         priorRegimeState,
+        priorReRiskCorridorState,
+        priorExposureStateControllerState,
         contextOptions: {
           lookbackDays: input.lookbackDays ?? 250,
           macroSeries: filterMacroSeries(input.macroSeries, date)
@@ -547,6 +551,7 @@ export const runHistoricalReplay = async (options: HistoricalReplayOptions): Pro
       });
 
       const regimes = readJson<any>(path.join(runDir, 'regimes.json'), {});
+      const capitalDeployment = readJson<any>(path.join(runDir, 'capital_deployment.json'), {});
       const insurancePlan = readJson<OptionExecutionPlan>(path.join(runDir, 'insurance_plan.json'), { plannedAction: 'NONE' });
       const growthPlan = readJson<OptionExecutionPlan>(path.join(runDir, 'growth_plan.json'), { plannedAction: 'NONE' });
       const capitalBudgets = readJson<{
@@ -656,12 +661,14 @@ export const runHistoricalReplay = async (options: HistoricalReplayOptions): Pro
             priorRegimes?.equityRegime?.timeInRegimeWeeks ??
             priorRegimeState?.timeInRegimeWeeks
         };
+        priorReRiskCorridorState = capitalDeployment?.reRiskCorridor?.state ?? priorReRiskCorridorState;
+        priorExposureStateControllerState =
+          capitalDeployment?.exposureState?.state ?? priorExposureStateControllerState;
         continue;
       }
 
       stepRunIds.push(runId);
 
-      const capitalDeployment = readJson<any>(path.join(runDir, 'capital_deployment.json'), {});
       const executionPlan = readJson<any>(path.join(runDir, 'execution_plan.json'), {
         targetWeights: {},
         achievedWeights: {}
@@ -709,6 +716,9 @@ export const runHistoricalReplay = async (options: HistoricalReplayOptions): Pro
         timeInRegimeWeeks:
           regimes?.equityRegime?.supports?.timeInRegimeWeeks ?? regimes?.equityRegime?.timeInRegimeWeeks ?? undefined
       };
+      priorReRiskCorridorState = capitalDeployment?.reRiskCorridor?.state ?? priorReRiskCorridorState;
+      priorExposureStateControllerState =
+        capitalDeployment?.exposureState?.state ?? priorExposureStateControllerState;
     }
   });
 

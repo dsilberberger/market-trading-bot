@@ -22,7 +22,7 @@ import { applyDecisionPolicyGate } from '../risk/decisionPolicyGate';
 import { assertRound5Input } from '../risk/round5Guards';
 import { preflightAuth } from '../broker/etrade/authService';
 import { planBaseEtfExecution, planWholeShareExecution } from '../execution/wholeSharePlanner';
-import { rebalancePortfolio } from '../execution/rebalanceEngine';
+import { rebalancePortfolio, RebalanceResult } from '../execution/rebalanceEngine';
 import { detectDislocation } from '../dislocation/dislocationDetector';
 import { buildDislocationBuys } from '../execution/dislocationPlanner';
 import { runSleeveLifecycle } from '../dislocation/sleeveLifecycle';
@@ -47,11 +47,18 @@ import {
   computeCoreBuyCapacityUsd,
   computeCoreCapacityHeadroomExpansion,
   computeCoreDeployPct,
+  buildIncrementalExposureDeltaContract,
+  computeExposureStateController,
   computeFavorableStatePersistence,
+  ExposureStateHandoffContractType,
+  getExposureStateHandoffContractType,
   computeNav,
   computeOptionReserveUsageUsd,
   clampBuyOrdersToBudget,
-  computeReRiskSequenceCatchUp
+  ExposureStateControllerState,
+  computeReRiskCorridor,
+  computeReRiskSequenceCatchUp,
+  ReRiskCorridorState
 } from '../core/capital';
 import { spawnSync } from 'child_process';
 import { arbitrateSleeves } from '../sleeves/sleeveArbitration';
@@ -86,6 +93,8 @@ export interface RunOptions {
   brokerOverride?: Broker;
   priorRegimes?: any;
   priorRegimeState?: { label?: string; timeInRegimeWeeks?: number };
+  priorReRiskCorridorState?: ReRiskCorridorState;
+  priorExposureStateControllerState?: ExposureStateControllerState;
   contextOptions?: Partial<ContextOptions>;
   skipReports?: boolean;
 }
@@ -110,6 +119,195 @@ const loadPreviousRegimes = (currentRunId: string): any | undefined => {
     }
   }
   return undefined;
+};
+
+const loadPreviousReRiskCorridorState = (currentRunId: string): ReRiskCorridorState | undefined => {
+  const runsDir = path.resolve(process.cwd(), 'runs');
+  if (!fs.existsSync(runsDir)) return undefined;
+  const entries = fs
+    .readdirSync(runsDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && d.name !== currentRunId)
+    .map((d) => d.name)
+    .sort()
+    .reverse();
+  for (const name of entries) {
+    const p = path.join(runsDir, name, 'capital_deployment.json');
+    if (!fs.existsSync(p)) continue;
+    try {
+      const deploy = JSON.parse(fs.readFileSync(p, 'utf-8'));
+      if (deploy?.reRiskCorridor?.state) return deploy.reRiskCorridor.state as ReRiskCorridorState;
+    } catch {
+      continue;
+    }
+  }
+  return undefined;
+};
+
+const loadPreviousExposureStateControllerState = (currentRunId: string): ExposureStateControllerState | undefined => {
+  const runsDir = path.resolve(process.cwd(), 'runs');
+  if (!fs.existsSync(runsDir)) return undefined;
+  const entries = fs
+    .readdirSync(runsDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && d.name !== currentRunId)
+    .map((d) => d.name)
+    .sort()
+    .reverse();
+  for (const name of entries) {
+    const p = path.join(runsDir, name, 'capital_deployment.json');
+    if (!fs.existsSync(p)) continue;
+    try {
+      const deploy = JSON.parse(fs.readFileSync(p, 'utf-8'));
+      if (deploy?.exposureState?.state) return deploy.exposureState.state as ExposureStateControllerState;
+    } catch {
+      continue;
+    }
+  }
+  return undefined;
+};
+
+const buildNoOpRebalanceResult = ({
+  currentEquityAllocationPct,
+  reason
+}: {
+  currentEquityAllocationPct: number;
+  reason: string;
+}): RebalanceResult => ({
+  status: 'SKIPPED_NO_CHANGES',
+  sellOrders: [],
+  buyOrders: [],
+  combinedOrders: [],
+  drift: {
+    portfolio: {
+      currentInvestedPct: currentEquityAllocationPct,
+      targetInvestedPct: currentEquityAllocationPct,
+      absDiff: 0
+    },
+    positions: {}
+  },
+  skipped: [],
+  flags: [
+    {
+      code: 'EXPOSURE_STATE_INCREMENTAL_DELTA_BYPASS',
+      severity: 'info',
+      message: reason
+    }
+  ]
+});
+
+export const selectEtfExecutionOrders = ({
+  controllerDeltaPathActive,
+  controllerDeltaOrders,
+  rebalanceOrders,
+  dislocationOrders
+}: {
+  controllerDeltaPathActive: boolean;
+  controllerDeltaOrders: TradeOrder[];
+  rebalanceOrders: TradeOrder[];
+  dislocationOrders: TradeOrder[];
+}) => (controllerDeltaPathActive ? [...controllerDeltaOrders, ...dislocationOrders] : [...rebalanceOrders, ...dislocationOrders]);
+
+const rankIncrementalDeltaCandidates = ({
+  orders,
+  prices
+}: {
+  orders: TradeOrder[];
+  prices: Record<string, number>;
+}) =>
+  orders
+    .filter((order) => order.side === 'BUY' && Math.max(0, order.notionalUSD || 0) > 0)
+    .map((order) => ({
+      order,
+      price: Number(prices[order.symbol] || 0)
+    }))
+    .filter((candidate) => candidate.price > 0)
+    .sort((left, right) => {
+      if (left.price !== right.price) return left.price - right.price;
+      if ((right.order.confidence ?? 0) !== (left.order.confidence ?? 0)) {
+        return (right.order.confidence ?? 0) - (left.order.confidence ?? 0);
+      }
+      return left.order.symbol.localeCompare(right.order.symbol);
+    });
+
+export const computeMinimumExecutableDeltaUsd = ({
+  orders,
+  prices
+}: {
+  orders: TradeOrder[];
+  prices: Record<string, number>;
+}) => {
+  const ranked = rankIncrementalDeltaCandidates({ orders, prices });
+  return ranked.length ? ranked[0].price : 0;
+};
+
+export const buildIncrementalDeltaV2PlannerInputs = ({
+  orders,
+  prices,
+  buyBudgetUSD
+}: {
+  orders: TradeOrder[];
+  prices: Record<string, number>;
+  buyBudgetUSD: number;
+}) => {
+  const totalTargetNotionalUsd = orders.reduce((sum, order) => sum + Math.max(0, order.notionalUSD || 0), 0);
+  const scaledAllOrders =
+    totalTargetNotionalUsd > 0 && buyBudgetUSD > 0
+      ? orders.map((order) => ({
+          ...order,
+          notionalUSD: (Math.max(0, order.notionalUSD || 0) / totalTargetNotionalUsd) * buyBudgetUSD
+        }))
+      : [];
+  const ranked = rankIncrementalDeltaCandidates({ orders, prices });
+  const minimumExecutableDeltaUsd = ranked.length ? ranked[0].price : 0;
+  const totalMinCostUsd = ranked.reduce((sum, candidate) => sum + candidate.price, 0);
+  const affordable = ranked.filter((candidate) => candidate.price <= buyBudgetUSD + 1e-9);
+
+  if (!ranked.length || buyBudgetUSD <= 0) {
+    return {
+      orders: scaledAllOrders,
+      selectionMode: 'no_valid_candidates' as const,
+      minimumExecutableDeltaUsd,
+      cheapestExecutableSymbol: null,
+      cheapestExecutablePriceUsd: minimumExecutableDeltaUsd,
+      affordableSymbolCount: 0
+    };
+  }
+
+  if (totalMinCostUsd <= buyBudgetUSD + 1e-9) {
+    return {
+      orders: scaledAllOrders,
+      selectionMode: 'scaled_full_basket' as const,
+      minimumExecutableDeltaUsd,
+      cheapestExecutableSymbol: ranked[0].order.symbol,
+      cheapestExecutablePriceUsd: ranked[0].price,
+      affordableSymbolCount: affordable.length
+    };
+  }
+
+  if (!affordable.length) {
+    return {
+      orders: scaledAllOrders,
+      selectionMode: 'no_affordable_symbol' as const,
+      minimumExecutableDeltaUsd,
+      cheapestExecutableSymbol: ranked[0].order.symbol,
+      cheapestExecutablePriceUsd: ranked[0].price,
+      affordableSymbolCount: 0
+    };
+  }
+
+  const cheapest = affordable[0];
+  return {
+    orders: [
+      {
+        ...cheapest.order,
+        notionalUSD: buyBudgetUSD
+      }
+    ],
+    selectionMode: 'single_cheapest_symbol' as const,
+    minimumExecutableDeltaUsd,
+    cheapestExecutableSymbol: cheapest.order.symbol,
+    cheapestExecutablePriceUsd: cheapest.price,
+    affordableSymbolCount: affordable.length
+  };
 };
 
 export const runBot = async (options: RunOptions) => {
@@ -371,6 +569,9 @@ export const runBot = async (options: RunOptions) => {
     return sum + marketValue;
   }, 0);
   const currentEquityAllocationPct = currentNavUsd > 0 ? currentEquityMarketValueUsd / currentNavUsd : 0;
+  const priorReRiskCorridorState = options.priorReRiskCorridorState ?? loadPreviousReRiskCorridorState(runId);
+  const priorExposureStateControllerState =
+    options.priorExposureStateControllerState ?? loadPreviousExposureStateControllerState(runId);
   const exposureCap = derivePolicyExposureCap({
     equityConfidence: equityConf,
     regimeLabel: equityLabel,
@@ -398,6 +599,16 @@ export const runBot = async (options: RunOptions) => {
     currentEquityAllocationPct,
     optionsReserveCashUsd: capitalLanes.optionsReserveCashUsd
   });
+  const reRiskCorridor = computeReRiskCorridor({
+    config,
+    priorState: priorReRiskCorridorState,
+    asOf,
+    regimeLabel: equityLabel,
+    currentEquityAllocationPct,
+    currentEquityMarketValueUsd,
+    navUsd: currentNavUsd,
+    favorableStateCeilingPct: exposureCap
+  });
   const favorableStatePersistence = computeFavorableStatePersistence({
     config,
     regimeLabel: equityLabel,
@@ -408,10 +619,75 @@ export const runBot = async (options: RunOptions) => {
     coreCashUsd: capitalLanes.coreCashUsd,
     coreHeadroomUsd: capitalLanes.coreHeadroomUsd,
     estimatedSellProceedsUsd: proposalEstimatedSellProceedsUsd,
-    supplementalCapacityUsd: coreCapacityHeadroomExpansion.supplementUsd + reRiskCatchUp.supplementUsd
+    supplementalCapacityUsd:
+      coreCapacityHeadroomExpansion.supplementUsd +
+      reRiskCatchUp.supplementUsd +
+      reRiskCorridor.supplementalCapacityUsd
   });
   const capBudget = Math.min(deployBudgetUsd, (inputs?.portfolio?.equity ?? rawBudget) * exposureCap);
-  const buyBudgetUSD = Math.max(0, Math.min(deployBudgetUsd, coreBuyCapacityUsd, capBudget));
+  const baselineBuyBudgetUSD = Math.max(0, Math.min(deployBudgetUsd, coreBuyCapacityUsd, capBudget));
+  const systemAllowedEquityCeilingPct = Math.max(
+    0,
+    Math.min(
+      1,
+      exposureCap,
+      currentNavUsd > 0 ? deployBudgetUsd / currentNavUsd : 0
+    )
+  );
+  const exposureStateHandoffContractType = getExposureStateHandoffContractType(config);
+  const controllerDeltaCandidateOrders = proposal.intent.orders.filter((order) => {
+    if (order.side !== 'BUY') return false;
+    const exposureKey = symbolToExposureKey(exposureGroups, order.symbol);
+    return Boolean(exposureKey && exposureKey.includes('EQUITY'));
+  });
+  const minimumExecutableDeltaUsd = computeMinimumExecutableDeltaUsd({
+    orders: controllerDeltaCandidateOrders,
+    prices: quotes
+  });
+  const exposureState = computeExposureStateController({
+    config,
+    priorState: priorExposureStateControllerState,
+    asOf,
+    regimeLabel: equityLabel,
+    currentEquityAllocationPct,
+    currentEquityMarketValueUsd,
+    navUsd: currentNavUsd,
+    favorableStateCeilingPct: exposureCap,
+    systemAllowedEquityCeilingPct,
+    minimumExecutableDeltaUsd,
+    handoffContractType: exposureStateHandoffContractType
+  });
+  const rawDeltaBuyBudgetUsd = exposureState.active
+    ? Math.max(0, Math.min(coreBuyCapacityUsd, capBudget, exposureState.requestedExposureDeltaUsd))
+    : 0;
+  const deltaBuyBudgetUsd =
+    exposureStateHandoffContractType === 'incremental_exposure_delta_v2' &&
+    rawDeltaBuyBudgetUsd > 0 &&
+    rawDeltaBuyBudgetUsd + 1e-9 < exposureState.minimumExecutableDeltaUsd
+      ? 0
+      : rawDeltaBuyBudgetUsd;
+  const incrementalExposureDeltaContract =
+    exposureStateHandoffContractType === 'incremental_exposure_delta_v1' ||
+    exposureStateHandoffContractType === 'incremental_exposure_delta_v2'
+      ? buildIncrementalExposureDeltaContract({
+          contractType: exposureStateHandoffContractType,
+          asOf,
+          regimeLabel: equityLabel,
+          currentEquityAllocationPct,
+          currentEquityMarketValueUsd,
+          navUsd: currentNavUsd,
+          systemAllowedEquityCeilingPct,
+          exposureState,
+          deltaBuyBudgetUsd,
+          minimumExecutableDeltaUsd: exposureState.minimumExecutableDeltaUsd
+        })
+      : undefined;
+  const buyBudgetUSD = exposureState.active
+    ? exposureStateHandoffContractType === 'incremental_exposure_delta_v1' ||
+      exposureStateHandoffContractType === 'incremental_exposure_delta_v2'
+      ? deltaBuyBudgetUsd
+      : Math.max(0, Math.min(coreBuyCapacityUsd, capBudget, exposureState.targetCoreEquityUsd))
+    : baselineBuyBudgetUSD;
   writeRunArtifact(runId, 'capital_deployment.json', {
     asOf,
     corePoolUsd,
@@ -443,6 +719,40 @@ export const runBot = async (options: RunOptions) => {
       favorableSequenceWeeks: coreCapacityHeadroomExpansion.favorableSequenceWeeks,
       supplementPct: coreCapacityHeadroomExpansion.supplementPct,
       supplementUsd: coreCapacityHeadroomExpansion.supplementUsd
+    },
+    reRiskCorridor: {
+      mode: config.reRiskCorridor?.mode ?? 'baseline',
+      active: reRiskCorridor.active,
+      state: reRiskCorridor.state,
+      currentCorridorTargetPct: reRiskCorridor.currentCorridorTargetPct,
+      effectiveCeilingPct: reRiskCorridor.effectiveCeilingPct,
+      intendedIncrementalReRiskUsd: reRiskCorridor.intendedIncrementalReRiskUsd,
+      supplementalCapacityUsd: reRiskCorridor.supplementalCapacityUsd,
+      entryReason: reRiskCorridor.entryReason,
+      advanceReason: reRiskCorridor.advanceReason,
+      pauseReason: reRiskCorridor.pauseReason,
+      exitReason: reRiskCorridor.exitReason
+    },
+    exposureState: {
+      mode: config.reRiskCorridor?.mode ?? 'baseline',
+      handoffContractType: exposureStateHandoffContractType,
+      active: exposureState.active,
+      state: exposureState.state,
+      controllerAction: exposureState.controllerAction,
+      controllerReason: exposureState.controllerReason,
+      effectiveCeilingPct: exposureState.effectiveCeilingPct,
+      systemAllowedEquityCeilingPct,
+      targetCoreEquityPct: exposureState.targetCoreEquityPct,
+      targetCoreEquityUsd: exposureState.targetCoreEquityUsd,
+      requestedExposureDeltaPct: exposureState.requestedExposureDeltaPct,
+      requestedExposureDeltaUsd: exposureState.requestedExposureDeltaUsd,
+      deltaBuyBudgetUsd,
+      minimumExecutableDeltaUsd: exposureState.minimumExecutableDeltaUsd,
+      contract:
+        exposureStateHandoffContractType === 'incremental_exposure_delta_v1' ||
+        exposureStateHandoffContractType === 'incremental_exposure_delta_v2'
+          ? incrementalExposureDeltaContract
+          : undefined
     },
     favorableStatePersistence: {
       mode: config.favorableStatePersistence?.mode ?? 'baseline',
@@ -540,8 +850,67 @@ export const runBot = async (options: RunOptions) => {
 
   const eqRegime = (llmContext as any)?.regimes?.equityRegime;
   const plannerTimeInRegimeWeeks = eqRegime?.supports?.timeInRegimeWeeks ?? 0;
+  const controllerDeltaPathActive =
+    (exposureStateHandoffContractType === 'incremental_exposure_delta_v1' ||
+      exposureStateHandoffContractType === 'incremental_exposure_delta_v2') &&
+    exposureState.requestedExposureDeltaUsd > 1e-9;
+  const plannerSourceOrders = (() => {
+    if (!exposureState.active) return proposal.intent.orders;
+    return proposal.intent.orders.filter((order) => {
+      if (controllerDeltaPathActive && order.side !== 'BUY') return false;
+      const exposureKey = symbolToExposureKey(exposureGroups, order.symbol);
+      return Boolean(exposureKey && exposureKey.includes('EQUITY'));
+    });
+  })();
+  const plannerInputOrders = (() => {
+    if (!exposureState.active) return proposal.intent.orders;
+    if (exposureStateHandoffContractType === 'incremental_exposure_delta_v2' && controllerDeltaPathActive) {
+      return buildIncrementalDeltaV2PlannerInputs({
+        orders: plannerSourceOrders,
+        prices: quotes,
+        buyBudgetUSD
+      }).orders;
+    }
+    const totalEquityTargetNotionalUsd = plannerSourceOrders.reduce((sum, order) => sum + Math.max(0, order.notionalUSD || 0), 0);
+    if (totalEquityTargetNotionalUsd <= 0 || buyBudgetUSD <= 0) return [];
+    return plannerSourceOrders.map((order) => ({
+      ...order,
+      notionalUSD: (Math.max(0, order.notionalUSD || 0) / totalEquityTargetNotionalUsd) * buyBudgetUSD
+    }));
+  })();
+  const deltaPlannerSelection =
+    exposureStateHandoffContractType === 'incremental_exposure_delta_v2' && controllerDeltaPathActive
+      ? buildIncrementalDeltaV2PlannerInputs({
+          orders: plannerSourceOrders,
+          prices: quotes,
+          buyBudgetUSD
+        })
+      : null;
+  const exposureStateImplementationReason = (() => {
+    if (!exposureState.active) return 'baseline_passthrough';
+    if (controllerDeltaPathActive) {
+      if (deltaBuyBudgetUsd <= 0) return 'incremental_delta_zero_budget';
+      if (exposureStateHandoffContractType === 'incremental_exposure_delta_v2' && deltaPlannerSelection) {
+        if (deltaPlannerSelection.selectionMode === 'single_cheapest_symbol') {
+          return 'incremental_delta_v2_single_cheapest_symbol';
+        }
+        if (deltaPlannerSelection.selectionMode === 'scaled_full_basket') {
+          return 'incremental_delta_v2_scaled_full_basket';
+        }
+        if (deltaPlannerSelection.selectionMode === 'no_affordable_symbol') {
+          return 'incremental_delta_v2_no_affordable_symbol';
+        }
+      }
+      return plannerInputOrders.length > 0
+        ? 'incremental_delta_buys_from_exposure_state'
+        : 'incremental_delta_no_equity_basket';
+    }
+    return plannerInputOrders.length > 0
+      ? 'equity_target_scaled_from_exposure_state'
+      : 'no_equity_target_basket';
+  })();
   const planner = planBaseEtfExecution({
-    targets: proposal.intent.orders.map((o) => ({ symbol: o.symbol, notionalUSD: o.notionalUSD, priority: o.confidence })),
+    targets: plannerInputOrders.map((o) => ({ symbol: o.symbol, notionalUSD: o.notionalUSD, priority: o.confidence })),
     prices: quotes,
     buyBudgetUSD,
     minCashUSD,
@@ -565,7 +934,7 @@ export const runBot = async (options: RunOptions) => {
   if (planner.status === 'PARTIAL') {
     console.warn('Execution plan is partial; proceeding with feasible subset.');
   }
-  const originalBySymbol = new Map(proposal.intent.orders.map((o) => [o.symbol, o]));
+  const originalBySymbol = new Map(plannerInputOrders.map((o) => [o.symbol, o]));
   const originalByExecuted = new Map(
     (planner.substitutions || []).map((s) => [s.executedSymbol, s.originalSymbol ?? s.executedSymbol])
   );
@@ -604,9 +973,11 @@ export const runBot = async (options: RunOptions) => {
       thesis: baseOriginal?.thesis || '',
       invalidation: adjustedInvalidation(baseOriginal?.invalidation, originalSymbol, o.symbol),
       confidence: baseOriginal?.confidence ?? 0.5,
-      portfolioLevel: basePL ? { ...basePL } : { targetHoldDays: 30, netExposureTarget: 1 }
+      portfolioLevel: basePL ? { ...basePL } : { targetHoldDays: 30, netExposureTarget: 1 },
+      executionPath: controllerDeltaPathActive ? 'controller_delta' : 'rebalance'
     } as TradeOrder;
   });
+  const controllerDeltaOrdersEnriched = controllerDeltaPathActive ? targetOrdersEnriched : [];
 
   const drawdown = await currentDrawdown(config, marketData);
   const proxySymbolsUsed = (planner.substitutions || [])
@@ -666,35 +1037,40 @@ export const runBot = async (options: RunOptions) => {
   const riskOffExit =
     llmContext?.regimes?.equityRegime?.label === 'risk_off' &&
     (llmContext?.regimes?.equityRegime?.confidence ?? 0) >= (config.dislocation?.earlyExit?.riskOffConfidenceThreshold ?? 0.7);
-  const rebalance = rebalancePortfolio({
-    asOf,
-    portfolio: inputs.portfolio,
-    prices: priceMap,
-    targetPlan: planner,
-    regimes: llmContext?.regimes,
-    priorRegimes,
-    proxyParentMap,
-    config,
-    protectFromSells: sleeveLifecycle.protectFromSells,
-    protectedSymbols: (config.dislocation?.deploymentTargets || []).map((t) => proxyParentMap[t.symbol] || t.symbol),
-    sleevePositions,
-    freezeBaseRebalance: freezeBase,
-    riskOffExit,
-    exposureGroups,
-    favorableStatePersistence: favorableStatePersistence.active
-      ? {
-          active: true,
-          maxPersistentOverweightPct: favorableStatePersistence.maxPersistentOverweightPct
-        }
-      : undefined
-  });
+  const rebalance = controllerDeltaPathActive
+    ? buildNoOpRebalanceResult({
+        currentEquityAllocationPct,
+        reason: 'Incremental exposure delta contract bypassed full-target rebalance semantics.'
+      })
+    : rebalancePortfolio({
+        asOf,
+        portfolio: inputs.portfolio,
+        prices: priceMap,
+        targetPlan: planner,
+        regimes: llmContext?.regimes,
+        priorRegimes,
+        proxyParentMap,
+        config,
+        protectFromSells: sleeveLifecycle.protectFromSells,
+        protectedSymbols: (config.dislocation?.deploymentTargets || []).map((t) => proxyParentMap[t.symbol] || t.symbol),
+        sleevePositions,
+        freezeBaseRebalance: freezeBase,
+        riskOffExit,
+        exposureGroups,
+        favorableStatePersistence: favorableStatePersistence.active
+          ? {
+              active: true,
+              maxPersistentOverweightPct: favorableStatePersistence.maxPersistentOverweightPct
+            }
+          : undefined
+      });
   writeRunArtifact(runId, 'rebalance.json', rebalance);
 
-  if (rebalance.status === 'SKIPPED_NO_DRIFT' || rebalance.status === 'SKIPPED_NO_CHANGES') {
+  if (!controllerDeltaPathActive && (rebalance.status === 'SKIPPED_NO_DRIFT' || rebalance.status === 'SKIPPED_NO_CHANGES')) {
     proposal.intent.orders = [];
     console.log('Rebalance skipped due to drift thresholds.');
   }
-  if (rebalance.status === 'UNEXECUTABLE') {
+  if (!controllerDeltaPathActive && rebalance.status === 'UNEXECUTABLE') {
     proposal.intent.orders = [];
     console.warn('Rebalance unexecutable; continuing with options/policy gating only.');
   }
@@ -810,7 +1186,8 @@ export const runBot = async (options: RunOptions) => {
           invalidation: o.invalidation || '',
           confidence: o.confidence ?? 0.6,
           portfolioLevel: { targetHoldDays: 30, netExposureTarget: 1 },
-          sleeve: 'dislocation'
+          sleeve: 'dislocation',
+          executionPath: 'dislocation'
         }));
         if (dislocationExtraOrders.length) {
           const existingFlags =
@@ -887,7 +1264,10 @@ export const runBot = async (options: RunOptions) => {
       spentByBaseRebalanceBuysUsd
     });
     if (canonicalPlan.orders.length) {
-      proposal.intent.orders = [...proposal.intent.orders, ...canonicalPlan.orders];
+      proposal.intent.orders = [
+        ...proposal.intent.orders,
+        ...canonicalPlan.orders.map((order) => ({ ...order, executionPath: 'canonicalization' as const }))
+      ];
     }
     if (canonicalPlan.flags.length) {
       const existingFlags =
@@ -910,12 +1290,18 @@ export const runBot = async (options: RunOptions) => {
         (o.side === 'SELL' ? 'Rebalance trim to target weight.' : 'Rebalance add to target weight.'),
       invalidation: base?.invalidation || o.invalidation || '',
       confidence: o.confidence ?? base?.confidence ?? 0.5,
-      portfolioLevel: base?.portfolioLevel ?? o.portfolioLevel ?? { targetHoldDays: 0, netExposureTarget: 1 }
+      portfolioLevel: base?.portfolioLevel ?? o.portfolioLevel ?? { targetHoldDays: 0, netExposureTarget: 1 },
+      executionPath: 'rebalance' as const
     };
   });
 
   // Combine rebalance orders with dislocation incremental buys
-  proposal.intent.orders = [...rebalanceOrdersEnriched, ...dislocationExtraOrders];
+  proposal.intent.orders = selectEtfExecutionOrders({
+    controllerDeltaPathActive,
+    controllerDeltaOrders: controllerDeltaOrdersEnriched,
+    rebalanceOrders: rebalanceOrdersEnriched,
+    dislocationOrders: dislocationExtraOrders
+  });
 
   // Enforce maxTradesPerRun deterministically by trimming lowest-notional orders if needed.
   if (config.maxTradesPerRun && proposal.intent.orders.length > config.maxTradesPerRun) {
@@ -1135,7 +1521,10 @@ export const runBot = async (options: RunOptions) => {
   const etfPlannedSellUsd = sellProceeds;
   const allowedBuyBudget = Math.max(
     0,
-    Math.min(deployBudgetUsd, coreCashBudget + sellProceeds, capitalLanes.coreHeadroomUsd + sellProceeds)
+    config.reRiskCorridor?.mode === 'stateful_risk_on_corridor' ||
+      config.reRiskCorridor?.mode === 'stateful_risk_on_corridor_v2'
+      ? Math.min(deployBudgetUsd, coreBuyCapacityUsd, capBudget)
+      : Math.min(deployBudgetUsd, coreCashBudget + sellProceeds, capitalLanes.coreHeadroomUsd + sellProceeds)
   );
   let etfAdjustments: Array<{
     symbol: string;
@@ -1217,6 +1606,228 @@ export const runBot = async (options: RunOptions) => {
   riskReport = evaluateRisk(proposal.intent, config, inputs.portfolio, { drawdown });
   writeRunArtifact(runId, 'risk_report.json', riskReport);
   appendEvent(makeEvent(runId, 'RISK_EVALUATED', { approved: riskReport.approved, blocked: riskReport.blockedReasons }));
+  let executionResult: Awaited<ReturnType<typeof executeOrders>> | null = null;
+
+  const sumNotional = (orders: TradeOrder[] = []) =>
+    orders.reduce((acc, order) => acc + Math.max(0, order.notionalUSD || 0), 0);
+  const controllerDeltaOrders = (orders: TradeOrder[] = []) =>
+    orders.filter((order) => order.executionPath === 'controller_delta');
+
+  const computePortfolioEquityStats = (portfolioState: {
+    holdings?: Array<{ symbol: string; quantity: number; avgPrice?: number }>;
+    cash?: number;
+    equity?: number;
+  }) => {
+    const navUsd = portfolioState.equity || 0;
+    if (navUsd <= 0) return { equityAllocationPct: 0, equityMarketValueUsd: 0 };
+    const equityMarketValueUsd = (portfolioState.holdings || []).reduce((sum, holding) => {
+      const mark = quotes?.[holding.symbol] ?? holding.avgPrice ?? 0;
+      const marketValue = (holding.quantity || 0) * mark;
+      const exposureKey = symbolToExposureKey(exposureGroups, holding.symbol);
+      if (!exposureKey || !exposureKey.includes('EQUITY')) return sum;
+      return sum + marketValue;
+    }, 0);
+    return {
+      equityAllocationPct: equityMarketValueUsd / navUsd,
+      equityMarketValueUsd
+    };
+  };
+
+  const computePortfolioEquityAllocationPct = (portfolioState: {
+    holdings?: Array<{ symbol: string; quantity: number; avgPrice?: number }>;
+    cash?: number;
+    equity?: number;
+  }) => computePortfolioEquityStats(portfolioState).equityAllocationPct;
+
+  const writeReRiskCorridorArtifact = async (phase: string) => {
+    const postPortfolio = await broker.getPortfolioState(asOf);
+    const postEquityAllocationPct = computePortfolioEquityAllocationPct(postPortfolio);
+    const actualRealizedChangePct = postEquityAllocationPct - currentEquityAllocationPct;
+    const tolerancePct = Math.max(0, config.reRiskCorridor?.advanceTolerancePct ?? 0.01);
+    const progressed =
+      reRiskCorridor.active &&
+      (postEquityAllocationPct >= reRiskCorridor.currentCorridorTargetPct - tolerancePct ||
+        actualRealizedChangePct >= tolerancePct);
+
+    let stallReason: string | null = null;
+    if (reRiskCorridor.active && reRiskCorridor.intendedIncrementalReRiskUsd > 0 && !progressed) {
+      if (!riskReport.approved) stallReason = 'risk';
+      else if ((planner?.status || 'OK') === 'UNEXECUTABLE') stallReason = 'planner';
+      else if ((rebalance?.buyOrders || []).length === 0) stallReason = 'turnover';
+      else if (buyBudgetUSD + 1e-6 < reRiskCorridor.intendedIncrementalReRiskUsd) stallReason = 'budget';
+      else if ((riskReport?.approvedOrders || []).filter((order) => order.side === 'BUY').length === 0) stallReason = 'risk';
+      else stallReason = 'turnover';
+    }
+
+    writeRunArtifact(runId, 'rerisk_corridor.json', {
+      asOf,
+      phase,
+      state: reRiskCorridor.state,
+      active: reRiskCorridor.active,
+      entryReason: reRiskCorridor.entryReason,
+      advanceReason: reRiskCorridor.advanceReason,
+      pauseReason: reRiskCorridor.pauseReason,
+      exitReason: reRiskCorridor.exitReason,
+      currentCorridorTargetPct: reRiskCorridor.currentCorridorTargetPct,
+      effectiveCeilingPct: reRiskCorridor.effectiveCeilingPct,
+      intendedIncrementalReRiskUsd: reRiskCorridor.intendedIncrementalReRiskUsd,
+      supplementalCapacityUsd: reRiskCorridor.supplementalCapacityUsd,
+      preExecutionEquityAllocationPct: currentEquityAllocationPct,
+      postExecutionEquityAllocationPct: postEquityAllocationPct,
+      actualRealizedChangePct,
+      progressed,
+      stallReason
+    });
+  };
+
+  const writeExposureStateArtifact = async (phase: string) => {
+    const postPortfolio = await broker.getPortfolioState(asOf);
+    const postEquityStats = computePortfolioEquityStats(postPortfolio);
+    const implementationCandidateOrders = plannerSourceOrders.map((order) => ({
+      symbol: order.symbol,
+      side: order.side,
+      notionalUSD: order.notionalUSD || 0,
+      confidence: order.confidence ?? 0
+    }));
+    const implementationScaledOrders = plannerInputOrders.map((order) => ({
+      symbol: order.symbol,
+      side: order.side,
+      notionalUSD: order.notionalUSD || 0,
+      confidence: order.confidence ?? 0
+    }));
+    const plannedControllerDeltaOrders = controllerDeltaOrders(controllerDeltaOrdersEnriched);
+    const proposalControllerDeltaOrders = controllerDeltaOrders(proposal.intent.orders || []);
+    const approvedControllerDeltaOrders = controllerDeltaOrders((riskReport?.approvedOrders as TradeOrder[]) || []);
+    const plannedDeltaBuyUsd = sumNotional(plannedControllerDeltaOrders.filter((order) => order.side === 'BUY'));
+    const approvedDeltaBuyUsd = sumNotional(approvedControllerDeltaOrders.filter((order) => order.side === 'BUY'));
+    const executedDeltaBuyUsd = executionResult
+      ? executionResult.fills.reduce((sum, fill) => {
+          const matched = executionResult?.placedOrders?.find(
+            (placed) => String(placed.orderId) === String(fill.orderId) && placed.order.executionPath === 'controller_delta'
+          );
+          return matched && fill.side === 'BUY' ? sum + Math.max(0, fill.notional || 0) : sum;
+        }, 0)
+      : 0;
+    const realizedExposureDeltaPct = postEquityStats.equityAllocationPct - currentEquityAllocationPct;
+    const realizedExposureDeltaUsd = postEquityStats.equityMarketValueUsd - currentEquityMarketValueUsd;
+    const deltaShortfallUsd = Math.max(
+      0,
+      exposureState.requestedExposureDeltaUsd - Math.max(0, realizedExposureDeltaUsd)
+    );
+    const negativeRealizedDeltaOnPositiveRequest =
+      exposureState.requestedExposureDeltaUsd > 0 && realizedExposureDeltaUsd < -1e-9;
+    const controllerDeltaSellOrdersCount = proposalControllerDeltaOrders.filter((order) => order.side === 'SELL').length;
+
+    let implementationStallReason: string | null = null;
+    if (controllerDeltaPathActive && exposureState.requestedExposureDeltaUsd > 0) {
+      if (equityLabel !== 'risk_on') implementationStallReason = 'regime_shutoff';
+      else if (deltaBuyBudgetUsd <= 1e-9) implementationStallReason = 'zero_delta_budget';
+      else if (implementationCandidateOrders.length === 0) implementationStallReason = 'no_equity_candidates';
+      else if ((planner?.status || 'OK') === 'UNEXECUTABLE') implementationStallReason = 'planner_unexecutable';
+      else if (!riskReport.approved) implementationStallReason = 'risk_blocked';
+      else if (approvedControllerDeltaOrders.length === 0) implementationStallReason = 'risk_reduced';
+      else if (phase === 'executed' && executedDeltaBuyUsd <= 1e-9) implementationStallReason = 'execution_no_fill';
+      else if ((planner?.status || 'OK') === 'PARTIAL') implementationStallReason = 'planner_partial';
+      else if (deltaBuyBudgetUsd + 1e-6 < exposureState.requestedExposureDeltaUsd) implementationStallReason = 'budget_bound';
+    } else if (exposureState.active && exposureState.requestedExposureDeltaUsd > 0 && deltaShortfallUsd > 1e-6) {
+      const blockedReasons = (riskReport?.blockedReasons || []).map((reason) => String(reason));
+      if (blockedReasons.some((reason) => reason.includes('Max positions exceeded'))) implementationStallReason = 'max_positions';
+      else if (!riskReport.approved) implementationStallReason = 'risk_blocked';
+      else if ((planner?.status || 'OK') === 'UNEXECUTABLE') implementationStallReason = 'planner_unexecutable';
+      else if ((planner?.status || 'OK') === 'PARTIAL') implementationStallReason = 'planner_compressed';
+      else if ((rebalance?.buyOrders || []).length === 0) implementationStallReason = 'rebalance_no_orders';
+      else if (buyBudgetUSD + 1e-6 < exposureState.targetCoreEquityUsd) implementationStallReason = 'budget_bound';
+      else if (proposalEstimatedSellProceedsUsd <= 0) implementationStallReason = 'sell_rotation_unavailable';
+      else if ((riskReport?.approvedOrders || []).filter((order) => order.side === 'BUY').length === 0) implementationStallReason = 'risk_reduced';
+      else implementationStallReason = 'turnover_constrained';
+    }
+
+    writeRunArtifact(runId, 'exposure_state.json', {
+      asOf,
+      phase,
+      contractType:
+        exposureStateHandoffContractType === 'incremental_exposure_delta_v1' ||
+        exposureStateHandoffContractType === 'incremental_exposure_delta_v2'
+          ? exposureStateHandoffContractType
+          : 'scaled_target_basket',
+      controllerInputs: {
+        regimeLabel: equityLabel,
+        currentEquityAllocationPct,
+        currentEquityMarketValueUsd,
+        navUsd: currentNavUsd,
+        favorableStateCeilingPct: exposureCap,
+        systemAllowedEquityCeilingPct,
+        minimumExecutableDeltaUsd: exposureState.minimumExecutableDeltaUsd
+      },
+      controllerOutputs: {
+        active: exposureState.active,
+        controllerAction: exposureState.controllerAction,
+        controllerReason: exposureState.controllerReason,
+        targetCoreEquityPct: exposureState.targetCoreEquityPct,
+        targetCoreEquityUsd: exposureState.targetCoreEquityUsd,
+        effectiveCeilingPct: exposureState.effectiveCeilingPct,
+        requestedExposureDeltaPct: exposureState.requestedExposureDeltaPct,
+        requestedExposureDeltaUsd: exposureState.requestedExposureDeltaUsd,
+        deltaBuyBudgetUsd,
+        minimumExecutableDeltaUsd: exposureState.minimumExecutableDeltaUsd
+      },
+      state: exposureState.state,
+      implementation: {
+        reason: exposureStateImplementationReason,
+        plannerInputSymbols: plannerInputOrders.map((order) => order.symbol),
+        plannerStatus: planner?.status || 'UNEXECUTABLE'
+      },
+      implementationInputs: {
+        plannerCandidateOrders: implementationCandidateOrders,
+        plannerScaledOrders: implementationScaledOrders,
+        plannerBuyBudgetUsd: buyBudgetUSD,
+        handoffContractType: exposureStateHandoffContractType,
+        deltaPlannerSelectionMode: deltaPlannerSelection?.selectionMode ?? null,
+        cheapestExecutableSymbol: deltaPlannerSelection?.cheapestExecutableSymbol ?? null,
+        cheapestExecutablePriceUsd: deltaPlannerSelection?.cheapestExecutablePriceUsd ?? 0,
+        affordableSymbolCount: deltaPlannerSelection?.affordableSymbolCount ?? 0
+      },
+      implementationPlan: {
+        plannedDeltaBuyUsd,
+        plannerStatus: planner?.status || 'UNEXECUTABLE',
+        selectedSymbols: planner?.selectedSymbols || [],
+        substitutions: planner?.substitutions || [],
+        skipped: planner?.skipped || [],
+        controllerDeltaOrdersCount: plannedControllerDeltaOrders.length
+      },
+      riskOutcome: {
+        approved: riskReport?.approved ?? false,
+        blockedReasons: riskReport?.blockedReasons || [],
+        approvedDeltaBuyUsd,
+        approvedDeltaOrdersCount: approvedControllerDeltaOrders.length,
+        adjustments: riskReport?.adjustments || []
+      },
+      executionOutcome: {
+        executedDeltaBuyUsd,
+        executedDeltaFillCount: executionResult
+          ? executionResult.fills.filter((fill) =>
+              executionResult?.placedOrders?.some(
+                (placed) => String(placed.orderId) === String(fill.orderId) && placed.order.executionPath === 'controller_delta'
+              )
+            ).length
+          : 0
+      },
+      realizedOutcome: {
+        preExecutionEquityAllocationPct: currentEquityAllocationPct,
+        postExecutionEquityAllocationPct: postEquityStats.equityAllocationPct,
+        preExecutionEquityMarketValueUsd: currentEquityMarketValueUsd,
+        postExecutionEquityMarketValueUsd: postEquityStats.equityMarketValueUsd,
+        realizedExposureDeltaPct,
+        realizedExposureDeltaUsd,
+        shortfallUsd: deltaShortfallUsd
+      },
+      deltaShortfallUsd,
+      implementationStallReason,
+      controllerDeltaSellOrdersCount,
+      negativeRealizedDeltaOnPositiveRequest,
+      stallReason: implementationStallReason
+    });
+  };
 
   // Segregated execution artifacts
   const etfOrdersArtifact = {
@@ -1271,8 +1882,14 @@ export const runBot = async (options: RunOptions) => {
   };
   writeRunArtifact(runId, 'executionManifest.json', executionManifest);
 
-  const hasExecutableEtfOrders =
-    planner.status !== 'UNEXECUTABLE' && (proposal.intent.orders || []).some((o) => o.side === 'BUY' || o.side === 'SELL');
+  const hasExecutableEtfOrders = (() => {
+    const hasOrders = (proposal.intent.orders || []).some((o) => o.side === 'BUY' || o.side === 'SELL');
+    if (!hasOrders) return false;
+    if (controllerDeltaPathActive) {
+      return controllerDeltaOrdersEnriched.length > 0 || dislocationExtraOrders.length > 0;
+    }
+    return planner.status !== 'UNEXECUTABLE';
+  })();
   const hasExecutableOptionOrders = optionOrders.some(
     (o) => (o.action === 'OPEN' || o.action === 'CLOSE') && (o.estimatedPremiumUsd || 0) <= optionsReserveCashBudget
   );
@@ -1323,6 +1940,8 @@ export const runBot = async (options: RunOptions) => {
     writeRunArtifact(runId, 'round5_flags.json', [...existingRound5Flags, ...round5Flags]);
     writeRunArtifact(runId, 'orders.json', []);
     writeRunArtifact(runId, 'fills.json', [{ type: 'NO_FILL', reason: 'NO_EXECUTABLE_ORDERS' }]);
+    await writeReRiskCorridorArtifact('no_executable_orders');
+    await writeExposureStateArtifact('no_executable_orders');
     appendEvent(makeEvent(runId, 'RUN_SKIPPED', { reason: 'NO_EXECUTABLE_ORDERS' }));
     generateNarrativesOnce();
     generateConsolidatedOnce();
@@ -1359,6 +1978,8 @@ export const runBot = async (options: RunOptions) => {
   }
 
   if (!riskReport.approved) {
+    await writeReRiskCorridorArtifact('risk_blocked');
+    await writeExposureStateArtifact('risk_blocked');
     appendEvent(makeEvent(runId, 'RUN_FAILED', { reason: riskReport.blockedReasons }));
     console.error('Run blocked by risk engine.');
     console.error(`Reasons: ${riskReport.blockedReasons.join('; ')}`);
@@ -1384,12 +2005,16 @@ export const runBot = async (options: RunOptions) => {
         : []) || [];
     existingFlags.push({ code: 'EXECUTION_SKIPPED_PENDING_APPROVAL', severity: 'info', message: 'Awaiting approval' });
     writeRunArtifact(runId, 'round5_flags.json', existingFlags);
+    await writeReRiskCorridorArtifact('pending_approval');
+    await writeExposureStateArtifact('pending_approval');
     generateNarrativesOnce();
     generateConsolidatedOnce();
     return;
   }
 
   if (dry) {
+    await writeReRiskCorridorArtifact('dry_run');
+    await writeExposureStateArtifact('dry_run');
     appendEvent(makeEvent(runId, 'RUN_COMPLETED', { dryRun: true }));
     console.log(`Dry run completed for ${runId}.`);
     generateNarrativesOnce();
@@ -1402,6 +2027,7 @@ export const runBot = async (options: RunOptions) => {
     mode: runMode as any,
     brokerProvider
   });
+  executionResult = execution;
   if (execution.fills.length && execution.placedOrders?.length) {
     const ordersById = Object.fromEntries(execution.placedOrders.map((entry) => [entry.orderId, entry.order]));
     const updatedSleevePositions = applyFilledSleeveOrders({
@@ -1418,6 +2044,8 @@ export const runBot = async (options: RunOptions) => {
     saveSleevePositions(updatedSleevePositions, sleeveEnv, sleeveAccountKey);
     writeRunArtifact(runId, 'sleeve_positions_snapshot.json', snapshotSleevePositions(updatedSleevePositions, asOf));
   }
+  await writeReRiskCorridorArtifact('executed');
+  await writeExposureStateArtifact('executed');
   appendEvent(makeEvent(runId, 'RUN_COMPLETED', { fills: execution.fills.length }));
   console.log(`Run ${runId} completed with ${execution.fills.length} fills.`);
   generateNarrativesOnce();

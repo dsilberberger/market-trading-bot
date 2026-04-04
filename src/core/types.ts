@@ -19,6 +19,7 @@ export interface TradeOrder {
   confidence: number;
   portfolioLevel: PortfolioLevelSettings;
   sleeve?: 'base' | 'dislocation';
+  executionPath?: 'rebalance' | 'controller_delta' | 'dislocation' | 'canonicalization';
 }
 
 export interface TradeIntent {
@@ -176,6 +177,19 @@ export interface BotConfig {
     lowEquityAllocationThresholdPct?: number;
     reserveHeadroomPctPerWeek?: number;
     maxReserveHeadroomPct?: number;
+  };
+  reRiskCorridor?: {
+    mode?: 'baseline' | 'stateful_risk_on_corridor' | 'stateful_risk_on_corridor_v2';
+    handoffContract?:
+      | 'scaled_target_basket'
+      | 'incremental_exposure_delta_v1'
+      | 'incremental_exposure_delta_v2';
+    entryEquityAllocationThresholdPct?: number;
+    weeklyAdvancePct?: number;
+    maxCorridorTargetPct?: number;
+    advanceTolerancePct?: number;
+    progressThresholdPct?: number;
+    maxStallWeeks?: number;
   };
   favorableStatePersistence?: {
     mode?: 'baseline' | 'risk_on_trim_buffer';
